@@ -1,0 +1,18 @@
+<section class="card">
+  <h1>{{title}}</h1>
+  <p>This is the starter login page.</p>
+
+  <form action="/api/auth/login" method="POST" class="form">
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" placeholder="Enter email" required />
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" placeholder="Enter password" required />
+    </div>
+
+    <button type="submit" class="btn">Login</button>
+  </form>
+</section>
