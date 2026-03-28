@@ -3,19 +3,25 @@ const User = require("../models/User");
 
 async function verifyJWT(req, res, next) {
   try {
+    let token = null;
+
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
+    } else if (req.cookies && req.cookies.token) {
+      token = req.cookies.token;
+    }
+
+    if (!token) {
       return res.status(401).json({
         success: false,
-        message: "No token provided",
+        message: "Authentication required",
       });
     }
 
-    const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    const user = await User.findById(decoded.id);
+    const user = await User.findById(decoded.id).select("-passwordHash");
 
     if (!user || user.isDeleted || !user.isEnabled) {
       return res.status(401).json({
@@ -34,4 +40,29 @@ async function verifyJWT(req, res, next) {
   }
 }
 
-module.exports = { verifyJWT };
+async function requireViewAuth(req, res, next) {
+  try {
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.redirect("/login");
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select("-passwordHash");
+
+    if (!user || user.isDeleted || !user.isEnabled) {
+      res.clearCookie("token");
+      return res.redirect("/login");
+    }
+
+    req.user = user;
+    res.locals.user = user;
+    next();
+  } catch (error) {
+    res.clearCookie("token");
+    return res.redirect("/login");
+  }
+}
+
+module.exports = { verifyJWT, requireViewAuth };

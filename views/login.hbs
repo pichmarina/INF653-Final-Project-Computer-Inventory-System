@@ -1,18 +1,70 @@
-<section class="card">
-  <h1>{{title}}</h1>
-  <p>This is the starter login page.</p>
+<section class="login-shell">
+  <div class="login-hero glass-card">
+    <div class="eyebrow">SMART INVENTORY PLATFORM</div>
+    <h1>Manage hardware with a cleaner, faster workflow.</h1>
+    <p>
+      Track devices, control access, manage API keys, and keep your IT operations
+      organized in one modern workspace.
+    </p>
 
-  <form action="/api/auth/login" method="POST" class="form">
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input id="email" name="email" type="email" placeholder="Enter email" required />
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <strong>Secure</strong>
+        <span>JWT + roles + audit</span>
+      </div>
+      <div class="hero-stat">
+        <strong>Fast</strong>
+        <span>Simple internal flow</span>
+      </div>
+      <div class="hero-stat">
+        <strong>Reliable</strong>
+        <span>History and reports ready</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-panel glass-card">
+    <div class="auth-header">
+      <div class="eyebrow">WELCOME BACK</div>
+      <h2>{{title}}</h2>
+      <p>Sign in to the Computer Inventory System.</p>
     </div>
 
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input id="password" name="password" type="password" placeholder="Enter password" required />
-    </div>
+    {{#if formError}}
+      <div class="alert alert-error">{{formError}}</div>
+    {{/if}}
 
-    <button type="submit" class="btn">Login</button>
-  </form>
+    <form action="/api/auth/login" method="POST" class="form">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          placeholder="admin@example.com"
+          value="{{values.email}}"
+          class="{{#if errors.email}}input-error{{/if}}"
+        />
+        {{#if errors.email}}
+          <small class="field-error">{{errors.email}}</small>
+        {{/if}}
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          placeholder="Enter your password"
+          class="{{#if errors.password}}input-error{{/if}}"
+        />
+        {{#if errors.password}}
+          <small class="field-error">{{errors.password}}</small>
+        {{/if}}
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Login</button>
+    </form>
+  </div>
 </section>

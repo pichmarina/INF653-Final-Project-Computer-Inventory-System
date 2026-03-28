@@ -1,0 +1,96 @@
+<section class="page-stack">
+  <div class="section-heading">
+    <div>
+      <div class="eyebrow">ADMIN MODULE</div>
+      <h1>{{title}}</h1>
+      <p>
+        Generate service-level API keys for integrations. Keys are hashed in the database,
+        and the raw key is shown only once.
+      </p>
+    </div>
+    <span class="panel-chip">Admin Only</span>
+  </div>
+
+  {{#if successMessage}}
+    <div class="alert alert-success">{{successMessage}}</div>
+  {{/if}}
+
+  {{#if errorMessage}}
+    <div class="alert alert-error">{{errorMessage}}</div>
+  {{/if}}
+
+  {{#if rawKey}}
+    <div class="alert alert-warning">
+      <strong>Important:</strong> Copy this key now. It will not be shown again.<br />
+      <code>{{rawKey}}</code>
+    </div>
+  {{/if}}
+
+  <div class="panel-grid">
+    <div class="glass-card form-panel">
+      <div class="panel-title-wrap">
+        <h2>Create API Key</h2>
+        <span class="panel-chip">Shown once</span>
+      </div>
+
+      <p class="panel-description">
+        Use this to create programmatic access for integrations using the <code>x-api-key</code> header.
+      </p>
+
+      <form action="/api/keys" method="POST" class="form">
+        <div class="form-group">
+          <label for="name">Key Name</label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            placeholder="Inventory Integration Key"
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Generate API Key</button>
+      </form>
+    </div>
+
+    <div class="glass-card table-panel">
+      <div class="panel-title-wrap">
+        <h2>Active API Keys</h2>
+        <span class="panel-chip">{{keys.length}} active</span>
+      </div>
+
+      <p class="panel-description">
+        Revoke any active key immediately if it is no longer needed.
+      </p>
+
+      <div class="user-list">
+        {{#each keys}}
+          <div class="user-card">
+            <div class="user-top">
+              <div>
+                <h3>{{this.name}}</h3>
+                <p>{{this.createdBy.name}} • {{this.createdBy.email}}</p>
+              </div>
+
+              <span class="badge badge-info">{{this.createdBy.role}}</span>
+            </div>
+
+            <div class="user-meta">
+              <span class="meta-pill">Created: {{this.createdAt}}</span>
+            </div>
+
+            <div class="user-actions">
+              <form action="/api/keys/{{this._id}}?_method=DELETE" method="POST">
+                <button type="submit" class="btn btn-sm btn-outline">Revoke Key</button>
+              </form>
+            </div>
+          </div>
+        {{else}}
+          <div class="empty-state">
+            <h3>No active API keys</h3>
+            <p>Create one from the form on the left for service access.</p>
+          </div>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+</section>

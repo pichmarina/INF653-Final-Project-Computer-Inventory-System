@@ -1,26 +1,129 @@
-<section class="card">
-  <h1>{{title}}</h1>
-  <p>Starter dashboard page for the Computer Inventory System.</p>
-
-  <div class="grid">
-    <div class="mini-card">
-      <h3>Users</h3>
-      <p>Manage system users</p>
+<section class="page-stack">
+  <div class="hero-banner glass-card">
+    <div>
+      <div class="eyebrow">SYSTEM OVERVIEW</div>
+      <h1>Computer Inventory System</h1>
+      <p>
+        Manage the full lifecycle of computer hardware and peripherals —
+        from inventory records and assignments to audit history and reporting.
+      </p>
     </div>
 
-    <div class="mini-card">
-      <h3>Inventory</h3>
-      <p>Manage items and status</p>
+    <form action="/api/auth/logout" method="POST">
+      <button type="submit" class="btn btn-outline-light">Logout</button>
+    </form>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card glow-blue">
+      <span class="stat-label">Inventory Module</span>
+      <h3>CRUD</h3>
+      <p>Add, edit, update, and soft-delete hardware assets.</p>
     </div>
 
-    <div class="mini-card">
-      <h3>Transactions</h3>
-      <p>Track check-in and check-out</p>
+    <div class="stat-card glow-purple">
+      <span class="stat-label">Assignment Module</span>
+      <h3>Check-In / Out</h3>
+      <p>Assign available assets and return them with documents.</p>
     </div>
 
-    <div class="mini-card">
-      <h3>Reports</h3>
-      <p>View inventory reports</p>
+    <div class="stat-card glow-teal">
+      <span class="stat-label">Audit Module</span>
+      <h3>History & Reports</h3>
+      <p>View item history, asset aging, and user-based audits.</p>
+    </div>
+  </div>
+
+  <div class="section-heading">
+    <div>
+      <div class="eyebrow">MAIN MODULES</div>
+      <h1>Where would you like to go?</h1>
+      <p>Each module below matches one of the project requirements.</p>
+    </div>
+  </div>
+
+  <div class="module-grid">
+    <a class="module-card" href="/inventory">
+      <div class="module-icon">🖥️</div>
+      <div>
+        <h3>Inventory Management</h3>
+        <p>Manage all computers and peripherals through item CRUD operations.</p>
+        <span class="module-link">Open Inventory</span>
+      </div>
+    </a>
+
+    <a class="module-card" href="/transactions">
+      <div class="module-icon">📦</div>
+      <div>
+        <h3>Check-Out / Check-In</h3>
+        <p>Assign available assets to users and return them with uploaded documents.</p>
+        <span class="module-link">Open Transactions</span>
+      </div>
+    </a>
+
+    <a class="module-card" href="/history">
+      <div class="module-icon">🕘</div>
+      <div>
+        <h3>Asset History</h3>
+        <p>Review previous assignees, usage timeline, and linked reference documents.</p>
+        <span class="module-link">Open History</span>
+      </div>
+    </a>
+
+    <a class="module-card" href="/users">
+      <div class="module-icon">👥</div>
+      <div>
+        <h3>User Management</h3>
+        <p>Create Admin and Technician accounts, assign roles, and enable or disable users.</p>
+        <span class="module-link">Open Users</span>
+      </div>
+    </a>
+
+    <a class="module-card" href="/keys">
+      <div class="module-icon">🔑</div>
+      <div>
+        <h3>API Key Management</h3>
+        <p>Generate hashed API keys for integrations and revoke them when needed.</p>
+        <span class="module-link">Open API Keys</span>
+      </div>
+    </a>
+
+    <a class="module-card" href="/reports">
+      <div class="module-icon">📊</div>
+      <div>
+        <h3>Reports</h3>
+        <p>View inventory summary, aging assets, and user audit reports.</p>
+        <span class="module-link">Open Reports</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="quick-guide glass-card">
+    <div class="panel-title-wrap">
+      <h2>Recommended Workflow for First-Time Users</h2>
+      <span class="panel-chip">Guided flow</span>
+    </div>
+
+    <div class="guide-steps">
+      <div class="guide-step">
+        <strong>1. Add or review inventory</strong>
+        <p>Start in Inventory to make sure items exist with the right status and classification.</p>
+      </div>
+
+      <div class="guide-step">
+        <strong>2. Create users if needed</strong>
+        <p>Go to Users to create Admin or Technician accounts.</p>
+      </div>
+
+      <div class="guide-step">
+        <strong>3. Assign or return assets</strong>
+        <p>Use Check-Out / Check-In to handle assignments and returns with documents.</p>
+      </div>
+
+      <div class="guide-step">
+        <strong>4. Review history and reports</strong>
+        <p>Use Asset History and Reports to audit activity and monitor system status.</p>
+      </div>
     </div>
   </div>
 </section>

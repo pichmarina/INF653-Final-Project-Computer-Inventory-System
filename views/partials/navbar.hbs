@@ -1,11 +1,21 @@
-<header class="navbar">
-  <div class="container nav-inner">
-    <a href="/dashboard" class="brand">{{appName}}</a>
+<header class="topbar">
+  <div class="container topbar-inner">
+    <div class="brand-wrap">
+      <a href="/dashboard" class="brand-mark">CI</a>
+      <div class="brand-text">
+        <a href="/dashboard" class="brand-title">{{appName}}</a>
+        <span class="brand-subtitle">Track, assign, return, and audit IT assets</span>
+      </div>
+    </div>
 
-    <nav class="nav-links">
-      <a href="/login">Login</a>
-      <a href="/dashboard">Dashboard</a>
-      <a href="/health">Health</a>
+    <nav class="topbar-nav">
+      <a href="/dashboard" class="nav-pill">Dashboard</a>
+      <a href="/inventory" class="nav-pill">Inventory</a>
+      <a href="/transactions" class="nav-pill">Check-Out / Check-In</a>
+      <a href="/history" class="nav-pill">Asset History</a>
+      <a href="/users" class="nav-pill">Users</a>
+      <a href="/keys" class="nav-pill">API Keys</a>
+      <a href="/reports" class="nav-pill">Reports</a>
     </nav>
   </div>
 </header>

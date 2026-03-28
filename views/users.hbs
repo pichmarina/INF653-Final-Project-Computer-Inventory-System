@@ -1,0 +1,148 @@
+<section class="page-stack">
+  <div class="section-heading">
+    <div>
+      <div class="eyebrow">ADMIN MODULE</div>
+      <h1>{{title}}</h1>
+      <p>
+        Create user accounts, assign Admin or Technician roles, and enable or disable access.
+      </p>
+    </div>
+    <span class="panel-chip">Admin Only</span>
+  </div>
+
+  {{#if successMessage}}
+    <div class="alert alert-success">{{successMessage}}</div>
+  {{/if}}
+
+  {{#if errorMessage}}
+    <div class="alert alert-error">{{errorMessage}}</div>
+  {{/if}}
+
+  <div class="panel-grid">
+    <div class="glass-card form-panel">
+      <div class="panel-title-wrap">
+        <h2>Create User</h2>
+        <span class="panel-chip">Access control</span>
+      </div>
+
+      <p class="panel-description">
+        Use this form to create a new system account for an Admin or Technician.
+      </p>
+
+      <form action="/api/users" method="POST" class="form">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            value="{{formValues.name}}"
+            placeholder="Enter full name"
+            class="{{#if errors.name}}input-error{{/if}}"
+          />
+          {{#if errors.name}}
+            <small class="field-error">{{errors.name}}</small>
+          {{/if}}
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            value="{{formValues.email}}"
+            placeholder="user@example.com"
+            class="{{#if errors.email}}input-error{{/if}}"
+          />
+          {{#if errors.email}}
+            <small class="field-error">{{errors.email}}</small>
+          {{/if}}
+        </div>
+
+        <div class="form-group">
+          <label for="password">Temporary Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="At least 6 characters"
+            class="{{#if errors.password}}input-error{{/if}}"
+          />
+          {{#if errors.password}}
+            <small class="field-error">{{errors.password}}</small>
+          {{/if}}
+        </div>
+
+        <div class="form-group">
+          <label for="role">Role</label>
+          <select id="role" name="role" class="{{#if errors.role}}input-error{{/if}}">
+            <option value="Technician" {{#if (eq formValues.role "Technician")}}selected{{/if}}>Technician</option>
+            <option value="Admin" {{#if (eq formValues.role "Admin")}}selected{{/if}}>Admin</option>
+          </select>
+          {{#if errors.role}}
+            <small class="field-error">{{errors.role}}</small>
+          {{/if}}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Create User</button>
+      </form>
+    </div>
+
+    <div class="glass-card table-panel">
+      <div class="panel-title-wrap">
+        <h2>Existing Users</h2>
+        <span class="panel-chip">{{users.length}} total</span>
+      </div>
+
+      <p class="panel-description">
+        Update roles or enable and disable accounts without removing historical records.
+      </p>
+
+      <div class="user-list">
+        {{#each users}}
+          <div class="user-card">
+            <div class="user-top">
+              <div>
+                <h3>{{this.name}}</h3>
+                <p>{{this.email}}</p>
+              </div>
+
+              {{#if this.isEnabled}}
+                <span class="badge badge-success">Enabled</span>
+              {{else}}
+                <span class="badge badge-danger">Disabled</span>
+              {{/if}}
+            </div>
+
+            <div class="user-meta">
+              <span class="meta-pill">Role: {{this.role}}</span>
+            </div>
+
+            <div class="user-actions">
+              <form action="/api/users/{{this._id}}/role?_method=PATCH" method="POST" class="inline-form modern-inline">
+                <select name="role">
+                  <option value="Technician" {{#if (eq this.role "Technician")}}selected{{/if}}>Technician</option>
+                  <option value="Admin" {{#if (eq this.role "Admin")}}selected{{/if}}>Admin</option>
+                </select>
+                <button type="submit" class="btn btn-sm">Update Role</button>
+              </form>
+
+              <form action="/api/users/{{this._id}}/status?_method=PATCH" method="POST" class="inline-form modern-inline">
+                <input type="hidden" name="isEnabled" value="{{#if this.isEnabled}}false{{else}}true{{/if}}" />
+                <button type="submit" class="btn btn-sm btn-outline">
+                  {{#if this.isEnabled}}Disable Account{{else}}Enable Account{{/if}}
+                </button>
+              </form>
+            </div>
+          </div>
+        {{else}}
+          <div class="empty-state">
+            <h3>No users yet</h3>
+            <p>Create your first Admin or Technician account from the form on the left.</p>
+          </div>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+</section>

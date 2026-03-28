@@ -7,12 +7,20 @@
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  {{> navbar}}
+  <div class="app-shell">
+    {{> navbar}}
 
-  <main class="container">
-    {{{body}}}
-  </main>
+    <main class="page-shell">
+      <div class="page-bg-orb orb-1"></div>
+      <div class="page-bg-orb orb-2"></div>
+      <div class="page-bg-grid"></div>
 
-  {{> footer}}
+      <section class="page-content container">
+        {{{body}}}
+      </section>
+    </main>
+
+    {{> footer}}
+  </div>
 </body>
 </html>

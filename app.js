@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const path = require("path");
 const express = require("express");
-const hbs = require("hbs");
+const { engine } = require("express-handlebars");
 const morgan = require("morgan");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -17,10 +17,28 @@ const PORT = process.env.PORT || 3000;
 
 connectDB();
 
+/* =========================
+   VIEW ENGINE
+========================= */
+app.engine(
+  "hbs",
+  engine({
+    extname: ".hbs",
+    defaultLayout: "main",
+    layoutsDir: path.join(__dirname, "views", "layouts"),
+    partialsDir: path.join(__dirname, "views", "partials"),
+    helpers: {
+      eq: (a, b) => a === b,
+    },
+  })
+);
+
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "views"));
-hbs.registerPartials(path.join(__dirname, "views", "partials"));
 
+/* =========================
+   GLOBAL MIDDLEWARE
+========================= */
 app.set("trust proxy", 1);
 
 app.use(morgan("common"));
@@ -52,6 +70,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use((req, res, next) => {
   res.locals.appName = "Computer Inventory System";
   res.locals.currentYear = new Date().getFullYear();
+  res.locals.user = null;
   next();
 });
 
@@ -82,7 +101,9 @@ app.use((req, res) => {
     });
   }
 
-  res.status(404).render("404", { title: "404 - Page Not Found" });
+  return res.status(404).render("404", {
+    title: "404 - Page Not Found",
+  });
 });
 
 app.use(errorHandler);
