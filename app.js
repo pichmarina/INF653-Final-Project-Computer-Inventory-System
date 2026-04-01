@@ -15,7 +15,7 @@ const errorHandler = require("./middleware/errorHandler");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-connectDB();
+// connectDB();
 
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "views"));
