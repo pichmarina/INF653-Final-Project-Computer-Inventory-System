@@ -12,30 +12,70 @@
   {{> navbar}}
 
   <main class="container">
-    <section class="card">
+    <section class="card page-header-card">
       <h1>{{title}}</h1>
-      <p>Starter dashboard page for the Computer Inventory System.</p>
+      <p>Overview of the Computer Inventory System and quick access to key sections.</p>
 
+      <section class="stats-grid">
+        <div class="mini-card stat-box">
+          <h3>Total Users</h3>
+          <p class="stat-number">{{stats.totalUsers}}</p>
+        </div>
+
+        <div class="mini-card stat-box">
+          <h3>Total Items</h3>
+          <p class="stat-number">{{stats.totalItems}}</p>
+        </div>
+
+        <div class="mini-card stat-box">
+          <h3>Available Items</h3>
+          <p class="stat-number">{{stats.availableItems}}</p>
+        </div>
+
+        <div class="mini-card stat-box">
+          <h3>Deployed Items</h3>
+          <p class="stat-number">{{stats.deployedItems}}</p>
+        </div>
+      </section>
+    </section>
+
+    <section class="card">
+      <h2>Quick Access</h2>
       <div class="grid">
-        <div class="mini-card">
-          <h3>Users</h3>
-          <p>Manage system users</p>
-        </div>
+        {{#each quickLinks}}
+        <a href="{{this.href}}" class="mini-card quick-link-card">
+          <h3>{{this.title}}</h3>
+          <p>{{this.description}}</p>
+        </a>
+        {{/each}}
+      </div>
+    </section>
 
-        <div class="mini-card">
-          <h3>Inventory</h3>
-          <p>Manage items and status</p>
-        </div>
-
-        <div class="mini-card">
-          <h3>Transactions</h3>
-          <p>Track check-in and check-out</p>
-        </div>
-
-        <div class="mini-card">
-          <h3>Reports</h3>
-          <p>View inventory reports</p>
-        </div>
+    <section class="card">
+      <h2>Recent Activity</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Action</th>
+              <th>User</th>
+              <th>Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each recentActivity}}
+            <tr>
+              <td>{{this.itemName}}</td>
+              <td>{{this.action}}</td>
+              <td>{{this.user}}</td>
+              <td>{{this.date}}</td>
+              <td><span class="status-badge">{{this.status}}</span></td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
       </div>
     </section>
   </main>
