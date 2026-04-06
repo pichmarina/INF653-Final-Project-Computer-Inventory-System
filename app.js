@@ -29,8 +29,9 @@ app.engine(
     partialsDir: path.join(__dirname, "views", "partials"),
     helpers: {
       eq: (a, b) => a === b,
+      or: (a, b) => a || b,
     },
-  })
+  }),
 );
 
 app.set("view engine", "hbs");
@@ -59,7 +60,7 @@ app.use(
       }
     },
     credentials: true,
-  })
+  }),
 );
 
 app.use(globalLimiter);
@@ -71,6 +72,7 @@ app.use((req, res, next) => {
   res.locals.appName = "Computer Inventory System";
   res.locals.currentYear = new Date().getFullYear();
   res.locals.user = null;
+  res.locals.currentPath = req.path;
   next();
 });
 

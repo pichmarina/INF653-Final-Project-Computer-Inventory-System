@@ -1,26 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{title}} | {{appName}}</title>
-  <link rel="stylesheet" href="/css/style.css" />
-</head>
-<body>
-  <div class="app-shell">
-    {{> navbar}}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{title}} | {{appName}}</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      {{#unless (eq currentPath "/login")}}
+        <header class="topbar">
+          <div class="container topbar-inner">
+            <a href="/dashboard" class="brand-wrap">
+              <div class="brand-mark">CIS</div>
+              <div class="brand-text">
+                <span class="brand-title">Computer Inventory System</span>
+                <span class="brand-subtitle">Internal IT workspace</span>
+              </div>
+            </a>
 
-    <main class="page-shell">
-      <div class="page-bg-orb orb-1"></div>
-      <div class="page-bg-orb orb-2"></div>
-      <div class="page-bg-grid"></div>
+            <nav class="topbar-nav">
+              <a href="/dashboard" class="nav-link {{#if (eq currentPath "/dashboard")}}active{{/if}}">Overview</a>
+              <a href="/inventory" class="nav-link {{#if (eq currentPath "/inventory")}}active{{/if}}">Inventory</a>
+              <a href="/transactions" class="nav-link {{#if (eq currentPath "/transactions")}}active{{/if}}">Transactions</a>
+              <a href="/history" class="nav-link {{#if (eq currentPath "/history")}}active{{/if}}">History</a>
+              <a href="/reports" class="nav-link {{#if (eq currentPath "/reports")}}active{{/if}}">Reports</a>
+              <a href="/users" class="nav-link {{#if (eq currentPath "/users")}}active{{/if}}">Users</a>
+              <a href="/keys" class="nav-link {{#if (eq currentPath "/keys")}}active{{/if}}">API Keys</a>
+            </nav>
+          </div>
+        </header>
+      {{/unless}}
 
-      <section class="page-content container">
-        {{{body}}}
-      </section>
-    </main>
+      <main class="page-shell">
+        <div class="container page-content">
+          {{{body}}}
+        </div>
+      </main>
 
-    {{> footer}}
-  </div>
-</body>
+      {{#unless (eq currentPath "/login")}}
+        <footer class="footer-bar">
+          <div class="container footer-inner">
+            <span>{{appName}}</span>
+            <span>© {{currentYear}} AUPP INF 653 Final Project</span>
+          </div>
+        </footer>
+      {{/unless}}
+    </div>
+  </body>
 </html>

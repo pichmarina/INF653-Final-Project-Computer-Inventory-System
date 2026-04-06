@@ -12,9 +12,14 @@ router.get("/login", (req, res) => {
 });
 
 router.get("/dashboard", requireViewAuth, (req, res) => {
+  console.log("DASHBOARD USER:", req.user);
+
   res.render("dashboard", {
     title: "Dashboard",
     user: req.user,
+    displayName: req.user.name,
+    displayEmail: req.user.email,
+    displayRole: req.user.role,
   });
 });
 

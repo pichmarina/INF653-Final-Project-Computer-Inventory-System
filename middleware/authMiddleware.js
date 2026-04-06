@@ -55,7 +55,6 @@ async function requireViewAuth(req, res, next) {
       res.clearCookie("token");
       return res.redirect("/login");
     }
-
     req.user = user;
     res.locals.user = user;
     next();

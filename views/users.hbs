@@ -1,11 +1,10 @@
 <section class="page-stack">
-  <div class="section-heading">
+  <div class="page-header">
     <div>
       <div class="eyebrow">Admin Workspace</div>
       <h1>User Management</h1>
       <p>
         Create and manage Admin and Technician accounts for the computer inventory system.
-        This page controls access, role assignment, and account status.
       </p>
     </div>
     <span class="panel-chip">Admin Only</span>
@@ -38,16 +37,15 @@
     </div>
   </div>
 
-  <div class="panel-grid">
-    <div class="glass-card">
-      <div class="panel-title-wrap">
-        <h2>Create New User</h2>
-        <span class="panel-chip">bcrypt protected</span>
+  <div class="admin-grid">
+    <div class="surface-card">
+      <div class="card-head">
+        <div>
+          <h2>Create New User</h2>
+          <p>Add internal users with the correct role and protected password storage.</p>
+        </div>
+        <span class="soft-badge">bcrypt protected</span>
       </div>
-
-      <p class="panel-description">
-        Add internal users who can access the inventory platform. Admins can create other Admins or Technicians.
-      </p>
 
       <form action="/api/users" method="POST" class="form">
         <div class="form-group">
@@ -100,35 +98,27 @@
 
         <button type="submit" class="btn btn-primary btn-block">Create User</button>
       </form>
-
-      <div class="info-block">
-        <strong>What happens on creation</strong>
-        <p>
-          The password is hashed with bcrypt before storage, and the user can then authenticate through the login endpoint.
-        </p>
-      </div>
     </div>
 
-    <div class="glass-card">
-      <div class="panel-title-wrap">
-        <h2>Existing Users</h2>
-        <span class="panel-chip">{{stats.totalUsers}} records</span>
+    <div class="surface-card">
+      <div class="card-head">
+        <div>
+          <h2>Existing Users</h2>
+          <p>Update roles, disable accounts, and keep admin access under control.</p>
+        </div>
+        <span class="soft-badge">{{stats.totalUsers}} records</span>
       </div>
 
-      <p class="panel-description">
-        Update roles, disable compromised accounts, and keep administrative access under control.
-      </p>
-
-      <div class="user-list">
+      <div class="entity-list">
         {{#each users}}
-          <div class="user-card modern-user-card">
-            <div class="user-top">
-              <div class="user-info">
+          <div class="entity-card">
+            <div class="entity-main">
+              <div>
                 <h3>{{this.name}}</h3>
                 <p>{{this.email}}</p>
               </div>
 
-              <div class="user-status-stack">
+              <div class="entity-badges">
                 {{#if (eq this.role "Admin")}}
                   <span class="badge badge-admin">Admin</span>
                 {{else}}
@@ -143,12 +133,12 @@
               </div>
             </div>
 
-            <div class="user-meta">
+            <div class="entity-meta">
               <span class="meta-pill">Created {{this.createdAtLabel}}</span>
               <span class="meta-pill">User ID {{this._id}}</span>
             </div>
 
-            <div class="user-actions-grid">
+            <div class="entity-actions">
               <form action="/api/users/{{this._id}}/role?_method=PATCH" method="POST" class="inline-form">
                 <select name="role">
                   <option value="Admin" {{#if (eq this.role "Admin")}}selected{{/if}}>Admin</option>
@@ -165,12 +155,12 @@
                     class="btn btn-danger btn-sm"
                     onclick="return confirm('Disable this user account? This will also revoke their active API keys.')"
                   >
-                    Disable Account
+                    Disable
                   </button>
                 {{else}}
                   <input type="hidden" name="isEnabled" value="true" />
                   <button type="submit" class="btn btn-primary btn-sm">
-                    Enable Account
+                    Enable
                   </button>
                 {{/if}}
               </form>
@@ -178,7 +168,6 @@
           </div>
         {{else}}
           <div class="empty-state">
-            <div class="empty-state-icon">👤</div>
             <h3>No users found</h3>
             <p>Create the first Admin or Technician account to begin managing access.</p>
           </div>

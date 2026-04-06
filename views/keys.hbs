@@ -1,11 +1,10 @@
 <section class="page-stack">
-  <div class="section-heading">
+  <div class="page-header">
     <div>
       <div class="eyebrow">Admin Workspace</div>
       <h1>API Key Management</h1>
       <p>
-        Generate, review, and revoke service credentials for integrations that need access to the
-        computer inventory system outside the browser UI.
+        Generate, review, and revoke integration keys for programmatic access to the system.
       </p>
     </div>
     <span class="panel-chip">Admin Only</span>
@@ -24,9 +23,7 @@
       <div style="flex:1;">
         <strong>Copy this key now. It will not be shown again.</strong>
         <span class="key-reveal">{{rawKey}}</span>
-        <small class="usage-note">
-          Header format: x-api-key: {{rawKey}}
-        </small>
+        <small class="usage-note">Header format: x-api-key: {{rawKey}}</small>
       </div>
     </div>
   {{/if}}
@@ -37,7 +34,7 @@
       <strong>{{keyCount}}</strong>
     </div>
     <div class="metric-card">
-      <span class="metric-label">Storage Method</span>
+      <span class="metric-label">Storage</span>
       <strong>SHA-256</strong>
     </div>
     <div class="metric-card">
@@ -45,21 +42,20 @@
       <strong>One Time</strong>
     </div>
     <div class="metric-card">
-      <span class="metric-label">Access Layer</span>
+      <span class="metric-label">Header</span>
       <strong>x-api-key</strong>
     </div>
   </div>
 
-  <div class="panel-grid">
-    <div class="glass-card">
-      <div class="panel-title-wrap">
-        <h2>Create New API Key</h2>
-        <span class="panel-chip">Integration access</span>
+  <div class="admin-grid">
+    <div class="surface-card">
+      <div class="card-head">
+        <div>
+          <h2>Create New API Key</h2>
+          <p>Generate secure keys for integrations and internal services.</p>
+        </div>
+        <span class="soft-badge">Integration access</span>
       </div>
-
-      <p class="panel-description">
-        Use API keys for non-browser clients and internal service integrations. The raw secret is generated once and only its hash is stored in the database.
-      </p>
 
       <form action="/api/keys" method="POST" class="form">
         <div class="form-group">
@@ -75,42 +71,39 @@
 
         <button type="submit" class="btn btn-primary btn-block">Generate API Key</button>
       </form>
-
-      <div class="info-block">
-        <strong>Security flow</strong>
-        <p>Generate raw key → hash before storage → validate incoming header by hashing again → revoke instantly when no longer trusted.</p>
-      </div>
     </div>
 
-    <div class="glass-card">
-      <div class="panel-title-wrap">
-        <h2>Active Keys</h2>
-        <span class="panel-chip">{{keyCount}} active</span>
+    <div class="surface-card">
+      <div class="card-head">
+        <div>
+          <h2>Active Keys</h2>
+          <p>Revoke any key immediately if an integration is retired or compromised.</p>
+        </div>
+        <span class="soft-badge">{{keyCount}} active</span>
       </div>
 
-      <p class="panel-description">
-        Revoke any key immediately if an integration is retired, rotated, or suspected to be exposed.
-      </p>
-
-      <div class="key-list">
+      <div class="entity-list">
         {{#each keys}}
-          <div class="key-card modern-key-card">
-            <div class="key-header">
+          <div class="entity-card">
+            <div class="entity-main">
               <div>
-                <span class="key-name">{{this.name}}</span>
-                <div class="key-subline">Hash preview: {{this.shortHash}}••••••••</div>
+                <h3>{{this.name}}</h3>
+                <p>Hash preview: {{this.shortHash}}••••••••</p>
               </div>
-              <span class="badge badge-success">Active</span>
+
+              <div class="entity-badges">
+                <span class="badge badge-success">Active</span>
+              </div>
             </div>
 
-            <div class="key-meta">
-              <span class="key-meta-item">{{this.createdBy.name}}</span>
-              <span class="key-meta-item">{{this.createdBy.email}}</span>
-              <span class="key-meta-item">{{this.createdBy.role}}</span>
-              <span class="key-meta-item">{{this.createdAtLabel}}</span>
+            <div class="entity-meta">
+              <span class="meta-pill">{{this.createdBy.name}}</span>
+              <span class="meta-pill">{{this.createdBy.email}}</span>
+              <span class="meta-pill">{{this.createdBy.role}}</span>
+              <span class="meta-pill">{{this.createdAtLabel}}</span>
             </div>
 
-            <div class="key-footer">
+            <div class="entity-actions">
               <form action="/api/keys/{{this._id}}?_method=DELETE" method="POST">
                 <button
                   type="submit"
@@ -124,7 +117,6 @@
           </div>
         {{else}}
           <div class="empty-state">
-            <div class="empty-state-icon">🔐</div>
             <h3>No active API keys</h3>
             <p>Create a key when an external integration needs controlled access.</p>
           </div>

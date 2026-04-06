@@ -1,129 +1,62 @@
 <section class="page-stack">
-
-  <div class="hero-banner">
+  <div class="page-header">
     <div>
-      <div class="eyebrow">AUPP — INF 653 Final Project</div>
-      <h1>Computer Inventory System</h1>
-      <p>Manage the full lifecycle of hardware and peripherals — from procurement and assignment to history and reporting.</p>
+      <div class="eyebrow">Overview</div>
+      <h1>Welcome to the computer inventory system</h1>
+      <p>
+        A modern internal workspace for managing assets, access control, transactions, and reports.
+      </p>
     </div>
-    <form action="/api/auth/logout" method="POST" style="flex-shrink:0;">
-      <button type="submit" class="btn btn-outline-light">Sign Out</button>
-    </form>
-  </div>
 
-  <div class="stat-grid">
-    <div class="stat-card glow-blue">
-      <span class="stat-label">Inventory Module</span>
-      <h3>CRUD</h3>
-      <p>Add, edit, update, and soft-delete hardware assets.</p>
-    </div>
-    <div class="stat-card glow-purple">
-      <span class="stat-label">Assignment Module</span>
-      <h3>Check-In / Out</h3>
-      <p>Assign available assets and return them with documents.</p>
-    </div>
-    <div class="stat-card glow-teal">
-      <span class="stat-label">Audit Module</span>
-      <h3>History & Reports</h3>
-      <p>View item history, asset aging, and user-based audits.</p>
+    <div class="account-card">
+      <div class="account-avatar">SA</div>
+
+      <div class="account-info">
+        <strong>{{displayName}}</strong>
+        <span>{{displayRole}} · {{displayEmail}}</span>
+      </div>
+
+      <form action="/api/auth/logout" method="POST">
+        <button type="submit" class="btn btn-outline btn-sm">Sign Out</button>
+      </form>
     </div>
   </div>
 
-  <div class="section-heading">
-    <div>
-      <div class="eyebrow">Navigation</div>
-      <h1>Where would you like to go?</h1>
-      <p>Each module maps directly to a project requirement from the SRS.</p>
-    </div>
-    {{#if user}}
-      <span class="panel-chip">Signed in as {{user.name}}</span>
-    {{/if}}
-  </div>
-
-  <div class="module-grid">
-    <a class="module-card" href="/inventory">
-      <div class="module-icon">🖥️</div>
-      <div>
-        <h3>Inventory Management</h3>
-        <p>Manage computers and peripherals through full item CRUD operations.</p>
-        <span class="module-link">Open Inventory</span>
-      </div>
+  <div class="overview-grid">
+    <a class="overview-card" href="/inventory">
+      <div class="overview-icon">🖥️</div>
+      <h3>Inventory</h3>
+      <p>Manage computers and peripherals with item records, status, and lifecycle updates.</p>
     </a>
 
-    <a class="module-card" href="/transactions">
-      <div class="module-icon">📦</div>
-      <div>
-        <h3>Check-Out / Check-In</h3>
-        <p>Assign available assets to users and return them with uploaded documents.</p>
-        <span class="module-link">Open Transactions</span>
-      </div>
+    <a class="overview-card" href="/transactions">
+      <div class="overview-icon">📦</div>
+      <h3>Transactions</h3>
+      <p>Handle check-out and check-in flows with supporting documents.</p>
     </a>
 
-    <a class="module-card" href="/history">
-      <div class="module-icon">🕘</div>
-      <div>
-        <h3>Asset History</h3>
-        <p>Review previous assignees, usage timeline, and linked reference documents.</p>
-        <span class="module-link">Open History</span>
-      </div>
+    <a class="overview-card" href="/history">
+      <div class="overview-icon">🕘</div>
+      <h3>History</h3>
+      <p>Review audit trails, previous assignees, and reference documents.</p>
     </a>
 
-    <a class="module-card" href="/users">
-      <div class="module-icon">👥</div>
-      <div>
-        <h3>User Management</h3>
-        <p>Create Admin and Technician accounts, assign roles, and manage access.</p>
-        <span class="module-link">Open Users</span>
-      </div>
+    <a class="overview-card" href="/users">
+      <div class="overview-icon">👥</div>
+      <h3>Users</h3>
+      <p>Create accounts, assign roles, and manage account status.</p>
     </a>
 
-    <a class="module-card" href="/keys">
-      <div class="module-icon">🔑</div>
-      <div>
-        <h3>API Key Management</h3>
-        <p>Generate hashed API keys for integrations and revoke them instantly.</p>
-        <span class="module-link">Open API Keys</span>
-      </div>
+    <a class="overview-card" href="/keys">
+      <div class="overview-icon">🔑</div>
+      <h3>API Keys</h3>
+      <p>Generate integration credentials and revoke them instantly when needed.</p>
     </a>
 
-    <a class="module-card" href="/reports">
-      <div class="module-icon">📊</div>
-      <div>
-        <h3>Reports</h3>
-        <p>View inventory summary, aging assets, and user-level audit data.</p>
-        <span class="module-link">Open Reports</span>
-      </div>
+    <a class="overview-card" href="/reports">
+      <div class="overview-icon">📊</div>
+      <h3>Reports</h3>
+      <p>Review inventory summary, aging assets, and user-based audit data.</p>
     </a>
   </div>
-
-  <div class="glass-card quick-guide">
-    <div class="panel-title-wrap">
-      <h2>Recommended Workflow</h2>
-      <span class="panel-chip">First-time guide</span>
-    </div>
-
-    <div class="guide-steps">
-      <div class="guide-step">
-        <span class="guide-step-num">Step 01</span>
-        <strong>Review or add inventory</strong>
-        <p>Open Inventory to confirm items exist with the correct status and classification.</p>
-      </div>
-      <div class="guide-step">
-        <span class="guide-step-num">Step 02</span>
-        <strong>Create users if needed</strong>
-        <p>Go to User Management to create Admin or Technician accounts with hashed passwords.</p>
-      </div>
-      <div class="guide-step">
-        <span class="guide-step-num">Step 03</span>
-        <strong>Assign or return assets</strong>
-        <p>Use Check-Out / Check-In to handle assignments and returns with uploaded documents.</p>
-      </div>
-      <div class="guide-step">
-        <span class="guide-step-num">Step 04</span>
-        <strong>Audit and report</strong>
-        <p>Use Asset History and Reports to review activity and monitor system-wide status.</p>
-      </div>
-    </div>
-  </div>
-
 </section>
