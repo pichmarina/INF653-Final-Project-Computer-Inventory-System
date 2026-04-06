@@ -1,47 +1,67 @@
-<section class="login-shell">
-  <div class="login-hero">
-    <div class="login-hero-content">
-      <div class="eyebrow">American University of Phnom Penh</div>
-      <h1>IT Asset<br /><span>Management System</span></h1>
-      <p>
-        Track hardware, control access, manage API integrations,
-        and keep your IT operations organized — all in one secure workspace.
+<section class="auth-shell">
+  <div class="auth-showcase">
+    <div class="auth-showcase-inner">
+      <div class="eyebrow">AUPP · INF 653 Final Project</div>
+      <h1>Computer Inventory <span>Control Center</span></h1>
+      <p class="auth-lead">
+        A secure internal workspace for managing technician access, administrator accounts,
+        and integration credentials for the computer inventory system.
       </p>
 
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <strong>Secured</strong>
-          <span>JWT + RBAC + bcrypt</span>
+      <div class="showcase-grid">
+        <div class="showcase-card">
+          <div class="showcase-icon">⌁</div>
+          <div>
+            <h3>Access Control</h3>
+            <p>JWT login, role-based permissions, and disabled-account blocking.</p>
+          </div>
         </div>
-        <div class="hero-stat">
-          <strong>Auditable</strong>
-          <span>Full asset history</span>
+
+        <div class="showcase-card">
+          <div class="showcase-icon">◫</div>
+          <div>
+            <h3>User Administration</h3>
+            <p>Create Admin and Technician accounts with secure password hashing.</p>
+          </div>
         </div>
-        <div class="hero-stat">
-          <strong>Integrated</strong>
-          <span>API key access</span>
+
+        <div class="showcase-card">
+          <div class="showcase-icon">⌘</div>
+          <div>
+            <h3>Integration Keys</h3>
+            <p>Generate hashed API keys for controlled service-level access.</p>
+          </div>
         </div>
+      </div>
+
+      <div class="showcase-foot">
+        <span class="mini-pill">JWT</span>
+        <span class="mini-pill">bcrypt</span>
+        <span class="mini-pill">RBAC</span>
+        <span class="mini-pill">API Keys</span>
       </div>
     </div>
   </div>
 
-  <div class="login-panel">
-    <div class="login-panel-inner">
+  <div class="auth-panel">
+    <div class="auth-panel-inner">
       <div class="auth-header">
-        <div class="eyebrow">INF 653 — Final Project</div>
-        <h2>Sign In</h2>
-        <p>Use your IT department credentials to access the system.</p>
+        <div class="eyebrow">Secure Sign In</div>
+        <h2>Welcome back</h2>
+        <p>Sign in with your authorized IT department account.</p>
       </div>
 
       {{#if formError}}
-        <div class="alert alert-error" style="margin-bottom:18px;">{{formError}}</div>
+        <div class="alert alert-error">{{formError}}</div>
       {{/if}}
 
-      <form action="/api/auth/login" method="POST" class="form">
+      <form action="/api/auth/login" method="POST" class="form auth-form">
         <div class="form-group">
-          <label for="email">Email Address</label>
+          <label for="email">Work Email</label>
           <input
-            id="email" name="email" type="email"
+            id="email"
+            name="email"
+            type="email"
             placeholder="admin@aupp.edu.kh"
             value="{{values.email}}"
             class="{{#if errors.email}}input-error{{/if}}"
@@ -53,7 +73,9 @@
         <div class="form-group">
           <label for="password">Password</label>
           <input
-            id="password" name="password" type="password"
+            id="password"
+            name="password"
+            type="password"
             placeholder="Enter your password"
             class="{{#if errors.password}}input-error{{/if}}"
             autocomplete="current-password"
@@ -61,14 +83,14 @@
           {{#if errors.password}}<small class="field-error">{{errors.password}}</small>{{/if}}
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" style="margin-top:4px;">
-          Sign In →
+        <button type="submit" class="btn btn-primary btn-block">
+          Sign In
         </button>
       </form>
 
-      <p style="margin-top:20px; font-size:0.75rem; color:var(--text-3); text-align:center;">
-        Access restricted to authorized AUPP IT personnel only.
-      </p>
+      <div class="auth-note">
+        Access is limited to approved AUPP IT personnel. Disabled accounts cannot authenticate.
+      </div>
     </div>
   </div>
 </section>

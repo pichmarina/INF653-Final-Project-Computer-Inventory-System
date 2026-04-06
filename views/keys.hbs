@@ -1,12 +1,11 @@
 <section class="page-stack">
   <div class="section-heading">
     <div>
-      <div class="eyebrow">Admin Module</div>
-      <h1>{{title}}</h1>
+      <div class="eyebrow">Admin Workspace</div>
+      <h1>API Key Management</h1>
       <p>
-        Generate hashed API keys for programmatic access using the
-        <code style="font-size:0.83em;color:var(--navy);background:var(--navy-light);padding:2px 7px;border-radius:5px;font-family:monospace;">x-api-key</code>
-        header. The raw key is shown exactly once upon creation.
+        Generate, review, and revoke service credentials for integrations that need access to the
+        computer inventory system outside the browser UI.
       </p>
     </div>
     <span class="panel-chip">Admin Only</span>
@@ -15,6 +14,7 @@
   {{#if successMessage}}
     <div class="alert alert-success">{{successMessage}}</div>
   {{/if}}
+
   {{#if errorMessage}}
     <div class="alert alert-error">{{errorMessage}}</div>
   {{/if}}
@@ -22,61 +22,84 @@
   {{#if rawKey}}
     <div class="alert alert-warning">
       <div style="flex:1;">
-        <strong>Copy this key now — it will never be shown again.</strong>
+        <strong>Copy this key now. It will not be shown again.</strong>
         <span class="key-reveal">{{rawKey}}</span>
-        <small style="display:block;margin-top:8px;font-size:0.74rem;opacity:0.7;font-family:monospace;">
-          Usage: x-api-key: {{rawKey}}
+        <small class="usage-note">
+          Header format: x-api-key: {{rawKey}}
         </small>
       </div>
     </div>
   {{/if}}
 
+  <div class="metric-grid">
+    <div class="metric-card">
+      <span class="metric-label">Active Keys</span>
+      <strong>{{keyCount}}</strong>
+    </div>
+    <div class="metric-card">
+      <span class="metric-label">Storage Method</span>
+      <strong>SHA-256</strong>
+    </div>
+    <div class="metric-card">
+      <span class="metric-label">Reveal Policy</span>
+      <strong>One Time</strong>
+    </div>
+    <div class="metric-card">
+      <span class="metric-label">Access Layer</span>
+      <strong>x-api-key</strong>
+    </div>
+  </div>
+
   <div class="panel-grid">
-    {{!-- GENERATE FORM --}}
     <div class="glass-card">
       <div class="panel-title-wrap">
-        <h2>Generate API Key</h2>
-        <span class="panel-chip">One-time reveal</span>
+        <h2>Create New API Key</h2>
+        <span class="panel-chip">Integration access</span>
       </div>
+
       <p class="panel-description">
-        Keys are stored as SHA-256 hashes in MongoDB. Only the raw key shown at creation time can authenticate requests.
+        Use API keys for non-browser clients and internal service integrations. The raw secret is generated once and only its hash is stored in the database.
       </p>
 
       <form action="/api/keys" method="POST" class="form">
         <div class="form-group">
           <label for="name">Key Label</label>
-          <input id="name" name="name" type="text"
-            placeholder="e.g. Monitoring Integration" autocomplete="off" />
+          <input
+            id="name"
+            name="name"
+            type="text"
+            placeholder="e.g. Desktop Audit Service"
+            autocomplete="off"
+          />
         </div>
-        <button type="submit" class="btn btn-primary btn-block">Generate Key →</button>
+
+        <button type="submit" class="btn btn-primary btn-block">Generate API Key</button>
       </form>
 
-      <div style="margin-top:20px;padding:14px 16px;border-radius:var(--radius);background:var(--navy-light);border:1px solid #C0CDED;">
-        <p style="font-size:0.78rem;color:var(--navy);line-height:1.8;margin:0;">
-          <strong style="display:block;margin-bottom:4px;color:var(--navy);">How it works</strong>
-          1. A 64-char hex key is generated<br/>
-          2. SHA-256 hash is stored in MongoDB<br/>
-          3. Incoming key is hashed on each request<br/>
-          4. Raw key is never stored — shown once only
-        </p>
+      <div class="info-block">
+        <strong>Security flow</strong>
+        <p>Generate raw key → hash before storage → validate incoming header by hashing again → revoke instantly when no longer trusted.</p>
       </div>
     </div>
 
-    {{!-- KEY LIST --}}
     <div class="glass-card">
       <div class="panel-title-wrap">
         <h2>Active Keys</h2>
-        <span class="panel-chip">{{keys.length}} active</span>
+        <span class="panel-chip">{{keyCount}} active</span>
       </div>
+
       <p class="panel-description">
-        Revocation is instant and permanent — the integration loses access immediately.
+        Revoke any key immediately if an integration is retired, rotated, or suspected to be exposed.
       </p>
 
       <div class="key-list">
         {{#each keys}}
-          <div class="key-card">
+          <div class="key-card modern-key-card">
             <div class="key-header">
-              <span class="key-name">{{this.name}}</span>
+              <div>
+                <span class="key-name">{{this.name}}</span>
+                <div class="key-subline">Hash preview: {{this.shortHash}}••••••••</div>
+              </div>
               <span class="badge badge-success">Active</span>
             </div>
 
@@ -84,13 +107,16 @@
               <span class="key-meta-item">{{this.createdBy.name}}</span>
               <span class="key-meta-item">{{this.createdBy.email}}</span>
               <span class="key-meta-item">{{this.createdBy.role}}</span>
-              <span class="key-meta-item">{{this.createdAt}}</span>
+              <span class="key-meta-item">{{this.createdAtLabel}}</span>
             </div>
 
             <div class="key-footer">
               <form action="/api/keys/{{this._id}}?_method=DELETE" method="POST">
-                <button type="submit" class="btn btn-sm btn-danger"
-                  onclick="return confirm('Revoke this key? This cannot be undone.')">
+                <button
+                  type="submit"
+                  class="btn btn-danger btn-sm"
+                  onclick="return confirm('Revoke this key? This action cannot be undone.')"
+                >
                   Revoke Key
                 </button>
               </form>
@@ -98,9 +124,9 @@
           </div>
         {{else}}
           <div class="empty-state">
-            <div class="empty-state-icon">🔑</div>
+            <div class="empty-state-icon">🔐</div>
             <h3>No active API keys</h3>
-            <p>Generate a key to enable programmatic access to the inventory API.</p>
+            <p>Create a key when an external integration needs controlled access.</p>
           </div>
         {{/each}}
       </div>

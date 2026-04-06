@@ -1,74 +1,189 @@
-<section class="login-shell">
-  <div class="login-hero">
-    <div class="login-hero-content">
-      <div class="eyebrow">American University of Phnom Penh</div>
-      <h1>IT Asset<br /><span>Management System</span></h1>
+<section class="page-stack">
+  <div class="section-heading">
+    <div>
+      <div class="eyebrow">Admin Workspace</div>
+      <h1>User Management</h1>
       <p>
-        Track hardware, control access, manage API integrations,
-        and keep your IT operations organized — all in one secure workspace.
+        Create and manage Admin and Technician accounts for the computer inventory system.
+        This page controls access, role assignment, and account status.
       </p>
+    </div>
+    <span class="panel-chip">Admin Only</span>
+  </div>
 
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <strong>Secured</strong>
-          <span>JWT + RBAC + bcrypt</span>
-        </div>
-        <div class="hero-stat">
-          <strong>Auditable</strong>
-          <span>Full asset history</span>
-        </div>
-        <div class="hero-stat">
-          <strong>Integrated</strong>
-          <span>API key access</span>
-        </div>
-      </div>
+  {{#if successMessage}}
+    <div class="alert alert-success">{{successMessage}}</div>
+  {{/if}}
+
+  {{#if errorMessage}}
+    <div class="alert alert-error">{{errorMessage}}</div>
+  {{/if}}
+
+  <div class="metric-grid">
+    <div class="metric-card">
+      <span class="metric-label">Total Users</span>
+      <strong>{{stats.totalUsers}}</strong>
+    </div>
+    <div class="metric-card">
+      <span class="metric-label">Active Accounts</span>
+      <strong>{{stats.activeUsers}}</strong>
+    </div>
+    <div class="metric-card">
+      <span class="metric-label">Admins</span>
+      <strong>{{stats.adminUsers}}</strong>
+    </div>
+    <div class="metric-card">
+      <span class="metric-label">Technicians</span>
+      <strong>{{stats.technicianUsers}}</strong>
     </div>
   </div>
 
-  <div class="login-panel">
-    <div class="login-panel-inner">
-      <div class="auth-header">
-        <div class="eyebrow">INF 653 — Final Project</div>
-        <h2>Sign In</h2>
-        <p>Use your IT department credentials to access the system.</p>
+  <div class="panel-grid">
+    <div class="glass-card">
+      <div class="panel-title-wrap">
+        <h2>Create New User</h2>
+        <span class="panel-chip">bcrypt protected</span>
       </div>
 
-      {{#if formError}}
-        <div class="alert alert-error" style="margin-bottom:18px;">{{formError}}</div>
-      {{/if}}
+      <p class="panel-description">
+        Add internal users who can access the inventory platform. Admins can create other Admins or Technicians.
+      </p>
 
-      <form action="/api/auth/login" method="POST" class="form">
+      <form action="/api/users" method="POST" class="form">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            placeholder="e.g. Lina Chan"
+            value="{{formValues.name}}"
+            class="{{#if errors.name}}input-error{{/if}}"
+          />
+          {{#if errors.name}}<small class="field-error">{{errors.name}}</small>{{/if}}
+        </div>
+
         <div class="form-group">
           <label for="email">Email Address</label>
           <input
-            id="email" name="email" type="email"
-            placeholder="admin@aupp.edu.kh"
-            value="{{values.email}}"
+            id="email"
+            name="email"
+            type="email"
+            placeholder="user@aupp.edu.kh"
+            value="{{formValues.email}}"
             class="{{#if errors.email}}input-error{{/if}}"
-            autocomplete="email"
           />
           {{#if errors.email}}<small class="field-error">{{errors.email}}</small>{{/if}}
         </div>
 
         <div class="form-group">
-          <label for="password">Password</label>
+          <label for="password">Temporary Password</label>
           <input
-            id="password" name="password" type="password"
-            placeholder="Enter your password"
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Minimum 6 characters"
             class="{{#if errors.password}}input-error{{/if}}"
-            autocomplete="current-password"
           />
           {{#if errors.password}}<small class="field-error">{{errors.password}}</small>{{/if}}
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" style="margin-top:4px;">
-          Sign In →
-        </button>
+        <div class="form-group">
+          <label for="role">Role</label>
+          <select id="role" name="role" class="{{#if errors.role}}input-error{{/if}}">
+            <option value="">Select role</option>
+            <option value="Admin" {{#if (eq formValues.role "Admin")}}selected{{/if}}>Admin</option>
+            <option value="Technician" {{#if (eq formValues.role "Technician")}}selected{{/if}}>Technician</option>
+          </select>
+          {{#if errors.role}}<small class="field-error">{{errors.role}}</small>{{/if}}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Create User</button>
       </form>
 
-      <p style="margin-top:20px; font-size:0.75rem; color:var(--text-3); text-align:center;">
-        Access restricted to authorized AUPP IT personnel only.
+      <div class="info-block">
+        <strong>What happens on creation</strong>
+        <p>
+          The password is hashed with bcrypt before storage, and the user can then authenticate through the login endpoint.
+        </p>
+      </div>
+    </div>
+
+    <div class="glass-card">
+      <div class="panel-title-wrap">
+        <h2>Existing Users</h2>
+        <span class="panel-chip">{{stats.totalUsers}} records</span>
+      </div>
+
+      <p class="panel-description">
+        Update roles, disable compromised accounts, and keep administrative access under control.
       </p>
+
+      <div class="user-list">
+        {{#each users}}
+          <div class="user-card modern-user-card">
+            <div class="user-top">
+              <div class="user-info">
+                <h3>{{this.name}}</h3>
+                <p>{{this.email}}</p>
+              </div>
+
+              <div class="user-status-stack">
+                {{#if (eq this.role "Admin")}}
+                  <span class="badge badge-admin">Admin</span>
+                {{else}}
+                  <span class="badge badge-info">Technician</span>
+                {{/if}}
+
+                {{#if this.isEnabled}}
+                  <span class="badge badge-success">Enabled</span>
+                {{else}}
+                  <span class="badge badge-danger">Disabled</span>
+                {{/if}}
+              </div>
+            </div>
+
+            <div class="user-meta">
+              <span class="meta-pill">Created {{this.createdAtLabel}}</span>
+              <span class="meta-pill">User ID {{this._id}}</span>
+            </div>
+
+            <div class="user-actions-grid">
+              <form action="/api/users/{{this._id}}/role?_method=PATCH" method="POST" class="inline-form">
+                <select name="role">
+                  <option value="Admin" {{#if (eq this.role "Admin")}}selected{{/if}}>Admin</option>
+                  <option value="Technician" {{#if (eq this.role "Technician")}}selected{{/if}}>Technician</option>
+                </select>
+                <button type="submit" class="btn btn-outline btn-sm">Update Role</button>
+              </form>
+
+              <form action="/api/users/{{this._id}}/status?_method=PATCH" method="POST" class="inline-form">
+                {{#if this.isEnabled}}
+                  <input type="hidden" name="isEnabled" value="false" />
+                  <button
+                    type="submit"
+                    class="btn btn-danger btn-sm"
+                    onclick="return confirm('Disable this user account? This will also revoke their active API keys.')"
+                  >
+                    Disable Account
+                  </button>
+                {{else}}
+                  <input type="hidden" name="isEnabled" value="true" />
+                  <button type="submit" class="btn btn-primary btn-sm">
+                    Enable Account
+                  </button>
+                {{/if}}
+              </form>
+            </div>
+          </div>
+        {{else}}
+          <div class="empty-state">
+            <div class="empty-state-icon">👤</div>
+            <h3>No users found</h3>
+            <p>Create the first Admin or Technician account to begin managing access.</p>
+          </div>
+        {{/each}}
+      </div>
     </div>
   </div>
 </section>

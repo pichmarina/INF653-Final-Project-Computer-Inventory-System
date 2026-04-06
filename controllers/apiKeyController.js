@@ -2,19 +2,40 @@ const crypto = require("crypto");
 const ApiKey = require("../models/ApiKey");
 const hashApiKey = require("../utils/hashApiKey");
 
+function formatDate(date) {
+  if (!date) return "-";
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(date));
+}
+
+async function buildKeysViewData(query = {}) {
+  const keyDocs = await ApiKey.find({ isRevoked: false })
+    .populate("createdBy", "name email role")
+    .sort({ createdAt: -1 });
+
+  const keys = keyDocs.map((key) => ({
+    ...key.toObject(),
+    createdAtLabel: formatDate(key.createdAt),
+    shortHash: key.keyHash.slice(0, 12),
+  }));
+
+  return {
+    title: "API Key Management",
+    keys,
+    keyCount: keys.length,
+    successMessage: query.success || null,
+    errorMessage: query.error || null,
+    rawKey: query.rawKey || null,
+  };
+}
+
 async function renderKeysPage(req, res, next) {
   try {
-    const keys = await ApiKey.find({ isRevoked: false })
-      .populate("createdBy", "name email role")
-      .sort({ createdAt: -1 });
-
-    return res.render("keys", {
-      title: "API Key Management",
-      keys,
-      successMessage: req.query.success || null,
-      errorMessage: req.query.error || null,
-      rawKey: req.query.rawKey || null,
-    });
+    const viewData = await buildKeysViewData(req.query);
+    return res.render("keys", viewData);
   } catch (error) {
     next(error);
   }
