@@ -1,9 +1,29 @@
-<section class="card">
-  <h1>{{title}}</h1>
-  <p>Track item check-in and check-out history.</p>
+<!DOCTYPE html>
+<html lang="en">
 
-  <div class="mini-card">
-    <h3>Transaction History</h3>
-    <p>This page will display inventory activity and item movement records.</p>
-  </div>
-</section>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{title}} | {{appName}}</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body>
+  {{> navbar}}
+
+  <main class="container">
+    <section class="card">
+      <h1>{{title}}</h1>
+      <p>Track item check-in and check-out history.</p>
+
+      <div class="mini-card">
+        <h3>Transaction History</h3>
+        <p>This page will display inventory activity and item movement records.</p>
+      </div>
+    </section>
+  </main>
+
+  {{> footer}}
+</body>
+
+</html>

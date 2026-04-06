@@ -1,21 +1,41 @@
-<section class="card">
-  <h1>{{title}}</h1>
-  <p>View system reports and inventory summaries.</p>
+<!DOCTYPE html>
+<html lang="en">
 
-  <div class="grid">
-    <div class="mini-card">
-      <h3>Inventory Summary</h3>
-      <p>Total items, available items, and assigned items.</p>
-    </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{title}} | {{appName}}</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
 
-    <div class="mini-card">
-      <h3>Asset Aging</h3>
-      <p>View assets older than 3 years.</p>
-    </div>
+<body>
+  {{> navbar}}
 
-    <div class="mini-card">
-      <h3>Assets by User</h3>
-      <p>See which assets are currently assigned to each user.</p>
-    </div>
-  </div>
-</section>
+  <main class="container">
+    <section class="card">
+      <h1>{{title}}</h1>
+      <p>View system reports and inventory summaries.</p>
+
+      <div class="grid">
+        <div class="mini-card">
+          <h3>Inventory Summary</h3>
+          <p>Total items, available items, and assigned items.</p>
+        </div>
+
+        <div class="mini-card">
+          <h3>Asset Aging</h3>
+          <p>View assets older than 3 years.</p>
+        </div>
+
+        <div class="mini-card">
+          <h3>Assets by User</h3>
+          <p>See which assets are currently assigned to each user.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  {{> footer}}
+</body>
+
+</html>
