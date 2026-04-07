@@ -63,6 +63,14 @@ main.container {
   margin-bottom: 20px;
 }
 
+.card h2 {
+  margin-top: 0;
+}
+
+.card p {
+  color: #4b5563;
+}
+
 .form {
   margin-top: 18px;
 }
@@ -171,6 +179,7 @@ main.container {
   text-align: left;
   padding: 12px 14px;
   border-bottom: 1px solid #d1d5db;
+  vertical-align: top;
 }
 
 .data-table th {

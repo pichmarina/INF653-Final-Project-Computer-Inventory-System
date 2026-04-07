@@ -12,25 +12,121 @@
   {{> navbar}}
 
   <main class="container">
-    <section class="card">
+    <section class="card page-header-card">
       <h1>{{title}}</h1>
-      <p>View system reports and inventory summaries.</p>
+      <p>Inventory reporting, asset aging, and assigned asset summary.</p>
+
+      <section class="stats-grid">
+        <div class="mini-card stat-box">
+          <h3>Total Items</h3>
+          <p class="stat-number">{{summary.totalItems}}</p>
+        </div>
+
+        <div class="mini-card stat-box">
+          <h3>Available Items</h3>
+          <p class="stat-number">{{summary.availableItems}}</p>
+        </div>
+
+        <div class="mini-card stat-box">
+          <h3>Assigned Items</h3>
+          <p class="stat-number">{{summary.assignedItems}}</p>
+        </div>
+      </section>
+    </section>
+
+    <section class="card">
+      <h2>Inventory Summary</h2>
+      <p>Quick overview of current inventory status.</p>
 
       <div class="grid">
         <div class="mini-card">
-          <h3>Inventory Summary</h3>
-          <p>Total items, available items, and assigned items.</p>
+          <h3>Total Assets</h3>
+          <p>{{summary.totalItems}}</p>
         </div>
 
         <div class="mini-card">
-          <h3>Asset Aging</h3>
-          <p>View assets older than 3 years.</p>
+          <h3>Available</h3>
+          <p>{{summary.availableItems}}</p>
         </div>
 
         <div class="mini-card">
-          <h3>Assets by User</h3>
-          <p>See which assets are currently assigned to each user.</p>
+          <h3>Assigned</h3>
+          <p>{{summary.assignedItems}}</p>
         </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Assets Older Than 3 Years</h2>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Asset Tag</th>
+              <th>Item Name</th>
+              <th>Category</th>
+              <th>Date Acquired</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each agingItems}}
+            <tr>
+              <td>{{this.assetTag}}</td>
+              <td>{{this.itemName}}</td>
+              <td>{{this.category}}</td>
+              <td>{{this.acquiredDate}}</td>
+              <td><span class="status-badge">{{this.status}}</span></td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Assets by User</h2>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Assigned Items</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each assetsByUser}}
+            <tr>
+              <td>{{this.userName}}</td>
+              <td>{{this.email}}</td>
+              <td>{{this.itemCount}}</td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Report API Links</h2>
+      <div class="grid">
+        <a href="/api/reports/summary" class="mini-card quick-link-card">
+          <h3>Summary API</h3>
+          <p>View summary data in JSON format.</p>
+        </a>
+
+        <a href="/api/reports/aging" class="mini-card quick-link-card">
+          <h3>Aging API</h3>
+          <p>View assets older than 3 years in JSON format.</p>
+        </a>
+
+        <a href="/api/reports/by-user" class="mini-card quick-link-card">
+          <h3>Assets by User API</h3>
+          <p>View assigned assets grouped by user in JSON format.</p>
+        </a>
       </div>
     </section>
   </main>
