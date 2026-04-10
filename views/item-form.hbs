@@ -1,8 +1,17 @@
 <section class="card">
   <h1>{{#if isEdit}}Edit Item{{else}}Add Item{{/if}}</h1>
   <p>{{#if isEdit}}Update item information below.{{else}}Enter the item details below.{{/if}}</p>
+  
+  {{#if isEdit}}
+    <p><strong>Editing item ID:</strong> {{itemId}}</p>
+  {{/if}}
 
-  <form class="form" method="POST" enctype="multipart/form-data">
+  <form
+    class="form"
+    method="POST"
+    enctype="multipart/form-data"
+    action="{{#if isEdit}}/api/items/{{itemId}}?_method=PUT{{else}}/api/items{{/if}}"
+  >
     <div class="form-group">
       <label for="itemId">Item ID</label>
       <input type="text" id="itemId" name="itemId" placeholder="Enter item ID" />
