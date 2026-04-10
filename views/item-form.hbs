@@ -1,0 +1,48 @@
+<section class="card">
+  <h1>{{#if isEdit}}Edit Item{{else}}Add Item{{/if}}</h1>
+  <p>{{#if isEdit}}Update item information below.{{else}}Enter the item details below.{{/if}}</p>
+
+  <form class="form" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+      <label for="itemId">Item ID</label>
+      <input type="text" id="itemId" name="itemId" placeholder="Enter item ID" />
+    </div>
+
+    <div class="form-group">
+      <label for="serialNumber">Serial Number</label>
+      <input type="text" id="serialNumber" name="serialNumber" placeholder="Enter serial number" />
+    </div>
+
+    <div class="form-group">
+      <label for="brand">Brand</label>
+      <input type="text" id="brand" name="brand" placeholder="Enter brand" />
+    </div>
+
+    <div class="form-group">
+      <label for="model">Model</label>
+      <input type="text" id="model" name="model" placeholder="Enter model" />
+    </div>
+
+    <div class="form-group">
+      <label for="category">Category</label>
+      <input type="text" id="category" name="category" placeholder="Enter category" />
+    </div>
+
+    <div class="form-group">
+      <label for="classification">Classification</label>
+      <input type="text" id="classification" name="classification" placeholder="Computer or Peripheral" />
+    </div>
+
+    <div class="form-group">
+      <label for="dateAcquired">Date Acquired</label>
+      <input type="date" id="dateAcquired" name="dateAcquired" />
+    </div>
+
+    <div class="form-group">
+      <label for="document">Upload Document</label>
+      <input type="file" id="document" name="document" />
+    </div>
+
+    <button type="submit" class="btn">{{#if isEdit}}Update Item{{else}}Create Item{{/if}}</button>
+  </form>
+</section>
