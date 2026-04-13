@@ -1,51 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{title}} | {{appName}}</title>
-    <link rel="stylesheet" href="/css/style.css" />
-  </head>
-  <body>
-    <div class="app-shell">
-      {{#unless (eq currentPath "/login")}}
-        <header class="topbar">
-          <div class="container topbar-inner">
-            <a href="/dashboard" class="brand-wrap">
-              <div class="brand-mark">CIS</div>
-              <div class="brand-text">
-                <span class="brand-title">Computer Inventory System</span>
-                <span class="brand-subtitle">Internal IT workspace</span>
-              </div>
-            </a>
-
-            <nav class="topbar-nav">
-              <a href="/dashboard" class="nav-link {{#if (eq currentPath "/dashboard")}}active{{/if}}">Overview</a>
-              <a href="/inventory" class="nav-link {{#if (eq currentPath "/inventory")}}active{{/if}}">Inventory</a>
-              <a href="/transactions" class="nav-link {{#if (eq currentPath "/transactions")}}active{{/if}}">Transactions</a>
-              <a href="/history" class="nav-link {{#if (eq currentPath "/history")}}active{{/if}}">History</a>
-              <a href="/reports" class="nav-link {{#if (eq currentPath "/reports")}}active{{/if}}">Reports</a>
-              <a href="/users" class="nav-link {{#if (eq currentPath "/users")}}active{{/if}}">Users</a>
-              <a href="/keys" class="nav-link {{#if (eq currentPath "/keys")}}active{{/if}}">API Keys</a>
-            </nav>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}} | {{appName}}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  {{#if user}}
+    <div class="app-container">
+      {{> sidebar}}
+      <div class="main-content">
+        {{> navbar}}
+        <main class="page-content">
+          <div class="container-fluid">
+            {{{body}}}
           </div>
-        </header>
-      {{/unless}}
-
-      <main class="page-shell">
-        <div class="container page-content">
-          {{{body}}}
-        </div>
-      </main>
-
-      {{#unless (eq currentPath "/login")}}
-        <footer class="footer-bar">
-          <div class="container footer-inner">
-            <span>{{appName}}</span>
-            <span>© {{currentYear}} AUPP INF 653 Final Project</span>
-          </div>
-        </footer>
-      {{/unless}}
+        </main>
+        {{> footer}}
+      </div>
     </div>
-  </body>
+  {{else}}
+    {{{body}}}
+  {{/if}}
+
+  <script src="/js/main.js"></script>
+</body>
 </html>

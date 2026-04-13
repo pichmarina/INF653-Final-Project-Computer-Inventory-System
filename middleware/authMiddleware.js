@@ -21,7 +21,9 @@ async function verifyJWT(req, res, next) {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select("-passwordHash");
+    const user = await User.findById(decoded.id)
+      .select("-passwordHash")
+      .lean();
 
     if (!user || user.isDeleted || !user.isEnabled) {
       return res.status(401).json({
@@ -49,12 +51,15 @@ async function requireViewAuth(req, res, next) {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select("-passwordHash");
+    const user = await User.findById(decoded.id)
+      .select("-passwordHash")
+      .lean();
 
     if (!user || user.isDeleted || !user.isEnabled) {
       res.clearCookie("token");
       return res.redirect("/login");
     }
+
     req.user = user;
     res.locals.user = user;
     next();

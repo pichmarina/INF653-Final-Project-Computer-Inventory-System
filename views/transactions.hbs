@@ -1,43 +1,57 @@
-<section class="page-stack">
-  <div class="section-heading">
-    <div>
-      <div class="eyebrow">REQUIREMENT MODULE</div>
-      <h1>{{title}}</h1>
-      <p>
-        Assign available assets to users, return them to inventory, and upload
-        reference or inspection documents.
-      </p>
-    </div>
-    <span class="panel-chip">Transaction Module</span>
-  </div>
-
-  <div class="panel-grid">
-    <div class="glass-card form-panel">
-      <div class="panel-title-wrap">
-        <h2>Business rules</h2>
-      </div>
-
-      <ul class="friendly-list">
-        <li>Only Available items should be assigned</li>
-        <li>Maintenance and Retired items cannot be checked out</li>
-        <li>Check-out must support document upload</li>
-        <li>Check-in must return item status to Available</li>
-      </ul>
-    </div>
-
-    <div class="glass-card table-panel">
-      <div class="panel-title-wrap">
-        <h2>Coming from Person 2</h2>
-        <span class="panel-chip">Backend + UI</span>
-      </div>
-
-      <div class="empty-state">
-        <h3>Transaction feature placeholder</h3>
-        <p>
-          This page will later include check-out forms, check-in forms, file upload,
-          and assignment workflow connected to the database.
-        </p>
+<div class="page-wrapper">
+  <div class="page-header-modern">
+    <div class="page-header-content">
+      <div class="page-header-left">
+        <span class="page-eyebrow">Operations</span>
+        <h1 class="page-heading">Check-In / Check-Out</h1>
+        <p class="page-description">Assign items to users or process returns with document uploads</p>
       </div>
     </div>
   </div>
-</section>
+
+  <div class="dashboard-grid">
+    <div class="dashboard-card">
+      <div class="dashboard-card-header">
+        <h3 class="dashboard-card-title">
+          <i class="fas fa-sign-out-alt"></i>
+          Check Out Item
+        </h3>
+      </div>
+      <div class="dashboard-card-body">
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <i class="fas fa-sign-out-alt"></i>
+          </div>
+          <h4>Check Out</h4>
+          <p>Assign an available item to a user</p>
+          <button class="btn btn-primary" onclick="alert('Check Out - To be implemented by Person 2')">
+            <i class="fas fa-plus"></i>
+            New Check Out
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="dashboard-card-header">
+        <h3 class="dashboard-card-title">
+          <i class="fas fa-sign-in-alt"></i>
+          Check In Item
+        </h3>
+      </div>
+      <div class="dashboard-card-body">
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <i class="fas fa-sign-in-alt"></i>
+          </div>
+          <h4>Check In</h4>
+          <p>Process a returned item</p>
+          <button class="btn btn-primary" onclick="alert('Check In - To be implemented by Person 2')">
+            <i class="fas fa-plus"></i>
+            New Check In
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

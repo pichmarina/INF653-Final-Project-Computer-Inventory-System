@@ -1,42 +1,55 @@
-<section class="page-stack">
-  <div class="section-heading">
-    <div>
-      <div class="eyebrow">REQUIREMENT MODULE</div>
-      <h1>{{title}}</h1>
-      <p>
-        Review the chronological transaction log for each item, including previous
-        assignees, usage duration, and linked documents.
-      </p>
-    </div>
-    <span class="panel-chip">Audit Module</span>
-  </div>
-
-  <div class="panel-grid">
-    <div class="glass-card form-panel">
-      <div class="panel-title-wrap">
-        <h2>What should appear here</h2>
-      </div>
-
-      <ul class="friendly-list">
-        <li>History by item</li>
-        <li>Previous assignees</li>
-        <li>Check-out / check-in dates</li>
-        <li>Reference document links</li>
-      </ul>
-    </div>
-
-    <div class="glass-card table-panel">
-      <div class="panel-title-wrap">
-        <h2>Coming from Person 2 + Person 3</h2>
-        <span class="panel-chip">Data + UI</span>
-      </div>
-
-      <div class="empty-state">
-        <h3>History feature placeholder</h3>
-        <p>
-          This page will later show item-level history pulled from the transaction log.
-        </p>
+<div class="page-wrapper">
+  <div class="page-header-modern">
+    <div class="page-header-content">
+      <div class="page-header-left">
+        <span class="page-eyebrow">Audit</span>
+        <h1 class="page-heading">Asset History</h1>
+        <p class="page-description">View complete transaction history and audit trails for all items</p>
       </div>
     </div>
   </div>
-</section>
+
+  <div class="data-card">
+    <div class="data-card-header">
+      <div class="data-card-header-left">
+        <h3 class="data-card-title">
+          <i class="fas fa-history"></i>
+          Transaction History
+        </h3>
+      </div>
+      <div class="data-card-header-right">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search history...">
+        </div>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Item</th>
+            <th>Action</th>
+            <th>User</th>
+            <th>Notes</th>
+            <th>Document</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="6" class="table-empty">
+              <div class="empty-state">
+                <div class="empty-state-icon">
+                  <i class="fas fa-history"></i>
+                </div>
+                <h4>No history yet</h4>
+                <p>Transaction history will appear here once items are checked in or out</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

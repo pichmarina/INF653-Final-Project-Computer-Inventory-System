@@ -1,178 +1,370 @@
-<section class="page-stack">
-  <div class="page-header">
-    <div>
-      <div class="eyebrow">Admin Workspace</div>
-      <h1>User Management</h1>
-      <p>
-        Create and manage Admin and Technician accounts for the computer inventory system.
-      </p>
+<div class="page-wrapper">
+  <!-- Page Header -->
+  <div class="page-header-modern">
+    <div class="page-header-content">
+      <div class="page-header-left">
+        <span class="page-eyebrow">Administration</span>
+        <h1 class="page-heading">User Management</h1>
+        <p class="page-description">Manage system users, assign roles, and control account access</p>
+      </div>
+      <div class="page-header-right">
+        <button class="btn btn-primary" id="openAddUserModal">
+          <i class="fas fa-plus"></i>
+          Add New User
+        </button>
+      </div>
     </div>
-    <span class="panel-chip">Admin Only</span>
   </div>
 
+  <!-- Alerts -->
   {{#if successMessage}}
-    <div class="alert alert-success">{{successMessage}}</div>
+  <div class="alert alert-success alert-dismissible">
+    <i class="fas fa-check-circle"></i>
+    <span>{{successMessage}}</span>
+    <button class="alert-close" onclick="this.parentElement.remove()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
   {{/if}}
 
   {{#if errorMessage}}
-    <div class="alert alert-error">{{errorMessage}}</div>
+  <div class="alert alert-error alert-dismissible">
+    <i class="fas fa-exclamation-circle"></i>
+    <span>{{errorMessage}}</span>
+    <button class="alert-close" onclick="this.parentElement.remove()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
   {{/if}}
 
-  <div class="metric-grid">
-    <div class="metric-card">
-      <span class="metric-label">Total Users</span>
-      <strong>{{stats.totalUsers}}</strong>
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-card-icon total">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="stat-card-content">
+        <span class="stat-card-value">{{stats.totalUsers}}</span>
+        <span class="stat-card-label">Total Users</span>
+      </div>
     </div>
-    <div class="metric-card">
-      <span class="metric-label">Active Accounts</span>
-      <strong>{{stats.activeUsers}}</strong>
+    <div class="stat-card">
+      <div class="stat-card-icon active">
+        <i class="fas fa-user-check"></i>
+      </div>
+      <div class="stat-card-content">
+        <span class="stat-card-value">{{stats.activeUsers}}</span>
+        <span class="stat-card-label">Active Users</span>
+      </div>
     </div>
-    <div class="metric-card">
-      <span class="metric-label">Admins</span>
-      <strong>{{stats.adminUsers}}</strong>
+    <div class="stat-card">
+      <div class="stat-card-icon admin">
+        <i class="fas fa-user-shield"></i>
+      </div>
+      <div class="stat-card-content">
+        <span class="stat-card-value">{{stats.adminUsers}}</span>
+        <span class="stat-card-label">Admins</span>
+      </div>
     </div>
-    <div class="metric-card">
-      <span class="metric-label">Technicians</span>
-      <strong>{{stats.technicianUsers}}</strong>
+    <div class="stat-card">
+      <div class="stat-card-icon technician">
+        <i class="fas fa-user-cog"></i>
+      </div>
+      <div class="stat-card-content">
+        <span class="stat-card-value">{{stats.technicianUsers}}</span>
+        <span class="stat-card-label">Technicians</span>
+      </div>
     </div>
   </div>
 
-  <div class="admin-grid">
-    <div class="surface-card">
-      <div class="card-head">
-        <div>
-          <h2>Create New User</h2>
-          <p>Add internal users with the correct role and protected password storage.</p>
-        </div>
-        <span class="soft-badge">bcrypt protected</span>
+  <!-- Users Table Card -->
+  <div class="data-card">
+    <div class="data-card-header">
+      <div class="data-card-header-left">
+        <h3 class="data-card-title">
+          <i class="fas fa-list"></i>
+          All Users
+        </h3>
+        <span class="data-card-count">{{users.length}} users</span>
       </div>
+      <div class="data-card-header-right">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" id="userSearch" placeholder="Search users...">
+        </div>
+        <div class="filter-dropdown">
+          <button class="btn btn-outline btn-sm">
+            <i class="fas fa-filter"></i>
+            Filter
+          </button>
+        </div>
+      </div>
+    </div>
 
-      <form action="/api/users" method="POST" class="form">
-        <div class="form-group">
-          <label for="name">Full Name</label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            placeholder="e.g. Lina Chan"
-            value="{{formValues.name}}"
-            class="{{#if errors.name}}input-error{{/if}}"
-          />
-          {{#if errors.name}}<small class="field-error">{{errors.name}}</small>{{/if}}
+    <div class="table-wrapper">
+      <table class="data-table" id="usersTable">
+        <thead>
+          <tr>
+            <th class="table-col-user">User</th>
+            <th class="table-col-role">Role</th>
+            <th class="table-col-status">Status</th>
+            <th class="table-col-date">Created</th>
+            <th class="table-col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each users}}
+          <tr>
+            <td class="table-cell-user">
+              <div class="user-cell">
+                <div class="user-cell-avatar">
+                  {{firstChar name}}
+                </div>
+                <div class="user-cell-info">
+                  <span class="user-cell-name">{{name}}</span>
+                  <span class="user-cell-email">{{email}}</span>
+                </div>
+              </div>
+            </td>
+            <td class="table-cell-role">
+              <form action="/api/users/{{_id}}/role?_method=PATCH" method="POST" class="role-form">
+                <input type="hidden" name="_method" value="PATCH">
+                <select name="role" class="role-select" onchange="this.form.submit()">
+                  <option value="Admin" {{#if (eq role 'Admin')}}selected{{/if}}>Admin</option>
+                  <option value="Technician" {{#if (eq role 'Technician')}}selected{{/if}}>Technician</option>
+                </select>
+              </form>
+            </td>
+            <td class="table-cell-status">
+              <form action="/api/users/{{_id}}/status?_method=PATCH" method="POST" class="status-form">
+                <input type="hidden" name="_method" value="PATCH">
+                <label class="status-toggle">
+                  <input type="checkbox" name="isEnabled" value="true" {{#if isEnabled}}checked{{/if}} onchange="this.form.submit()">
+                  <span class="status-toggle-slider"></span>
+                  <span class="status-toggle-label">{{#if isEnabled}}Active{{else}}Disabled{{/if}}</span>
+                </label>
+              </form>
+            </td>
+            <td class="table-cell-date">
+              <span class="date-cell">{{createdAtLabel}}</span>
+            </td>
+            <td class="table-cell-actions">
+              <div class="action-buttons">
+                <button
+                  type="button"
+                  class="action-btn-icon"
+                  title="View Details"
+                  data-user-name="{{name}}"
+                  data-user-email="{{email}}"
+                  data-user-role="{{role}}"
+                  data-user-status="{{#if isEnabled}}Active{{else}}Disabled{{/if}}"
+                  data-user-created="{{createdAtLabel}}"
+                  onclick="openUserDetails(this)"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {{else}}
+          <tr>
+            <td colspan="5" class="table-empty">
+              <div class="empty-state">
+                <div class="empty-state-icon">
+                  <i class="fas fa-users"></i>
+                </div>
+                <h4>No users found</h4>
+                <p>Get started by adding your first user</p>
+                <button class="btn btn-primary" id="openAddUserModalEmpty">
+                  <i class="fas fa-plus"></i>
+                  Add User
+                </button>
+              </div>
+            </td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="data-card-footer">
+      <div class="pagination-info">
+        Showing <strong>{{users.length}}</strong> of <strong>{{users.length}}</strong> users
+      </div>
+      <div class="pagination-controls">
+        <button class="btn btn-outline btn-sm" disabled>
+          <i class="fas fa-chevron-left"></i>
+          Previous
+        </button>
+        <button class="btn btn-outline btn-sm" disabled>
+          Next
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal" id="addUserModal">
+  <div class="modal-overlay"></div>
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <i class="fas fa-user-plus"></i>
+        Add New User
+      </h3>
+      <button class="modal-close" id="closeAddUserModal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form action="/api/users" method="POST" class="modal-form" id="addUserForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" name="name" class="form-input {{#if errors.name}}input-error{{/if}}" placeholder="Enter full name" value="{{formValues.name}}" required>
+            {{#if errors.name}}
+            <span class="form-error">{{errors.name}}</span>
+            {{/if}}
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="email">Email Address</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="user@aupp.edu.kh"
-            value="{{formValues.email}}"
-            class="{{#if errors.email}}input-error{{/if}}"
-          />
-          {{#if errors.email}}<small class="field-error">{{errors.email}}</small>{{/if}}
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" name="email" class="form-input {{#if errors.email}}input-error{{/if}}" placeholder="Enter email address" value="{{formValues.email}}" required>
+            {{#if errors.email}}
+            <span class="form-error">{{errors.email}}</span>
+            {{/if}}
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="password">Temporary Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            placeholder="Minimum 6 characters"
-            class="{{#if errors.password}}input-error{{/if}}"
-          />
-          {{#if errors.password}}<small class="field-error">{{errors.password}}</small>{{/if}}
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-input {{#if errors.password}}input-error{{/if}}" placeholder="Minimum 6 characters" required>
+            {{#if errors.password}}
+            <span class="form-error">{{errors.password}}</span>
+            {{/if}}
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="role">Role</label>
-          <select id="role" name="role" class="{{#if errors.role}}input-error{{/if}}">
-            <option value="">Select role</option>
-            <option value="Admin" {{#if (eq formValues.role "Admin")}}selected{{/if}}>Admin</option>
-            <option value="Technician" {{#if (eq formValues.role "Technician")}}selected{{/if}}>Technician</option>
-          </select>
-          {{#if errors.role}}<small class="field-error">{{errors.role}}</small>{{/if}}
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Role</label>
+            <select name="role" class="form-select">
+              <option value="Technician" {{#if (eq formValues.role 'Technician')}}selected{{/if}}>Technician</option>
+              <option value="Admin" {{#if (eq formValues.role 'Admin')}}selected{{/if}}>Admin</option>
+            </select>
+          </div>
         </div>
-
-        <button type="submit" class="btn btn-primary btn-block">Create User</button>
       </form>
     </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="cancelAddUser">Cancel</button>
+      <button type="submit" form="addUserForm" class="btn btn-primary">
+        <i class="fas fa-plus"></i>
+        Create User
+      </button>
+    </div>
+  </div>
+</div>
 
-    <div class="surface-card">
-      <div class="card-head">
-        <div>
-          <h2>Existing Users</h2>
-          <p>Update roles, disable accounts, and keep admin access under control.</p>
-        </div>
-        <span class="soft-badge">{{stats.totalUsers}} records</span>
+<div class="modal" id="userDetailsModal">
+  <div class="modal-overlay"></div>
+  <div class="modal-container modal-sm">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <i class="fas fa-user"></i>
+        User Details
+      </h3>
+      <button class="modal-close" id="closeUserDetailsModal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" id="detailUserName" readonly>
       </div>
-
-      <div class="entity-list">
-        {{#each users}}
-          <div class="entity-card">
-            <div class="entity-main">
-              <div>
-                <h3>{{this.name}}</h3>
-                <p>{{this.email}}</p>
-              </div>
-
-              <div class="entity-badges">
-                {{#if (eq this.role "Admin")}}
-                  <span class="badge badge-admin">Admin</span>
-                {{else}}
-                  <span class="badge badge-info">Technician</span>
-                {{/if}}
-
-                {{#if this.isEnabled}}
-                  <span class="badge badge-success">Enabled</span>
-                {{else}}
-                  <span class="badge badge-danger">Disabled</span>
-                {{/if}}
-              </div>
-            </div>
-
-            <div class="entity-meta">
-              <span class="meta-pill">Created {{this.createdAtLabel}}</span>
-              <span class="meta-pill">User ID {{this._id}}</span>
-            </div>
-
-            <div class="entity-actions">
-              <form action="/api/users/{{this._id}}/role?_method=PATCH" method="POST" class="inline-form">
-                <select name="role">
-                  <option value="Admin" {{#if (eq this.role "Admin")}}selected{{/if}}>Admin</option>
-                  <option value="Technician" {{#if (eq this.role "Technician")}}selected{{/if}}>Technician</option>
-                </select>
-                <button type="submit" class="btn btn-outline btn-sm">Update Role</button>
-              </form>
-
-              <form action="/api/users/{{this._id}}/status?_method=PATCH" method="POST" class="inline-form">
-                {{#if this.isEnabled}}
-                  <input type="hidden" name="isEnabled" value="false" />
-                  <button
-                    type="submit"
-                    class="btn btn-danger btn-sm"
-                    onclick="return confirm('Disable this user account? This will also revoke their active API keys.')"
-                  >
-                    Disable
-                  </button>
-                {{else}}
-                  <input type="hidden" name="isEnabled" value="true" />
-                  <button type="submit" class="btn btn-primary btn-sm">
-                    Enable
-                  </button>
-                {{/if}}
-              </form>
-            </div>
-          </div>
-        {{else}}
-          <div class="empty-state">
-            <h3>No users found</h3>
-            <p>Create the first Admin or Technician account to begin managing access.</p>
-          </div>
-        {{/each}}
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="text" class="form-input" id="detailUserEmail" readonly>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <input type="text" class="form-input" id="detailUserRole" readonly>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <input type="text" class="form-input" id="detailUserStatus" readonly>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Created</label>
+        <input type="text" class="form-input" id="detailUserCreated" readonly>
       </div>
     </div>
   </div>
-</section>
+</div>
+
+<script>
+  const modal = document.getElementById('addUserModal');
+  const openBtn = document.getElementById('openAddUserModal');
+  const openBtnEmpty = document.getElementById('openAddUserModalEmpty');
+  const closeBtn = document.getElementById('closeAddUserModal');
+  const cancelBtn = document.getElementById('cancelAddUser');
+  const overlay = modal.querySelector('.modal-overlay');
+
+  function openModal() {
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  if (openBtn) openBtn.addEventListener('click', openModal);
+  if (openBtnEmpty) openBtnEmpty.addEventListener('click', openModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+  if (overlay) overlay.addEventListener('click', closeModal);
+
+  const userSearch = document.getElementById('userSearch');
+  if (userSearch) {
+    userSearch.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      const rows = document.querySelectorAll('#usersTable tbody tr');
+
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+      });
+    });
+  }
+
+  const userDetailsModal = document.getElementById('userDetailsModal');
+  const closeUserDetailsModalBtn = document.getElementById('closeUserDetailsModal');
+  const userDetailsOverlay = userDetailsModal?.querySelector('.modal-overlay');
+
+  function openUserDetails(button) {
+    document.getElementById('detailUserName').value = button.dataset.userName || '-';
+    document.getElementById('detailUserEmail').value = button.dataset.userEmail || '-';
+    document.getElementById('detailUserRole').value = button.dataset.userRole || '-';
+    document.getElementById('detailUserStatus').value = button.dataset.userStatus || '-';
+    document.getElementById('detailUserCreated').value = button.dataset.userCreated || '-';
+
+    userDetailsModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeUserDetails() {
+    userDetailsModal.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  if (closeUserDetailsModalBtn) closeUserDetailsModalBtn.addEventListener('click', closeUserDetails);
+  if (userDetailsOverlay) userDetailsOverlay.addEventListener('click', closeUserDetails);
+</script>

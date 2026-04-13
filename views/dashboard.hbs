@@ -1,62 +1,220 @@
-<section class="page-stack">
-  <div class="page-header">
-    <div>
-      <div class="eyebrow">Overview</div>
-      <h1>Welcome to the computer inventory system</h1>
-      <p>
-        A modern internal workspace for managing assets, access control, transactions, and reports.
-      </p>
-    </div>
-
-    <div class="account-card">
-      <div class="account-avatar">SA</div>
-
-      <div class="account-info">
-        <strong>{{displayName}}</strong>
-        <span>{{displayRole}} · {{displayEmail}}</span>
+<div class="page-wrapper">
+  <!-- Welcome Section -->
+  <div class="welcome-section">
+    <div class="welcome-content">
+      <div class="welcome-avatar">
+        {{firstChar displayName}}
       </div>
-
-      <form action="/api/auth/logout" method="POST">
-        <button type="submit" class="btn btn-outline btn-sm">Sign Out</button>
-      </form>
+      <div class="welcome-text">
+        <h1 class="welcome-title">Welcome back, {{displayName}}!</h1>
+        <p class="welcome-subtitle">Here's what's happening with your inventory
+          today</p>
+      </div>
+    </div>
+    <div class="welcome-actions">
+      <a href="/inventory" class="btn btn-primary">
+        <i class="fas fa-boxes"></i>
+        View Inventory
+      </a>
+      <a href="/transactions" class="btn btn-outline">
+        <i class="fas fa-exchange-alt"></i>
+        Check-In/Out
+      </a>
     </div>
   </div>
 
-  <div class="overview-grid">
-    <a class="overview-card" href="/inventory">
-      <div class="overview-icon">🖥️</div>
-      <h3>Inventory</h3>
-      <p>Manage computers and peripherals with item records, status, and lifecycle updates.</p>
-    </a>
-
-    <a class="overview-card" href="/transactions">
-      <div class="overview-icon">📦</div>
-      <h3>Transactions</h3>
-      <p>Handle check-out and check-in flows with supporting documents.</p>
-    </a>
-
-    <a class="overview-card" href="/history">
-      <div class="overview-icon">🕘</div>
-      <h3>History</h3>
-      <p>Review audit trails, previous assignees, and reference documents.</p>
-    </a>
-
-    <a class="overview-card" href="/users">
-      <div class="overview-icon">👥</div>
-      <h3>Users</h3>
-      <p>Create accounts, assign roles, and manage account status.</p>
-    </a>
-
-    <a class="overview-card" href="/keys">
-      <div class="overview-icon">🔑</div>
-      <h3>API Keys</h3>
-      <p>Generate integration credentials and revoke them instantly when needed.</p>
-    </a>
-
-    <a class="overview-card" href="/reports">
-      <div class="overview-icon">📊</div>
-      <h3>Reports</h3>
-      <p>Review inventory summary, aging assets, and user-based audit data.</p>
-    </a>
+  <!-- Quick Stats -->
+  <div class="dashboard-stats">
+    <div class="dashboard-stat-card">
+      <div class="stat-card-bg">
+        <i class="fas fa-boxes"></i>
+      </div>
+      <div class="stat-card-content">
+        <span class="stat-card-value" id="totalItems">-</span>
+        <span class="stat-card-label">Total Items</span>
+      </div>
+    </div>
+    <div class="dashboard-stat-card">
+      <div class="stat-card-bg">
+        <i class="fas fa-user-check"></i>
+      </div>
+      <div class="stat-card-content">
+        <span class="stat-card-value" id="deployedItems">-</span>
+        <span class="stat-card-label">In Use</span>
+      </div>
+    </div>
+    <div class="dashboard-stat-card">
+      <div class="stat-card-bg">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stat-card-content">
+        <span class="stat-card-value" id="availableItems">-</span>
+        <span class="stat-card-label">Available</span>
+      </div>
+    </div>
+    <div class="dashboard-stat-card">
+      <div class="stat-card-bg">
+        <i class="fas fa-tools"></i>
+      </div>
+      <div class="stat-card-content">
+        <span class="stat-card-value" id="maintenanceItems">-</span>
+        <span class="stat-card-label">Maintenance</span>
+      </div>
+    </div>
   </div>
-</section>
+
+  <!-- Navigation Cards - Quick Access to All Pages -->
+  <div class="section-header">
+    <h2 class="section-title">
+      <i class="fas fa-compass"></i>
+      Quick Navigation
+    </h2>
+  </div>
+
+  <div class="nav-cards-grid">
+    <a href="/inventory" class="nav-card">
+      <div class="nav-card-icon blue">
+        <i class="fas fa-boxes"></i>
+      </div>
+      <div class="nav-card-content">
+        <h4>Inventory</h4>
+        <p>Manage all computer hardware and peripherals</p>
+      </div>
+      <div class="nav-card-arrow">
+        <i class="fas fa-chevron-right"></i>
+      </div>
+    </a>
+
+    <a href="/transactions" class="nav-card">
+      <div class="nav-card-icon green">
+        <i class="fas fa-exchange-alt"></i>
+      </div>
+      <div class="nav-card-content">
+        <h4>Check-In / Check-Out</h4>
+        <p>Assign items to users or process returns</p>
+      </div>
+      <div class="nav-card-arrow">
+        <i class="fas fa-chevron-right"></i>
+      </div>
+    </a>
+
+    <a href="/history" class="nav-card">
+      <div class="nav-card-icon purple">
+        <i class="fas fa-history"></i>
+      </div>
+      <div class="nav-card-content">
+        <h4>Asset History</h4>
+        <p>View complete transaction audit trails</p>
+      </div>
+      <div class="nav-card-arrow">
+        <i class="fas fa-chevron-right"></i>
+      </div>
+    </a>
+
+    <a href="/reports" class="nav-card">
+      <div class="nav-card-icon orange">
+        <i class="fas fa-chart-bar"></i>
+      </div>
+      <div class="nav-card-content">
+        <h4>Reports</h4>
+        <p>Generate insights and analytics</p>
+      </div>
+      <div class="nav-card-arrow">
+        <i class="fas fa-chevron-right"></i>
+      </div>
+    </a>
+
+    {{! Always show admin cards for testing }}
+    {{#if (isAdmin user)}}
+      <a href="/users" class="nav-card admin-card">
+        <div class="nav-card-icon red">
+          <i class="fas fa-users-cog"></i>
+        </div>
+        <div class="nav-card-content">
+          <h4>User Management</h4>
+          <p>Create users, assign roles, manage access</p>
+        </div>
+        <div class="nav-card-arrow">
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </a>
+
+      <a href="/keys" class="nav-card admin-card">
+        <div class="nav-card-icon yellow">
+          <i class="fas fa-key"></i>
+        </div>
+        <div class="nav-card-content">
+          <h4>API Keys</h4>
+          <p>Generate and manage API access keys</p>
+        </div>
+        <div class="nav-card-arrow">
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </a>
+    {{/if}}
+  </div>
+</div>
+
+<script>
+  async function fetchDashboardData() {
+    try {
+      const response = await fetch('/api/reports/summary', {
+        credentials: 'same-origin'
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        const data = result.data;
+
+        const total = data.total ?? 0;
+        const deployed = data.deployed ?? 0;
+        const available = data.available ?? 0;
+        const maintenance = data.maintenance ?? 0;
+
+        const totalItems = document.getElementById('totalItems');
+        const deployedItems = document.getElementById('deployedItems');
+        const availableItems = document.getElementById('availableItems');
+        const maintenanceItems = document.getElementById('maintenanceItems');
+
+        const navAvailableCount = document.getElementById('navAvailableCount');
+        const navInUseCount = document.getElementById('navInUseCount');
+        const navMaintenanceCount = document.getElementById('navMaintenanceCount');
+
+        if (totalItems) totalItems.textContent = total;
+        if (deployedItems) deployedItems.textContent = deployed;
+        if (availableItems) availableItems.textContent = available;
+        if (maintenanceItems) maintenanceItems.textContent = maintenance;
+
+        if (navAvailableCount) navAvailableCount.textContent = available;
+        if (navInUseCount) navInUseCount.textContent = deployed;
+        if (navMaintenanceCount) navMaintenanceCount.textContent = maintenance;
+      } else {
+        throw new Error('Invalid summary response');
+      }
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+
+      const fallbackIds = [
+        'totalItems',
+        'deployedItems',
+        'availableItems',
+        'maintenanceItems',
+        'navAvailableCount',
+        'navInUseCount',
+        'navMaintenanceCount'
+      ];
+
+      fallbackIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '0';
+      });
+    }
+  }
+
+  fetchDashboardData();
+</script>

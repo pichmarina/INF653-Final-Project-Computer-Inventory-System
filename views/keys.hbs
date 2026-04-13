@@ -1,127 +1,264 @@
-<section class="page-stack">
-  <div class="page-header">
-    <div>
-      <div class="eyebrow">Admin Workspace</div>
-      <h1>API Key Management</h1>
-      <p>
-        Generate, review, and revoke integration keys for programmatic access to the system.
-      </p>
+<div class="page-wrapper">
+  <!-- Page Header -->
+  <div class="page-header-modern">
+    <div class="page-header-content">
+      <div class="page-header-left">
+        <span class="page-eyebrow">Administration</span>
+        <h1 class="page-heading">API Key Management</h1>
+        <p class="page-description">Generate and manage API keys for external integrations and programmatic access</p>
+      </div>
+      <div class="page-header-right">
+        <button class="btn btn-primary" id="openCreateKeyModal">
+          <i class="fas fa-plus"></i>
+          Generate API Key
+        </button>
+      </div>
     </div>
-    <span class="panel-chip">Admin Only</span>
   </div>
 
+  <!-- Alerts -->
   {{#if successMessage}}
-    <div class="alert alert-success">{{successMessage}}</div>
+  <div class="alert alert-success alert-dismissible">
+    <i class="fas fa-check-circle"></i>
+    <span>{{successMessage}}</span>
+    <button class="alert-close" onclick="this.parentElement.remove()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
   {{/if}}
 
   {{#if errorMessage}}
-    <div class="alert alert-error">{{errorMessage}}</div>
+  <div class="alert alert-error alert-dismissible">
+    <i class="fas fa-exclamation-circle"></i>
+    <span>{{errorMessage}}</span>
+    <button class="alert-close" onclick="this.parentElement.remove()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
   {{/if}}
 
+  <!-- New Key Alert -->
   {{#if rawKey}}
-    <div class="alert alert-warning">
-      <div style="flex:1;">
-        <strong>Copy this key now. It will not be shown again.</strong>
-        <span class="key-reveal">{{rawKey}}</span>
-        <small class="usage-note">Header format: x-api-key: {{rawKey}}</small>
+  <div class="alert alert-key alert-dismissible">
+    <div class="alert-key-header">
+      <i class="fas fa-key"></i>
+      <span>New API Key Generated</span>
+    </div>
+    <p class="alert-key-message">Copy this key now. You won't be able to see it again!</p>
+    <div class="key-reveal-box">
+      <code id="apiKeyValue">{{rawKey}}</code>
+      <button class="copy-btn" onclick="copyApiKey()">
+        <i class="fas fa-copy"></i>
+        Copy
+      </button>
+    </div>
+    <button class="alert-close" onclick="this.parentElement.remove()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  {{/if}}
+
+  <!-- Info Card -->
+  <div class="info-cards-grid">
+    <div class="info-card">
+      <div class="info-card-icon">
+        <i class="fas fa-shield-alt"></i>
+      </div>
+      <div class="info-card-content">
+        <h4>Secure Storage</h4>
+        <p>API keys are hashed before storage. Only the raw key is shown once upon creation.</p>
       </div>
     </div>
-  {{/if}}
-
-  <div class="metric-grid">
-    <div class="metric-card">
-      <span class="metric-label">Active Keys</span>
-      <strong>{{keyCount}}</strong>
+    <div class="info-card">
+      <div class="info-card-icon">
+        <i class="fas fa-ban"></i>
+      </div>
+      <div class="info-card-content">
+        <h4>Instant Revocation</h4>
+        <p>Revoked keys are immediately invalidated and cannot be used for API access.</p>
+      </div>
     </div>
-    <div class="metric-card">
-      <span class="metric-label">Storage</span>
-      <strong>SHA-256</strong>
-    </div>
-    <div class="metric-card">
-      <span class="metric-label">Reveal Policy</span>
-      <strong>One Time</strong>
-    </div>
-    <div class="metric-card">
-      <span class="metric-label">Header</span>
-      <strong>x-api-key</strong>
+    <div class="info-card">
+      <div class="info-card-icon">
+        <i class="fas fa-user-slash"></i>
+      </div>
+      <div class="info-card-content">
+        <h4>User Linking</h4>
+        <p>All keys are linked to their creator. Disabling a user revokes all their keys.</p>
+      </div>
     </div>
   </div>
 
-  <div class="admin-grid">
-    <div class="surface-card">
-      <div class="card-head">
-        <div>
-          <h2>Create New API Key</h2>
-          <p>Generate secure keys for integrations and internal services.</p>
-        </div>
-        <span class="soft-badge">Integration access</span>
+  <!-- Keys Table Card -->
+  <div class="data-card">
+    <div class="data-card-header">
+      <div class="data-card-header-left">
+        <h3 class="data-card-title">
+          <i class="fas fa-key"></i>
+          Active API Keys
+        </h3>
+        <span class="data-card-count">{{keyCount}} active keys</span>
       </div>
-
-      <form action="/api/keys" method="POST" class="form">
-        <div class="form-group">
-          <label for="name">Key Label</label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            placeholder="e.g. Desktop Audit Service"
-            autocomplete="off"
-          />
+      <div class="data-card-header-right">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" id="keySearch" placeholder="Search keys...">
         </div>
-
-        <button type="submit" class="btn btn-primary btn-block">Generate API Key</button>
-      </form>
+      </div>
     </div>
 
-    <div class="surface-card">
-      <div class="card-head">
-        <div>
-          <h2>Active Keys</h2>
-          <p>Revoke any key immediately if an integration is retired or compromised.</p>
-        </div>
-        <span class="soft-badge">{{keyCount}} active</span>
-      </div>
-
-      <div class="entity-list">
-        {{#each keys}}
-          <div class="entity-card">
-            <div class="entity-main">
-              <div>
-                <h3>{{this.name}}</h3>
-                <p>Hash preview: {{this.shortHash}}••••••••</p>
+    <div class="table-wrapper">
+      <table class="data-table" id="keysTable">
+        <thead>
+          <tr>
+            <th class="table-col-name">Key Name</th>
+            <th class="table-col-hash">Key Hash</th>
+            <th class="table-col-creator">Created By</th>
+            <th class="table-col-date">Created</th>
+            <th class="table-col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each keys}}
+          <tr>
+            <td class="table-cell-name">
+              <div class="key-cell">
+                <div class="key-cell-icon">
+                  <i class="fas fa-key"></i>
+                </div>
+                <span class="key-cell-name">{{name}}</span>
               </div>
-
-              <div class="entity-badges">
-                <span class="badge badge-success">Active</span>
+            </td>
+            <td class="table-cell-hash">
+              <code class="key-hash">{{shortHash}}...</code>
+            </td>
+            <td class="table-cell-creator">
+              <div class="creator-cell">
+                <span class="creator-name">{{createdBy.name}}</span>
+                <span class="creator-role badge badge-{{toLowerCase createdBy.role}}">{{createdBy.role}}</span>
               </div>
-            </div>
-
-            <div class="entity-meta">
-              <span class="meta-pill">{{this.createdBy.name}}</span>
-              <span class="meta-pill">{{this.createdBy.email}}</span>
-              <span class="meta-pill">{{this.createdBy.role}}</span>
-              <span class="meta-pill">{{this.createdAtLabel}}</span>
-            </div>
-
-            <div class="entity-actions">
-              <form action="/api/keys/{{this._id}}?_method=DELETE" method="POST">
-                <button
-                  type="submit"
-                  class="btn btn-danger btn-sm"
-                  onclick="return confirm('Revoke this key? This action cannot be undone.')"
-                >
-                  Revoke Key
+            </td>
+            <td class="table-cell-date">
+              <span class="date-cell">{{createdAtLabel}}</span>
+            </td>
+            <td class="table-cell-actions">
+              <form action="/api/keys/{{_id}}?_method=DELETE" method="POST" class="revoke-form" onsubmit="return confirmRevoke(event)">
+                <input type="hidden" name="_method" value="DELETE">
+                <button type="submit" class="btn btn-danger btn-sm">
+                  <i class="fas fa-ban"></i>
+                  Revoke
                 </button>
               </form>
-            </div>
-          </div>
-        {{else}}
-          <div class="empty-state">
-            <h3>No active API keys</h3>
-            <p>Create a key when an external integration needs controlled access.</p>
-          </div>
-        {{/each}}
-      </div>
+            </td>
+          </tr>
+          {{else}}
+          <tr>
+            <td colspan="5" class="table-empty">
+              <div class="empty-state">
+                <div class="empty-state-icon">
+                  <i class="fas fa-key"></i>
+                </div>
+                <h4>No API keys found</h4>
+                <p>Generate your first API key to enable programmatic access</p>
+                <button class="btn btn-primary" id="openCreateKeyModalEmpty">
+                  <i class="fas fa-plus"></i>
+                  Generate Key
+                </button>
+              </div>
+            </td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
     </div>
   </div>
-</section>
+</div>
+
+<!-- Create Key Modal -->
+<div class="modal" id="createKeyModal">
+  <div class="modal-overlay"></div>
+  <div class="modal-container modal-sm">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <i class="fas fa-key"></i>
+        Generate API Key
+      </h3>
+      <button class="modal-close" id="closeCreateKeyModal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form action="/api/keys" method="POST" class="modal-form" id="createKeyForm">
+        <div class="form-group">
+          <label class="form-label">Key Name</label>
+          <input type="text" name="name" class="form-input" placeholder="e.g., Integration Service" required>
+          <span class="form-hint">Give your key a descriptive name for easy identification</span>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="cancelCreateKey">Cancel</button>
+      <button type="submit" form="createKeyForm" class="btn btn-primary">
+        <i class="fas fa-plus"></i>
+        Generate Key
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Modal functionality
+  const modal = document.getElementById('createKeyModal');
+  const openBtn = document.getElementById('openCreateKeyModal');
+  const openBtnEmpty = document.getElementById('openCreateKeyModalEmpty');
+  const closeBtn = document.getElementById('closeCreateKeyModal');
+  const cancelBtn = document.getElementById('cancelCreateKey');
+  const overlay = modal.querySelector('.modal-overlay');
+
+  function openModal() {
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  openBtn.addEventListener('click', openModal);
+  if (openBtnEmpty) openBtnEmpty.addEventListener('click', openModal);
+  closeBtn.addEventListener('click', closeModal);
+  cancelBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', closeModal);
+
+  // Search functionality
+  document.getElementById('keySearch').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#keysTable tbody tr');
+
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+  });
+
+  // Copy API key
+  function copyApiKey() {
+    const keyValue = document.getElementById('apiKeyValue').textContent;
+    navigator.clipboard.writeText(keyValue).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.innerHTML = originalHTML;
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  // Confirm revoke
+  function confirmRevoke(event) {
+    return confirm('Are you sure you want to revoke this API key? This action cannot be undone.');
+  }
+</script>

@@ -1,43 +1,71 @@
-<section class="page-stack">
-  <div class="section-heading">
-    <div>
-      <div class="eyebrow">REQUIREMENT MODULE</div>
-      <h1>{{title}}</h1>
-      <p>
-        Manage computers and peripherals through item creation, updates, status changes,
-        and soft deletion.
-      </p>
-    </div>
-    <span class="panel-chip">CRUD Module</span>
-  </div>
-
-  <div class="panel-grid">
-    <div class="glass-card form-panel">
-      <div class="panel-title-wrap">
-        <h2>What this module does</h2>
+<div class="page-wrapper">
+  <div class="page-header-modern">
+    <div class="page-header-content">
+      <div class="page-header-left">
+        <span class="page-eyebrow">Assets</span>
+        <h1 class="page-heading">Inventory Management</h1>
+        <p class="page-description">Manage all computer hardware and peripherals in your organization</p>
       </div>
-
-      <ul class="friendly-list">
-        <li>Add new inventory items</li>
-        <li>Edit item details like model, brand, category, and date acquired</li>
-        <li>Track item status: Available, In-Use, Maintenance, Retired</li>
-        <li>Keep historical integrity through soft delete</li>
-      </ul>
-    </div>
-
-    <div class="glass-card table-panel">
-      <div class="panel-title-wrap">
-        <h2>Coming from Person 2</h2>
-        <span class="panel-chip">Backend + UI</span>
-      </div>
-
-      <div class="empty-state">
-        <h3>Inventory feature placeholder</h3>
-        <p>
-          This page will later contain item search, filters, add item form,
-          and inventory table/cards connected to MongoDB.
-        </p>
+      <div class="page-header-right">
+        <button class="btn btn-primary" onclick="alert('Add Item - To be implemented by Person 2')">
+          <i class="fas fa-plus"></i>
+          Add Item
+        </button>
       </div>
     </div>
   </div>
-</section>
+
+  <div class="data-card">
+    <div class="data-card-header">
+      <div class="data-card-header-left">
+        <h3 class="data-card-title">
+          <i class="fas fa-boxes"></i>
+          All Items
+        </h3>
+      </div>
+      <div class="data-card-header-right">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search items...">
+        </div>
+        <button class="btn btn-outline btn-sm">
+          <i class="fas fa-filter"></i>
+          Filter
+        </button>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Item ID</th>
+            <th>Serial Number</th>
+            <th>Model</th>
+            <th>Brand</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Assigned To</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="8" class="table-empty">
+              <div class="empty-state">
+                <div class="empty-state-icon">
+                  <i class="fas fa-boxes"></i>
+                </div>
+                <h4>No items found</h4>
+                <p>Inventory items will appear here once added</p>
+                <button class="btn btn-primary" onclick="alert('Add Item - To be implemented by Person 2')">
+                  <i class="fas fa-plus"></i>
+                  Add First Item
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

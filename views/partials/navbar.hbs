@@ -1,21 +1,63 @@
-<header class="topbar">
-  <div class="container topbar-inner">
-    <div class="brand-wrap">
-      <a href="/dashboard" class="brand-mark">CI</a>
-      <div class="brand-text">
-        <a href="/dashboard" class="brand-title">{{appName}}</a>
-        <span class="brand-subtitle">Track, assign, return, and audit IT assets</span>
+<header class="top-navbar">
+  <div class="navbar-left">
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="page-title-wrapper">
+      <h1 class="page-title">{{title}}</h1>
+      <span class="page-date">{{formatDate (now)}}</span>
+    </div>
+  </div>
+
+  <div class="navbar-right">
+    <div class="quick-stats">
+      <div class="quick-stat">
+        <span class="quick-stat-icon available"><i class="fas fa-check-circle"></i></span>
+        <span class="quick-stat-label">
+          Available:
+          <strong id="navAvailableCount">0</strong>
+        </span>
+      </div>
+
+      <div class="quick-stat">
+        <span class="quick-stat-icon in-use"><i class="fas fa-user-check"></i></span>
+        <span class="quick-stat-label">
+          In Use:
+          <strong id="navInUseCount">0</strong>
+        </span>
+      </div>
+
+      <div class="quick-stat">
+        <span class="quick-stat-icon maintenance"><i class="fas fa-tools"></i></span>
+        <span class="quick-stat-label">
+          Maintenance:
+          <strong id="navMaintenanceCount">0</strong>
+        </span>
       </div>
     </div>
 
-    <nav class="topbar-nav">
-      <a href="/dashboard" class="nav-pill">Dashboard</a>
-      <a href="/inventory" class="nav-pill">Inventory</a>
-      <a href="/transactions" class="nav-pill">Check-Out / Check-In</a>
-      <a href="/history" class="nav-pill">Asset History</a>
-      <a href="/users" class="nav-pill">Users</a>
-      <a href="/keys" class="nav-pill">API Keys</a>
-      <a href="/reports" class="nav-pill">Reports</a>
-    </nav>
+    <div class="navbar-divider"></div>
+
+    <div class="navbar-actions">
+      <button
+        class="action-btn"
+        id="themeToggleBtn"
+        type="button"
+        title="Toggle dark mode"
+        aria-label="Toggle dark mode"
+      >
+        <i class="fas fa-moon" id="themeToggleIcon"></i>
+      </button>
+
+      <button
+        class="action-btn"
+        id="helpBtn"
+        type="button"
+        title="Page Help"
+        aria-label="Open page help"
+      >
+        <i class="fas fa-question-circle"></i>
+      </button>
+    </div>
   </div>
 </header>
