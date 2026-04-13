@@ -15,6 +15,9 @@ const errorHandler = require("./middleware/errorHandler");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const integrationRoutes = require("./routes/integrationRoutes");
+app.use("/api/integration", integrationRoutes);
+
 connectDB();
 
 /* =========================
