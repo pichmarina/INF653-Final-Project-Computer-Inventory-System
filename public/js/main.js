@@ -6,34 +6,34 @@ document.addEventListener("DOMContentLoaded", function () {
   const sidebarToggle = document.getElementById("sidebarToggle");
   const mobileMenuToggle = document.getElementById("mobileMenuToggle");
   const sidebarOverlay = document.getElementById("sidebarOverlay");
-    // Dark mode toggle
-  const themeToggleBtn = document.getElementById('themeToggleBtn');
-  const themeToggleIcon = document.getElementById('themeToggleIcon');
+  // Dark mode toggle
+  const themeToggleBtn = document.getElementById("themeToggleBtn");
+  const themeToggleIcon = document.getElementById("themeToggleIcon");
 
   function applyTheme(theme) {
-    if (theme === 'dark') {
-      document.body.classList.add('dark-mode');
+    if (theme === "dark") {
+      document.body.classList.add("dark-mode");
       if (themeToggleIcon) {
-        themeToggleIcon.classList.remove('fa-moon');
-        themeToggleIcon.classList.add('fa-sun');
+        themeToggleIcon.classList.remove("fa-moon");
+        themeToggleIcon.classList.add("fa-sun");
       }
     } else {
-      document.body.classList.remove('dark-mode');
+      document.body.classList.remove("dark-mode");
       if (themeToggleIcon) {
-        themeToggleIcon.classList.remove('fa-sun');
-        themeToggleIcon.classList.add('fa-moon');
+        themeToggleIcon.classList.remove("fa-sun");
+        themeToggleIcon.classList.add("fa-moon");
       }
     }
   }
 
-  const savedTheme = localStorage.getItem('cis-theme') || 'light';
+  const savedTheme = localStorage.getItem("cis-theme") || "light";
   applyTheme(savedTheme);
 
   if (themeToggleBtn) {
-    themeToggleBtn.addEventListener('click', function() {
-      const isDark = document.body.classList.contains('dark-mode');
-      const nextTheme = isDark ? 'light' : 'dark';
-      localStorage.setItem('cis-theme', nextTheme);
+    themeToggleBtn.addEventListener("click", function () {
+      const isDark = document.body.classList.contains("dark-mode");
+      const nextTheme = isDark ? "light" : "dark";
+      localStorage.setItem("cis-theme", nextTheme);
       applyTheme(nextTheme);
     });
   }
@@ -117,7 +117,6 @@ document.addEventListener("DOMContentLoaded", function () {
         important: true,
       });
     }
-    
 
     const totalItemsEl = document.getElementById("totalItems");
     const deployedItemsEl = document.getElementById("deployedItems");
@@ -318,21 +317,196 @@ document.addEventListener("DOMContentLoaded", function () {
     return sections;
   }
 
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   function renderHelpModal() {
     if (!helpModalBody) return;
 
-    const sections = getPageHelpSections();
+    const pageTitle =
+      document.querySelector(".page-title")?.textContent?.trim() || "This page";
+    const userName =
+      document.querySelector(".user-name")?.textContent?.trim() ||
+      "Unknown user";
+    const userRole =
+      document.querySelector(".role-badge")?.textContent?.trim() ||
+      "Unknown role";
+    const currentPath = window.location.pathname;
+
+    const sections = [
+      {
+        title: "Current session",
+        items: [
+          `Signed in as ${userName} (${userRole}).`,
+          `You are currently viewing the ${pageTitle} page.`,
+        ],
+      },
+    ];
+
+    if (currentPath === "/dashboard") {
+      sections.push(
+        {
+          title: "What this page does",
+          items: [
+            "Shows a quick overview of inventory status.",
+            "Provides shortcuts to the main parts of the system.",
+            "Displays summary cards such as total items, in use, available, and maintenance.",
+          ],
+        },
+        {
+          title: "How to use it",
+          items: [
+            "Use the sidebar to move to Inventory, Check-In/Out, History, Reports, Users, or API Keys.",
+            "Use the navigation cards to jump directly to a section.",
+            "Use dark mode if you prefer a lower-brightness view.",
+          ],
+        },
+      );
+    }
+
+    if (currentPath === "/inventory") {
+      sections.push(
+        {
+          title: "What this page does",
+          items: [
+            "Displays inventory items and their current status.",
+            "Helps you review hardware and peripheral records.",
+          ],
+        },
+        {
+          title: "How to use it",
+          items: [
+            "Use the search box to find items quickly.",
+            "Use the filter button if your inventory tools support filtering.",
+            "Use the Add Item button when the item creation flow is connected.",
+          ],
+        },
+      );
+    }
+
+    if (currentPath === "/transactions") {
+      sections.push(
+        {
+          title: "What this page does",
+          items: [
+            "Handles check-in and check-out operations.",
+            "Supports assigning items to users and processing returns.",
+          ],
+        },
+        {
+          title: "How to use it",
+          items: [
+            "Choose Check Out to assign an available item.",
+            "Choose Check In to return an item to available status.",
+            "Follow the connected transaction flow and upload required documents if enabled.",
+          ],
+        },
+      );
+    }
+
+    if (currentPath === "/history") {
+      sections.push(
+        {
+          title: "What this page does",
+          items: [
+            "Shows transaction history and audit activity.",
+            "Helps track who used an item and what action was taken.",
+          ],
+        },
+        {
+          title: "How to use it",
+          items: [
+            "Use the search box to find specific history records.",
+            "Review action, date, user, and document information from the table.",
+          ],
+        },
+      );
+    }
+
+    if (currentPath === "/reports") {
+      sections.push(
+        {
+          title: "What this page does",
+          items: [
+            "Provides reporting and summary views for the inventory system.",
+            "Helps review asset status, aging, and user-related data.",
+          ],
+        },
+        {
+          title: "How to use it",
+          items: [
+            "Open a report card to review that category when the report logic is connected.",
+            "Use this page to understand the overall condition of the system.",
+          ],
+        },
+      );
+    }
+
+    if (currentPath === "/users") {
+      sections.push(
+        {
+          title: "What this page does",
+          items: [
+            "Manages system users and their roles.",
+            "Lets admins control access by enabling or disabling accounts.",
+          ],
+        },
+        {
+          title: "How to use it",
+          items: [
+            "Use the search box to find a user.",
+            "Use the role dropdown to change a user role.",
+            "Use the status toggle to enable or disable an account.",
+            "Use Add New User to create another account.",
+          ],
+        },
+      );
+    }
+
+    if (currentPath === "/keys") {
+      sections.push(
+        {
+          title: "What this page does",
+          items: [
+            "Manages API keys for integrations and programmatic access.",
+            "Lets admins create and revoke keys securely.",
+          ],
+        },
+        {
+          title: "How to use it",
+          items: [
+            "Use Generate API Key to create a new key.",
+            "Copy the raw key immediately because it is shown only once.",
+            "Use the search box to find keys quickly.",
+            "Use Revoke to disable a key permanently.",
+          ],
+        },
+      );
+    }
+
+    sections.push({
+      title: "General note",
+      items: [
+        "Press Escape to close an open modal or popup.",
+      ],
+    });
 
     helpModalBody.innerHTML = sections
       .map(
         (section) => `
-      <div class="help-section">
-        <div class="help-section-title">${escapeHtml(section.title)}</div>
-        <ul class="help-list">
-          ${section.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-        </ul>
-      </div>
-    `,
+    <div class="help-section">
+      <div class="help-section-title">${escapeHtml(section.title)}</div>
+      <ul class="help-list">
+        ${section.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+      </ul>
+    </div>
+  `,
       )
       .join("");
   }
@@ -618,6 +792,9 @@ function debounce(func, wait) {
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
   };
+}
+function confirmLogout(event) {
+  return window.confirm('Are you sure you want to log out?');
 }
 
 // Export for use in other scripts

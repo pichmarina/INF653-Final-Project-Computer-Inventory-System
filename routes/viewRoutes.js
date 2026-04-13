@@ -12,8 +12,6 @@ router.get("/login", (req, res) => {
 });
 
 router.get("/dashboard", requireViewAuth, (req, res) => {
-  console.log("DASHBOARD USER:", req.user);
-
   res.render("dashboard", {
     title: "Dashboard",
     user: req.user,
