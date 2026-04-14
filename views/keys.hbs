@@ -5,7 +5,8 @@
       <div class="page-header-left">
         <span class="page-eyebrow">Administration</span>
         <h1 class="page-heading">API Key Management</h1>
-        <p class="page-description">Generate and manage API keys for external integrations and programmatic access</p>
+        <p class="page-description">Generate and manage API keys for external
+          integrations and programmatic access</p>
       </div>
       <div class="page-header-right">
         <button class="btn btn-primary" id="openCreateKeyModal">
@@ -18,44 +19,45 @@
 
   <!-- Alerts -->
   {{#if successMessage}}
-  <div class="alert alert-success alert-dismissible">
-    <i class="fas fa-check-circle"></i>
-    <span>{{successMessage}}</span>
-    <button class="alert-close" onclick="this.parentElement.remove()">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
+    <div class="alert alert-success alert-dismissible">
+      <i class="fas fa-check-circle"></i>
+      <span>{{successMessage}}</span>
+      <button class="alert-close" onclick="this.parentElement.remove()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
   {{/if}}
 
   {{#if errorMessage}}
-  <div class="alert alert-error alert-dismissible">
-    <i class="fas fa-exclamation-circle"></i>
-    <span>{{errorMessage}}</span>
-    <button class="alert-close" onclick="this.parentElement.remove()">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
+    <div class="alert alert-error alert-dismissible">
+      <i class="fas fa-exclamation-circle"></i>
+      <span>{{errorMessage}}</span>
+      <button class="alert-close" onclick="this.parentElement.remove()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
   {{/if}}
 
   <!-- New Key Alert -->
   {{#if rawKey}}
-  <div class="alert alert-key alert-dismissible">
-    <div class="alert-key-header">
-      <i class="fas fa-key"></i>
-      <span>New API Key Generated</span>
-    </div>
-    <p class="alert-key-message">Copy this key now. You won't be able to see it again!</p>
-    <div class="key-reveal-box">
-      <code id="apiKeyValue">{{rawKey}}</code>
-      <button class="copy-btn" onclick="copyApiKey()">
-        <i class="fas fa-copy"></i>
-        Copy
+    <div class="alert alert-key alert-dismissible">
+      <div class="alert-key-header">
+        <i class="fas fa-key"></i>
+        <span>New API Key Generated</span>
+      </div>
+      <p class="alert-key-message">Copy this key now. You won't be able to see
+        it again!</p>
+      <div class="key-reveal-box">
+        <code id="apiKeyValue">{{rawKey}}</code>
+        <button class="copy-btn" onclick="copyApiKey()">
+          <i class="fas fa-copy"></i>
+          Copy
+        </button>
+      </div>
+      <button class="alert-close" onclick="this.parentElement.remove()">
+        <i class="fas fa-times"></i>
       </button>
     </div>
-    <button class="alert-close" onclick="this.parentElement.remove()">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
   {{/if}}
 
   <!-- Info Card -->
@@ -66,7 +68,8 @@
       </div>
       <div class="info-card-content">
         <h4>Secure Storage</h4>
-        <p>API keys are hashed before storage. Only the raw key is shown once upon creation.</p>
+        <p>API keys are hashed before storage. Only the raw key is shown once
+          upon creation.</p>
       </div>
     </div>
     <div class="info-card">
@@ -75,7 +78,8 @@
       </div>
       <div class="info-card-content">
         <h4>Instant Revocation</h4>
-        <p>Revoked keys are immediately invalidated and cannot be used for API access.</p>
+        <p>Revoked keys are immediately invalidated and cannot be used for API
+          access.</p>
       </div>
     </div>
     <div class="info-card">
@@ -84,7 +88,8 @@
       </div>
       <div class="info-card-content">
         <h4>User Linking</h4>
-        <p>All keys are linked to their creator. Disabling a user revokes all their keys.</p>
+        <p>All keys are linked to their creator. Disabling a user revokes all
+          their keys.</p>
       </div>
     </div>
   </div>
@@ -102,7 +107,7 @@
       <div class="data-card-header-right">
         <div class="search-box">
           <i class="fas fa-search"></i>
-          <input type="text" id="keySearch" placeholder="Search keys...">
+          <input type="text" id="keySearch" placeholder="Search keys..." />
         </div>
       </div>
     </div>
@@ -120,53 +125,62 @@
         </thead>
         <tbody>
           {{#each keys}}
-          <tr>
-            <td class="table-cell-name">
-              <div class="key-cell">
-                <div class="key-cell-icon">
-                  <i class="fas fa-key"></i>
+            <tr>
+              <td class="table-cell-name">
+                <div class="key-cell">
+                  <div class="key-cell-icon">
+                    <i class="fas fa-key"></i>
+                  </div>
+                  <span class="key-cell-name">{{name}}</span>
                 </div>
-                <span class="key-cell-name">{{name}}</span>
-              </div>
-            </td>
-            <td class="table-cell-hash">
-              <code class="key-hash">{{shortHash}}...</code>
-            </td>
-            <td class="table-cell-creator">
-              <div class="creator-cell">
-                <span class="creator-name">{{createdBy.name}}</span>
-                <span class="creator-role badge badge-{{toLowerCase createdBy.role}}">{{createdBy.role}}</span>
-              </div>
-            </td>
-            <td class="table-cell-date">
-              <span class="date-cell">{{createdAtLabel}}</span>
-            </td>
-            <td class="table-cell-actions">
-              <form action="/api/keys/{{_id}}?_method=DELETE" method="POST" class="revoke-form" onsubmit="return confirmRevoke(event)">
-                <input type="hidden" name="_method" value="DELETE">
-                <button type="submit" class="btn btn-danger btn-sm">
-                  <i class="fas fa-ban"></i>
-                  Revoke
-                </button>
-              </form>
-            </td>
-          </tr>
+              </td>
+              <td class="table-cell-hash">
+                <code class="key-hash">{{shortHash}}...</code>
+              </td>
+              <td class="table-cell-creator">
+                <div class="creator-cell">
+                  <span class="creator-name">{{createdBy.name}}</span>
+                  <span
+                    class="creator-role badge badge-{{toLowerCase
+                        createdBy.role
+                      }}"
+                  >{{createdBy.role}}</span>
+                </div>
+              </td>
+              <td class="table-cell-date">
+                <span class="date-cell">{{createdAtLabel}}</span>
+              </td>
+              <td class="table-cell-actions">
+                <form
+                  action="/api/keys/{{_id}}?_method=DELETE"
+                  method="POST"
+                  class="revoke-form"
+                  data-confirm-message="Are you sure you want to revoke this API key? This action cannot be undone."
+                >
+                  <input type="hidden" name="_method" value="DELETE">
+                  <button type="submit" class="btn btn-danger btn-sm">
+                    <i class="fas fa-ban"></i>
+                    Revoke
+                  </button>
+                </form>
+              </td>
+            </tr>
           {{else}}
-          <tr>
-            <td colspan="5" class="table-empty">
-              <div class="empty-state">
-                <div class="empty-state-icon">
-                  <i class="fas fa-key"></i>
+            <tr>
+              <td colspan="5" class="table-empty">
+                <div class="empty-state">
+                  <div class="empty-state-icon">
+                    <i class="fas fa-key"></i>
+                  </div>
+                  <h4>No API keys found</h4>
+                  <p>Generate your first API key to enable programmatic access</p>
+                  <button class="btn btn-primary" id="openCreateKeyModalEmpty">
+                    <i class="fas fa-plus"></i>
+                    Generate Key
+                  </button>
                 </div>
-                <h4>No API keys found</h4>
-                <p>Generate your first API key to enable programmatic access</p>
-                <button class="btn btn-primary" id="openCreateKeyModalEmpty">
-                  <i class="fas fa-plus"></i>
-                  Generate Key
-                </button>
-              </div>
-            </td>
-          </tr>
+              </td>
+            </tr>
           {{/each}}
         </tbody>
       </table>
@@ -188,11 +202,23 @@
       </button>
     </div>
     <div class="modal-body">
-      <form action="/api/keys" method="POST" class="modal-form" id="createKeyForm">
+      <form
+        action="/api/keys"
+        method="POST"
+        class="modal-form"
+        id="createKeyForm"
+      >
         <div class="form-group">
           <label class="form-label">Key Name</label>
-          <input type="text" name="name" class="form-input" placeholder="e.g., Integration Service" required>
-          <span class="form-hint">Give your key a descriptive name for easy identification</span>
+          <input
+            type="text"
+            name="name"
+            class="form-input"
+            placeholder="e.g., Integration Service"
+            required
+          />
+          <span class="form-hint">Give your key a descriptive name for easy
+            identification</span>
         </div>
       </form>
     </div>
@@ -207,58 +233,61 @@
 </div>
 
 <script>
-  // Modal functionality
   const modal = document.getElementById('createKeyModal');
   const openBtn = document.getElementById('openCreateKeyModal');
   const openBtnEmpty = document.getElementById('openCreateKeyModalEmpty');
   const closeBtn = document.getElementById('closeCreateKeyModal');
   const cancelBtn = document.getElementById('cancelCreateKey');
-  const overlay = modal.querySelector('.modal-overlay');
+  const overlay = modal ? modal.querySelector('.modal-overlay') : null;
 
   function openModal() {
+    if (!modal) return;
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
   }
 
   function closeModal() {
+    if (!modal) return;
     modal.classList.remove('active');
     document.body.style.overflow = '';
   }
 
-  openBtn.addEventListener('click', openModal);
+  if (openBtn) openBtn.addEventListener('click', openModal);
   if (openBtnEmpty) openBtnEmpty.addEventListener('click', openModal);
-  closeBtn.addEventListener('click', closeModal);
-  cancelBtn.addEventListener('click', closeModal);
-  overlay.addEventListener('click', closeModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+  if (overlay) overlay.addEventListener('click', closeModal);
 
-  // Search functionality
-  document.getElementById('keySearch').addEventListener('input', function() {
-    const searchTerm = this.value.toLowerCase();
-    const rows = document.querySelectorAll('#keysTable tbody tr');
+  const keySearch = document.getElementById('keySearch');
+  if (keySearch) {
+    keySearch.addEventListener('input', function () {
+      const searchTerm = this.value.toLowerCase();
+      const rows = document.querySelectorAll('#keysTable tbody tr');
 
-    rows.forEach(row => {
-      const text = row.textContent.toLowerCase();
-      row.style.display = text.includes(searchTerm) ? '' : 'none';
+      rows.forEach((row) => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+      });
     });
-  });
+  }
 
-  // Copy API key
   function copyApiKey() {
-    const keyValue = document.getElementById('apiKeyValue').textContent;
+    const keyValueEl = document.getElementById('apiKeyValue');
+    if (!keyValueEl) return;
+
+    const keyValue = keyValueEl.textContent;
     navigator.clipboard.writeText(keyValue).then(() => {
       const btn = document.querySelector('.copy-btn');
+      if (!btn) return;
+
       const originalHTML = btn.innerHTML;
       btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
       btn.classList.add('copied');
+
       setTimeout(() => {
         btn.innerHTML = originalHTML;
         btn.classList.remove('copied');
       }, 2000);
     });
-  }
-
-  // Confirm revoke
-  function confirmRevoke(event) {
-    return confirm('Are you sure you want to revoke this API key? This action cannot be undone.');
   }
 </script>

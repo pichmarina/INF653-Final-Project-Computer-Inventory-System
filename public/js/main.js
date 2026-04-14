@@ -1,24 +1,300 @@
 // Main JavaScript for Computer Inventory System
 
 document.addEventListener("DOMContentLoaded", function () {
-  // Sidebar toggle functionality
+  const body = document.body;
+
+  // Sidebar
   const sidebar = document.getElementById("sidebar");
   const sidebarToggle = document.getElementById("sidebarToggle");
   const mobileMenuToggle = document.getElementById("mobileMenuToggle");
   const sidebarOverlay = document.getElementById("sidebarOverlay");
-  // Dark mode toggle
+
+  // Theme
   const themeToggleBtn = document.getElementById("themeToggleBtn");
   const themeToggleIcon = document.getElementById("themeToggleIcon");
 
+  // Notifications
+  const notificationsBtn = document.getElementById("notificationsBtn");
+  const notificationsDropdown = document.getElementById(
+    "notificationsDropdown",
+  );
+  const notificationsList = document.getElementById("notificationsList");
+  const notificationDot = document.getElementById("notificationDot");
+  const refreshNotificationsBtn = document.getElementById(
+    "refreshNotificationsBtn",
+  );
+
+  // Help
+  const helpBtn = document.getElementById("helpBtn");
+  const helpModal = document.getElementById("helpModal");
+  const helpModalBody = document.getElementById("helpModalBody");
+  const closeHelpModal = document.getElementById("closeHelpModal");
+  const closeHelpModalFooter = document.getElementById("closeHelpModalFooter");
+  const helpOverlay = helpModal
+    ? helpModal.querySelector(".modal-overlay")
+    : null;
+
+  // Shared confirm modal
+  const confirmModal = document.getElementById("confirmModal");
+  const confirmModalMessage = document.getElementById("confirmModalMessage");
+  const closeConfirmModalBtn = document.getElementById("closeConfirmModal");
+  const cancelConfirmModalBtn = document.getElementById("cancelConfirmModal");
+  const acceptConfirmModalBtn = document.getElementById("acceptConfirmModal");
+  const confirmModalOverlay = confirmModal
+    ? confirmModal.querySelector(".modal-overlay")
+    : null;
+
+  // Shared state for confirm flow
+  let pendingConfirmForm = null;
+  let pendingToggleState = null;
+
+  // Restore scroll position after submit
+  const savedScrollY = sessionStorage.getItem("cis-scroll-y");
+  if (savedScrollY !== null) {
+    requestAnimationFrame(() => {
+      window.scrollTo(0, parseInt(savedScrollY, 10));
+      sessionStorage.removeItem("cis-scroll-y");
+    });
+  }
+
+  function saveScrollPosition() {
+    sessionStorage.setItem("cis-scroll-y", String(window.scrollY));
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function setBodyLocked(locked) {
+    body.style.overflow = locked ? "hidden" : "";
+  }
+
+  function updateStatusToggleLabel(input, checked) {
+    const label = input
+      ?.closest(".status-toggle")
+      ?.querySelector(".status-toggle-label");
+
+    if (!label) return;
+
+    label.textContent = checked ? "Active" : "Disabled";
+    label.classList.toggle("disabled", !checked);
+    label.style.color = checked ? "var(--success)" : "var(--danger)";
+  }
+
+  function resetSubmitButton(form) {
+    if (!form) return;
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (!submitBtn) return;
+
+    if (submitBtn.dataset.originalText) {
+      submitBtn.innerHTML = submitBtn.dataset.originalText;
+    }
+
+    submitBtn.disabled = false;
+  }
+
+  function openConfirmModal(message, form, toggleState = null) {
+    if (!confirmModal || !confirmModalMessage) return;
+
+    pendingConfirmForm = form || null;
+    pendingToggleState = toggleState || null;
+
+    confirmModalMessage.textContent =
+      message || "Are you sure you want to continue?";
+
+    confirmModal.classList.add("active");
+    setBodyLocked(true);
+  }
+
+  function restorePendingToggleState() {
+    if (!pendingToggleState) return;
+
+    const { input, previousChecked, hiddenInput } = pendingToggleState;
+
+    if (input) {
+      input.checked = previousChecked;
+      input.dataset.currentChecked = String(previousChecked);
+      updateStatusToggleLabel(input, previousChecked);
+    }
+
+    if (hiddenInput) {
+      hiddenInput.value = previousChecked ? "true" : "false";
+    }
+
+    pendingToggleState = null;
+  }
+
+  function closeConfirmModal(restoreState = false) {
+    if (!confirmModal) return;
+
+    confirmModal.classList.remove("active");
+    setBodyLocked(false);
+
+    if (restoreState) {
+      resetSubmitButton(pendingConfirmForm);
+      restorePendingToggleState();
+    } else {
+      pendingToggleState = null;
+    }
+
+    pendingConfirmForm = null;
+  }
+
+  if (acceptConfirmModalBtn) {
+    acceptConfirmModalBtn.addEventListener("click", function () {
+      if (!pendingConfirmForm) {
+        closeConfirmModal(false);
+        return;
+      }
+
+      if (pendingToggleState?.input) {
+        pendingToggleState.input.dataset.currentChecked = String(
+          pendingToggleState.nextChecked,
+        );
+      }
+
+      pendingConfirmForm.dataset.confirmed = "true";
+      saveScrollPosition();
+      pendingConfirmForm.submit();
+      closeConfirmModal(false);
+    });
+  }
+
+  if (closeConfirmModalBtn) {
+    closeConfirmModalBtn.addEventListener("click", function () {
+      closeConfirmModal(true);
+    });
+  }
+
+  if (cancelConfirmModalBtn) {
+    cancelConfirmModalBtn.addEventListener("click", function () {
+      closeConfirmModal(true);
+    });
+  }
+
+  if (confirmModalOverlay) {
+    confirmModalOverlay.addEventListener("click", function () {
+      closeConfirmModal(true);
+    });
+  }
+
+  // One shared confirm interceptor for normal forms only
+  document.addEventListener(
+    "submit",
+    function (e) {
+      const form = e.target;
+      const message = form.getAttribute("data-confirm-message");
+
+      if (!message) return;
+      if (form.dataset.skipSharedConfirm === "true") return;
+
+      if (form.dataset.confirmed === "true") {
+        form.dataset.confirmed = "";
+        return;
+      }
+
+      e.preventDefault();
+      openConfirmModal(message, form);
+    },
+    true,
+  );
+
+  // Expose one clean status toggle handler globally for inline onchange
+  window.handleStatusToggleChange = function (input) {
+    const form = input?.form;
+    if (!form) return;
+
+    const previousChecked = input.dataset.currentChecked === "true";
+    const nextChecked = input.checked;
+
+    if (previousChecked === nextChecked) return;
+
+    // This toggle uses the shared confirm modal directly.
+    form.dataset.skipSharedConfirm = "true";
+
+    // Remove checkbox name to avoid duplicate submitted values.
+    if (!input.dataset.originalName) {
+      input.dataset.originalName = input.getAttribute("name") || "isEnabled";
+    }
+    input.removeAttribute("name");
+
+    let hiddenInput = form.querySelector('input[data-status-hidden="true"]');
+    if (!hiddenInput) {
+      hiddenInput = document.createElement("input");
+      hiddenInput.type = "hidden";
+      hiddenInput.name = input.dataset.originalName || "isEnabled";
+      hiddenInput.setAttribute("data-status-hidden", "true");
+      form.appendChild(hiddenInput);
+    }
+
+    hiddenInput.value = nextChecked ? "true" : "false";
+
+    updateStatusToggleLabel(input, nextChecked);
+
+    const message =
+      form.getAttribute("data-confirm-message") ||
+      "Are you sure you want to change this user's account status?";
+
+    openConfirmModal(message, form, {
+      input,
+      hiddenInput,
+      previousChecked,
+      nextChecked,
+    });
+  };
+
+  // Dropdown helper
+  function setupSimpleDropdown(toggleId, menuId) {
+    const toggle = document.getElementById(toggleId);
+    const menu = document.getElementById(menuId);
+
+    if (!toggle || !menu) return;
+
+    toggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+
+      const isHidden = menu.hasAttribute("hidden");
+
+      document.querySelectorAll(".filter-menu").forEach((item) => {
+        item.setAttribute("hidden", "");
+      });
+
+      if (isHidden) {
+        menu.removeAttribute("hidden");
+      } else {
+        menu.setAttribute("hidden", "");
+      }
+    });
+
+    menu.addEventListener("click", function (e) {
+      e.stopPropagation();
+    });
+  }
+
+  setupSimpleDropdown("userFilterToggle", "userFilterMenu");
+
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".filter-menu").forEach((item) => {
+      item.setAttribute("hidden", "");
+    });
+  });
+
+  // Theme
   function applyTheme(theme) {
     if (theme === "dark") {
-      document.body.classList.add("dark-mode");
+      body.classList.add("dark-mode");
       if (themeToggleIcon) {
         themeToggleIcon.classList.remove("fa-moon");
         themeToggleIcon.classList.add("fa-sun");
       }
     } else {
-      document.body.classList.remove("dark-mode");
+      body.classList.remove("dark-mode");
       if (themeToggleIcon) {
         themeToggleIcon.classList.remove("fa-sun");
         themeToggleIcon.classList.add("fa-moon");
@@ -31,49 +307,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (themeToggleBtn) {
     themeToggleBtn.addEventListener("click", function () {
-      const isDark = document.body.classList.contains("dark-mode");
+      const isDark = body.classList.contains("dark-mode");
       const nextTheme = isDark ? "light" : "dark";
       localStorage.setItem("cis-theme", nextTheme);
       applyTheme(nextTheme);
     });
   }
 
-  const notificationsBtn = document.getElementById("notificationsBtn");
-  const notificationsDropdown = document.getElementById(
-    "notificationsDropdown",
-  );
-  const notificationsList = document.getElementById("notificationsList");
-  const notificationDot = document.getElementById("notificationDot");
-  const refreshNotificationsBtn = document.getElementById(
-    "refreshNotificationsBtn",
-  );
-
-  const helpBtn = document.getElementById("helpBtn");
-  const helpModal = document.getElementById("helpModal");
-  const helpModalBody = document.getElementById("helpModalBody");
-  const closeHelpModal = document.getElementById("closeHelpModal");
-  const closeHelpModalFooter = document.getElementById("closeHelpModalFooter");
-  const helpOverlay = helpModal
-    ? helpModal.querySelector(".modal-overlay")
-    : null;
-
-  function escapeHtml(value) {
-    return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-  }
-
   async function fetchSystemNotifications() {
     const items = [];
+
     const pageTitle =
       document.querySelector(".page-title")?.textContent?.trim() ||
+      document.querySelector(".page-heading")?.textContent?.trim() ||
       "Current page";
+
     const userName =
       document.querySelector(".user-name")?.textContent?.trim() ||
       "Signed-in user";
+
     const userRole =
       document.querySelector(".role-badge")?.textContent?.trim() ||
       "Unknown role";
@@ -90,6 +342,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const healthResponse = await fetch("/health", {
         credentials: "same-origin",
       });
+
       if (healthResponse.ok) {
         const healthData = await healthResponse.json();
         items.push({
@@ -143,6 +396,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const countLabel =
         document.querySelector(".data-card-count")?.textContent?.trim() ||
         "User count unavailable";
+
       items.push({
         icon: "fas fa-users",
         title: "User management summary",
@@ -157,6 +411,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const countLabel =
         document.querySelector(".data-card-count")?.textContent?.trim() ||
         "API key count unavailable";
+
       items.push({
         icon: "fas fa-key",
         title: "API key summary",
@@ -191,6 +446,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!items.length) {
       notificationsList.innerHTML =
         '<div class="dropdown-empty">No status information available.</div>';
+
       if (notificationDot) notificationDot.style.display = "none";
       return;
     }
@@ -218,125 +474,22 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function getPageHelpSections() {
-    const pageTitle =
-      document.querySelector(".page-title")?.textContent?.trim() || "This page";
-    const userName =
-      document.querySelector(".user-name")?.textContent?.trim() ||
-      "Unknown user";
-    const userRole =
-      document.querySelector(".role-badge")?.textContent?.trim() ||
-      "Unknown role";
-    const currentPath = window.location.pathname;
-
-    const sections = [
-      {
-        title: "Current session",
-        items: [
-          `You are signed in as ${userName} (${userRole}).`,
-          `You are currently on the ${pageTitle} page.`,
-        ],
-      },
-      {
-        title: "Keyboard shortcuts",
-        items: [
-          "Press Ctrl/Cmd + K to focus the first search box on the page.",
-          "Press Escape to close an open modal or dropdown.",
-        ],
-      },
-    ];
-
-    if (currentPath === "/dashboard") {
-      sections.push({
-        title: "What you can do here",
-        items: [
-          "Review live inventory summary cards.",
-          "Use Quick Navigation to jump to Inventory, Transactions, Reports, Users, or API Keys.",
-          "Open System Status to verify server and page data.",
-        ],
-      });
-    }
-
-    if (currentPath === "/users") {
-      sections.push({
-        title: "What you can do here",
-        items: [
-          "Search existing users with the search box.",
-          "Change a user role using the role dropdown.",
-          "Enable or disable accounts using the status toggle.",
-          "Create a new user from the Add New User button.",
-        ],
-      });
-    }
-
-    if (currentPath === "/keys") {
-      sections.push({
-        title: "What you can do here",
-        items: [
-          "Generate a new API key from the modal form.",
-          "Search keys using the search box.",
-          "Revoke an active key from the table.",
-          "Copy a newly created raw key immediately because it is only shown once.",
-        ],
-      });
-    }
-
-    if (currentPath === "/inventory") {
-      sections.push({
-        title: "What you can do here",
-        items: [
-          "Review inventory records and current statuses.",
-          "Use search to filter visible items.",
-          "Add-item behavior depends on the connected inventory implementation.",
-        ],
-      });
-    }
-
-    if (currentPath === "/transactions") {
-      sections.push({
-        title: "What you can do here",
-        items: [
-          "Use this page for check-in and check-out operations.",
-          "Transaction actions depend on the connected transaction implementation.",
-          "Uploaded documents should be tied to the transaction flow.",
-        ],
-      });
-    }
-
-    if (currentPath === "/reports") {
-      sections.push({
-        title: "What you can do here",
-        items: [
-          "Use reports to review inventory summary, asset aging, and user audit data.",
-          "Real report output depends on your connected report routes.",
-          "System Status can help confirm whether summary data is loading.",
-        ],
-      });
-    }
-
-    return sections;
-  }
-
-  function escapeHtml(value) {
-    return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-  }
-
   function renderHelpModal() {
     if (!helpModalBody) return;
 
     const pageTitle =
-      document.querySelector(".page-title")?.textContent?.trim() || "This page";
+      document.querySelector(".page-title")?.textContent?.trim() ||
+      document.querySelector(".page-heading")?.textContent?.trim() ||
+      "This page";
+
     const userName =
       document.querySelector(".user-name")?.textContent?.trim() ||
       "Unknown user";
+
     const userRole =
       document.querySelector(".role-badge")?.textContent?.trim() ||
       "Unknown role";
+
     const currentPath = window.location.pathname;
 
     const sections = [
@@ -492,21 +645,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
     sections.push({
       title: "General note",
-      items: [
-        "Press Escape to close an open modal or popup.",
-      ],
+      items: ["Press Escape to close an open modal or popup."],
     });
 
     helpModalBody.innerHTML = sections
       .map(
         (section) => `
-    <div class="help-section">
-      <div class="help-section-title">${escapeHtml(section.title)}</div>
-      <ul class="help-list">
-        ${section.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-      </ul>
-    </div>
-  `,
+      <div class="help-section">
+        <div class="help-section-title">${escapeHtml(section.title)}</div>
+        <ul class="help-list">
+          ${section.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+        </ul>
+      </div>
+    `,
       )
       .join("");
   }
@@ -526,13 +677,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!helpModal) return;
     renderHelpModal();
     helpModal.classList.add("active");
-    document.body.style.overflow = "hidden";
+    setBodyLocked(true);
   }
 
   function hideHelpModal() {
     if (!helpModal) return;
     helpModal.classList.remove("active");
-    document.body.style.overflow = "";
+    setBodyLocked(false);
   }
 
   if (notificationsBtn && notificationsDropdown) {
@@ -556,10 +707,17 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  if (closeHelpModal) closeHelpModal.addEventListener("click", hideHelpModal);
-  if (closeHelpModalFooter)
+  if (closeHelpModal) {
+    closeHelpModal.addEventListener("click", hideHelpModal);
+  }
+
+  if (closeHelpModalFooter) {
     closeHelpModalFooter.addEventListener("click", hideHelpModal);
-  if (helpOverlay) helpOverlay.addEventListener("click", hideHelpModal);
+  }
+
+  if (helpOverlay) {
+    helpOverlay.addEventListener("click", hideHelpModal);
+  }
 
   document.addEventListener("click", function (e) {
     if (notificationsDropdown && notificationsBtn) {
@@ -573,13 +731,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Toggle sidebar collapse (desktop)
-  if (sidebarToggle) {
+  // Sidebar collapse
+  if (sidebarToggle && sidebar) {
     sidebarToggle.addEventListener("click", function () {
       sidebar.classList.toggle("collapsed");
-      document.body.classList.toggle("sidebar-collapsed");
+      body.classList.toggle("sidebar-collapsed");
 
       const icon = this.querySelector("i");
+      if (!icon) return;
+
       if (sidebar.classList.contains("collapsed")) {
         icon.classList.remove("fa-chevron-left");
         icon.classList.add("fa-chevron-right");
@@ -590,27 +750,24 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Mobile menu toggle
-  if (mobileMenuToggle) {
+  // Mobile menu
+  if (mobileMenuToggle && sidebar && sidebarOverlay) {
     mobileMenuToggle.addEventListener("click", function () {
       sidebar.classList.toggle("mobile-open");
       sidebarOverlay.classList.toggle("active");
-      document.body.style.overflow = sidebar.classList.contains("mobile-open")
-        ? "hidden"
-        : "";
+      setBodyLocked(sidebar.classList.contains("mobile-open"));
     });
   }
 
-  // Close sidebar on overlay click (mobile)
-  if (sidebarOverlay) {
+  if (sidebarOverlay && sidebar) {
     sidebarOverlay.addEventListener("click", function () {
       sidebar.classList.remove("mobile-open");
-      this.classList.remove("active");
-      document.body.style.overflow = "";
+      sidebarOverlay.classList.remove("active");
+      setBodyLocked(false);
     });
   }
 
-  // Auto-hide alerts after 5 seconds
+  // Auto-hide alerts
   const alerts = document.querySelectorAll(".alert-dismissible");
   alerts.forEach((alert) => {
     setTimeout(() => {
@@ -620,7 +777,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 5000);
   });
 
-  // Table row hover effect enhancement
+  // Table hover
   const tableRows = document.querySelectorAll(".data-table tbody tr");
   tableRows.forEach((row) => {
     row.addEventListener("mouseenter", function () {
@@ -631,12 +788,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Form input focus effects
+  // Form focus
   const formInputs = document.querySelectorAll(".form-input, .form-select");
   formInputs.forEach((input) => {
     input.addEventListener("focus", function () {
       this.closest(".form-group")?.classList.add("focused");
     });
+
     input.addEventListener("blur", function () {
       this.closest(".form-group")?.classList.remove("focused");
     });
@@ -645,7 +803,17 @@ document.addEventListener("DOMContentLoaded", function () {
   // Button loading state
   const forms = document.querySelectorAll("form");
   forms.forEach((form) => {
-    form.addEventListener("submit", function (e) {
+    form.addEventListener("submit", function () {
+      if (
+        this.hasAttribute("data-confirm-message") &&
+        this.dataset.confirmed !== "true" &&
+        this.dataset.skipSharedConfirm !== "true"
+      ) {
+        return;
+      }
+
+      saveScrollPosition();
+
       const submitBtn = this.querySelector('button[type="submit"]');
       if (submitBtn && !submitBtn.classList.contains("no-loading")) {
         submitBtn.disabled = true;
@@ -656,26 +824,18 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Status toggle animation
-  const statusToggles = document.querySelectorAll(".status-toggle input");
-  statusToggles.forEach((toggle) => {
-    toggle.addEventListener("change", function () {
-      const label = this.closest(".status-toggle").querySelector(
-        ".status-toggle-label",
-      );
-      label.textContent = this.checked ? "Active" : "Disabled";
-      label.style.color = this.checked ? "var(--success)" : "var(--danger)";
-    });
-  });
-
-  // Search input clear button
+  // Search input clear buttons
   const searchInputs = document.querySelectorAll(".search-box input");
   searchInputs.forEach((input) => {
+    const wrapper = input.parentElement;
+    if (!wrapper) return;
+
     const clearBtn = document.createElement("button");
+    clearBtn.type = "button";
     clearBtn.className = "search-clear";
     clearBtn.innerHTML = '<i class="fas fa-times"></i>';
     clearBtn.style.display = "none";
-    input.parentElement.appendChild(clearBtn);
+    wrapper.appendChild(clearBtn);
 
     input.addEventListener("input", function () {
       clearBtn.style.display = this.value ? "flex" : "none";
@@ -692,9 +852,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const cards = document.querySelectorAll(
     ".data-card, .dashboard-card, .stat-card",
   );
+
   cards.forEach((card, index) => {
     card.style.opacity = "0";
     card.style.transform = "translateY(20px)";
+
     setTimeout(() => {
       card.style.transition = "opacity 0.4s ease, transform 0.4s ease";
       card.style.opacity = "1";
@@ -702,10 +864,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }, index * 100);
   });
 
-  // Tooltip initialization for icons
+  // Tooltip
   const tooltipTriggers = document.querySelectorAll("[title]");
   tooltipTriggers.forEach((trigger) => {
-    trigger.addEventListener("mouseenter", function (e) {
+    trigger.addEventListener("mouseenter", function () {
       const tooltip = document.createElement("div");
       tooltip.className = "tooltip";
       tooltip.textContent = this.getAttribute("title");
@@ -729,34 +891,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Keyboard shortcuts
   document.addEventListener("keydown", function (e) {
-    // ESC to close modals
     if (e.key === "Escape") {
       const activeModal = document.querySelector(".modal.active");
       if (activeModal) {
         activeModal.classList.remove("active");
-        document.body.style.overflow = "";
+        setBodyLocked(false);
       }
 
-      const activeDropdown = document.querySelector(".action-dropdown.active");
-      if (activeDropdown) {
-        activeDropdown.classList.remove("active");
+      document.querySelectorAll(".filter-menu").forEach((item) => {
+        item.setAttribute("hidden", "");
+      });
+
+      if (
+        notificationsDropdown &&
+        notificationsDropdown.classList.contains("active")
+      ) {
+        closeNotifications();
       }
     }
 
-    // Ctrl/Cmd + K to focus search
-    if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
       e.preventDefault();
       const searchInput = document.querySelector(".search-box input");
       if (searchInput) searchInput.focus();
     }
   });
 
-  // Window resize handler for sidebar
+  // Window resize
   window.addEventListener("resize", function () {
-    if (window.innerWidth > 1024) {
+    if (window.innerWidth > 1024 && sidebar && sidebarOverlay) {
       sidebar.classList.remove("mobile-open");
       sidebarOverlay.classList.remove("active");
-      document.body.style.overflow = "";
+      setBodyLocked(false);
     }
   });
 });
@@ -793,11 +959,8 @@ function debounce(func, wait) {
     timeout = setTimeout(later, wait);
   };
 }
-function confirmLogout(event) {
-  return window.confirm('Are you sure you want to log out?');
-}
 
-// Export for use in other scripts
+// Export helpers
 window.CIS = {
   formatDate,
   formatDateTime,

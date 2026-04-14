@@ -78,26 +78,128 @@
   </div>
 
   <!-- Users Table Card -->
-  <div class="data-card">
+  <div class="data-card users-table-card">
     <div class="data-card-header">
       <div class="data-card-header-left">
-        <h3 class="data-card-title">
-          <i class="fas fa-list"></i>
-          All Users
-        </h3>
-        <span class="data-card-count">{{users.length}} users</span>
+        <div class="users-title-row">
+          <span class="section-icon" aria-hidden="true">
+            <i class="fas fa-list"></i>
+          </span>
+
+          <div class="users-title-text">
+            <h3 class="data-card-title">All Users</h3>
+            <span class="data-card-count">{{pagination.totalFilteredUsers}} users</span>
+          </div>
+        </div>
       </div>
+
       <div class="data-card-header-right">
-        <div class="search-box">
-          <i class="fas fa-search"></i>
-          <input type="text" id="userSearch" placeholder="Search users...">
-        </div>
-        <div class="filter-dropdown">
-          <button class="btn btn-outline btn-sm">
-            <i class="fas fa-filter"></i>
-            Filter
-          </button>
-        </div>
+        <form method="GET" action="/users" class="users-toolbar-form">
+          <input type="hidden" name="role" value="{{filters.role}}">
+          <input type="hidden" name="status" value="{{filters.status}}">
+
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input
+              type="text"
+              id="userSearch"
+              name="q"
+              placeholder="Search users..."
+              value="{{filters.q}}"
+            >
+          </div>
+        </form>
+
+        <details class="filter-dropdown">
+          <summary class="btn btn-outline btn-sm filter-trigger-btn">
+            <span class="filter-summary-left">
+              <i class="fas fa-sliders-h"></i>
+              <span>Filter</span>
+            </span>
+            <i class="fas fa-chevron-down filter-summary-arrow"></i>
+          </summary>
+
+          <div class="filter-panel compact-filter-panel">
+            <div class="filter-panel-header">
+              <h4>Filters</h4>
+              <a href="/users?q={{filters.q}}&status=all&role=all" class="filter-clear-link">
+                Clear All
+              </a>
+            </div>
+
+            <form method="GET" action="/users" class="filter-form">
+              <input type="hidden" name="q" value="{{filters.q}}">
+
+              <details class="filter-section">
+                <summary class="filter-section-toggle">
+                  <span class="filter-section-left">
+                    <i class="fas fa-toggle-on"></i>
+                    <span>
+                      {{#if (eq filters.status "active")}}Active
+                      {{else if (eq filters.status "disabled")}}Disabled
+                      {{else}}All Statuses
+                      {{/if}}
+                    </span>
+                  </span>
+                  <i class="fas fa-chevron-down"></i>
+                </summary>
+
+                <div class="filter-section-body">
+                  <label class="filter-radio-option">
+                    <input type="radio" name="status" value="all" {{#if (eq filters.status "all")}}checked{{/if}}>
+                    <span>All Statuses</span>
+                  </label>
+
+                  <label class="filter-radio-option">
+                    <input type="radio" name="status" value="active" {{#if (eq filters.status "active")}}checked{{/if}}>
+                    <span>Active</span>
+                  </label>
+
+                  <label class="filter-radio-option">
+                    <input type="radio" name="status" value="disabled" {{#if (eq filters.status "disabled")}}checked{{/if}}>
+                    <span>Disabled</span>
+                  </label>
+                </div>
+              </details>
+
+              <details class="filter-section">
+                <summary class="filter-section-toggle">
+                  <span class="filter-section-left">
+                    <i class="fas fa-user-tag"></i>
+                    <span>
+                      {{#if (eq filters.role "Admin")}}Admin
+                      {{else if (eq filters.role "Technician")}}Technician
+                      {{else}}All Roles
+                      {{/if}}
+                    </span>
+                  </span>
+                  <i class="fas fa-chevron-down"></i>
+                </summary>
+
+                <div class="filter-section-body">
+                  <label class="filter-radio-option">
+                    <input type="radio" name="role" value="all" {{#if (eq filters.role "all")}}checked{{/if}}>
+                    <span>All Roles</span>
+                  </label>
+
+                  <label class="filter-radio-option">
+                    <input type="radio" name="role" value="Admin" {{#if (eq filters.role "Admin")}}checked{{/if}}>
+                    <span>Admin</span>
+                  </label>
+
+                  <label class="filter-radio-option">
+                    <input type="radio" name="role" value="Technician" {{#if (eq filters.role "Technician")}}checked{{/if}}>
+                    <span>Technician</span>
+                  </label>
+                </div>
+              </details>
+
+              <div class="filter-panel-footer filter-panel-actions">
+                <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+              </div>
+            </form>
+          </div>
+        </details>
       </div>
     </div>
 
@@ -136,12 +238,24 @@
               </form>
             </td>
             <td class="table-cell-status">
-              <form action="/api/users/{{_id}}/status?_method=PATCH" method="POST" class="status-form">
+              <form
+                action="/api/users/{{_id}}/status?_method=PATCH"
+                method="POST"
+                class="status-form"
+                data-confirm-message="Are you sure you want to change this user's account status?"
+              >
                 <input type="hidden" name="_method" value="PATCH">
                 <label class="status-toggle">
-                  <input type="checkbox" name="isEnabled" value="true" {{#if isEnabled}}checked{{/if}} onchange="this.form.submit()">
+                  <input
+                    type="checkbox"
+                    name="isEnabled"
+                    value="true"
+                    {{#if isEnabled}}checked{{/if}}
+                    data-current-checked="{{#if isEnabled}}true{{else}}false{{/if}}"
+                    onchange="handleStatusToggleChange(this)"
+                  >
                   <span class="status-toggle-slider"></span>
-                  <span class="status-toggle-label">{{#if isEnabled}}Active{{else}}Disabled{{/if}}</span>
+                  <span class="status-toggle-label {{#unless isEnabled}}disabled{{/unless}}">{{#if isEnabled}}Active{{else}}Disabled{{/if}}</span>
                 </label>
               </form>
             </td>
@@ -189,17 +303,49 @@
 
     <div class="data-card-footer">
       <div class="pagination-info">
-        Showing <strong>{{users.length}}</strong> of <strong>{{users.length}}</strong> users
+        Showing
+        <strong>{{pagination.startIndex}}</strong>
+        to
+        <strong>{{pagination.endIndex}}</strong>
+        of
+        <strong>{{pagination.totalFilteredUsers}}</strong>
+        users
       </div>
+
       <div class="pagination-controls">
-        <button class="btn btn-outline btn-sm" disabled>
-          <i class="fas fa-chevron-left"></i>
-          Previous
-        </button>
-        <button class="btn btn-outline btn-sm" disabled>
-          Next
-          <i class="fas fa-chevron-right"></i>
-        </button>
+        {{#if pagination.hasPrevPage}}
+          <a
+            class="btn btn-outline btn-sm"
+            href="/users?page={{pagination.prevPage}}&q={{filters.q}}&status={{filters.status}}&role={{filters.role}}"
+          >
+            <i class="fas fa-chevron-left"></i>
+            Previous
+          </a>
+        {{else}}
+          <button class="btn btn-outline btn-sm" disabled>
+            <i class="fas fa-chevron-left"></i>
+            Previous
+          </button>
+        {{/if}}
+
+        <span class="pagination-page-label">
+          Page {{pagination.currentPage}} of {{pagination.totalPages}}
+        </span>
+
+        {{#if pagination.hasNextPage}}
+          <a
+            class="btn btn-outline btn-sm"
+            href="/users?page={{pagination.nextPage}}&q={{filters.q}}&status={{filters.status}}&role={{filters.role}}"
+          >
+            Next
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        {{else}}
+          <button class="btn btn-outline btn-sm" disabled>
+            Next
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        {{/if}}
       </div>
     </div>
   </div>
@@ -315,7 +461,7 @@
   const closeBtn = document.getElementById('closeAddUserModal');
   const cancelBtn = document.getElementById('cancelAddUser');
   const overlay = modal.querySelector('.modal-overlay');
-
+  
   function openModal() {
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -367,4 +513,5 @@
 
   if (closeUserDetailsModalBtn) closeUserDetailsModalBtn.addEventListener('click', closeUserDetails);
   if (userDetailsOverlay) userDetailsOverlay.addEventListener('click', closeUserDetails);
+  
 </script>

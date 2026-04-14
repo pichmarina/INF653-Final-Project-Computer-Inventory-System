@@ -95,7 +95,12 @@
         </span>
       </div>
     </div>
-    <form action="/api/auth/logout" method="POST" class="logout-form" onsubmit="return confirmLogout(event)">
+    <form
+      action="/api/auth/logout"
+      method="POST"
+      class="logout-form"
+      data-confirm-message="Are you sure you want to log out?"
+    >
       <button type="submit" class="logout-btn" title="Logout">
         <i class="fas fa-sign-out-alt"></i>
       </button>

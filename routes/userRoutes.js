@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const {
+  renderUsersPage,
   createUser,
   getUsers,
   updateUserRole,
@@ -9,6 +10,10 @@ const {
 const { verifyJWT } = require("../middleware/authMiddleware");
 const { requireAdmin } = require("../middleware/roleMiddleware");
 
+// Server-rendered page
+router.get("/users", verifyJWT, requireAdmin, renderUsersPage);
+
+// JSON API
 router.get("/", verifyJWT, requireAdmin, getUsers);
 router.post("/", verifyJWT, requireAdmin, createUser);
 router.patch("/:id/role", verifyJWT, requireAdmin, updateUserRole);

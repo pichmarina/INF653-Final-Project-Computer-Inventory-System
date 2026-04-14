@@ -11,20 +11,72 @@ function formatDate(date) {
   }).format(new Date(date));
 }
 
+function buildUsersFilter(query = {}) {
+  const search = String(query.q || "").trim();
+  const status = String(query.status || "all").trim();
+  const role = String(query.role || "all").trim();
+
+  const mongoFilter = {
+    isDeleted: false,
+  };
+
+  if (search) {
+    mongoFilter.$or = [
+      { name: { $regex: search, $options: "i" } },
+      { email: { $regex: search, $options: "i" } },
+      { role: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  if (status === "active") {
+    mongoFilter.isEnabled = true;
+  } else if (status === "disabled") {
+    mongoFilter.isEnabled = false;
+  }
+
+  if (role === "Admin" || role === "Technician") {
+    mongoFilter.role = role;
+  }
+
+  return {
+    mongoFilter,
+    search,
+    status,
+    role,
+  };
+}
+
 async function buildUsersViewData(query = {}, extras = {}) {
-  const users = await User.find({ isDeleted: false })
+  const { mongoFilter, search, status, role } = buildUsersFilter(query);
+
+  const page = Math.max(parseInt(query.page || "1", 10), 1);
+  const limit = 10;
+
+  const totalFilteredUsers = await User.countDocuments(mongoFilter);
+  const totalPages = Math.max(Math.ceil(totalFilteredUsers / limit), 1);
+  const currentPage = Math.min(page, totalPages);
+  const skip = (currentPage - 1) * limit;
+
+  const users = await User.find(mongoFilter)
     .select("-passwordHash")
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .lean();
 
   const mappedUsers = users.map((user) => ({
-    ...user.toObject(),
+    ...user,
     createdAtLabel: formatDate(user.createdAt),
   }));
 
-  const totalUsers = mappedUsers.length;
-  const activeUsers = mappedUsers.filter((u) => u.isEnabled).length;
-  const adminUsers = mappedUsers.filter((u) => u.role === "Admin").length;
-  const technicianUsers = mappedUsers.filter((u) => u.role === "Technician").length;
+  const allUsers = await User.find({ isDeleted: false }).select(
+    "role isEnabled isDeleted"
+  );
+
+  const totalUsers = allUsers.length;
+  const activeUsers = allUsers.filter((u) => u.isEnabled).length;
+  const adminUsers = allUsers.filter((u) => u.role === "Admin").length;
+  const technicianUsers = allUsers.filter((u) => u.role === "Technician").length;
 
   return {
     title: "User Management",
@@ -39,6 +91,23 @@ async function buildUsersViewData(query = {}, extras = {}) {
     errorMessage: query.error || null,
     errors: extras.errors || {},
     formValues: extras.formValues || {},
+    filters: {
+      q: search,
+      status,
+      role,
+    },
+    pagination: {
+      currentPage,
+      totalPages,
+      limit,
+      totalFilteredUsers,
+      hasPrevPage: currentPage > 1,
+      hasNextPage: currentPage < totalPages,
+      prevPage: currentPage - 1,
+      nextPage: currentPage + 1,
+      startIndex: totalFilteredUsers === 0 ? 0 : skip + 1,
+      endIndex: Math.min(skip + mappedUsers.length, totalFilteredUsers),
+    },
   };
 }
 
