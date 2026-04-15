@@ -47,6 +47,10 @@ const itemSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+    uploadPath: {
+      type: String,
+      default: "",
+    },
     isDeleted: {
       type: Boolean,
       default: false,

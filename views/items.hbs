@@ -1,0 +1,50 @@
+<section class="card">
+  <h1>Inventory List</h1>
+  <p>View all inventory items and access item actions.</p>
+
+  <div style="margin: 20px 0;">
+    <a href="/items/new" class="btn" style="text-decoration: none; display: inline-block;">Add New Item</a>
+    <a href="/checkout" class="btn" style="text-decoration: none; display: inline-block; margin-left: 10px;">Check Out</a>
+    <a href="/checkin" class="btn" style="text-decoration: none; display: inline-block; margin-left: 10px;">Check In</a>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Item ID</th>
+        <th>Brand</th>
+        <th>Model</th>
+        <th>Category</th>
+        <th>Status</th>
+        <th>Assigned To</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>LT-001</td>
+        <td>Dell</td>
+        <td>Latitude 5420</td>
+        <td>Laptop</td>
+        <td>Available</td>
+        <td>—</td>
+        <td>
+          <a href="/items/1">Details</a> |
+          <a href="/items/1/edit">Edit</a>
+        </td>
+      </tr>
+      <tr>
+        <td>MN-014</td>
+        <td>HP</td>
+        <td>ProDisplay 24</td>
+        <td>Monitor</td>
+        <td>In-Use</td>
+        <td>John Doe</td>
+        <td>
+          <a href="/items/2">Details</a> |
+          <a href="/items/2/edit">Edit</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>

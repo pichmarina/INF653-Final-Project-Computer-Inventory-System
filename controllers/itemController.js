@@ -38,7 +38,13 @@ async function getItemById(req, res, next) {
 
 async function createItem(req, res, next) {
   try {
-    const item = await Item.create(req.body);
+    const itemData = req.body;
+
+    if (req.file) {
+      itemData.uploadPath = req.file.path;
+    }
+
+    const item = await Item.create(itemData);
 
     res.status(201).json({
       success: true,
@@ -52,9 +58,27 @@ async function createItem(req, res, next) {
 
 async function updateItem(req, res, next) {
   try {
-    const item = await Item.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const updateData = req.body; 
+
+    if (req.file) {
+      updateData.uploadPath = req.file.path;
+    }
+
+    const item = await Item.findOneAndUpdate(
+      { _id: req.params.id, isDeleted: false },
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        message: "Item not found",
+      });
+    }
 
     res.json({
       success: true,
@@ -68,11 +92,18 @@ async function updateItem(req, res, next) {
 
 async function softDeleteItem(req, res, next) {
   try {
-    const item = await Item.findByIdAndUpdate(
-      req.params.id,
+    const item = await Item.findOneAndUpdate(
+      { _id: req.params.id, isDeleted: false },
       { isDeleted: true },
       { new: true }
     );
+
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        message: "Item not found",
+      });
+    }
 
     res.json({
       success: true,
