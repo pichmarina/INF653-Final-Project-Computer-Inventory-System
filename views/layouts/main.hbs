@@ -1,18 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{title}} | {{appName}}</title>
-  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  {{> navbar}}
-
-  <main class="container">
+  {{#if user}}
+    <div class="app-container">
+      {{> sidebar}}
+      <div class="main-content">
+        {{> navbar}}
+        <main class="page-content">
+          <div class="container-fluid">
+            {{{body}}}
+          </div>
+        </main>
+        {{> footer}}
+      </div>
+    </div>
+  {{else}}
     {{{body}}}
-  </main>
+  {{/if}}
+  <div class="modal" id="confirmModal">
+    <div class="modal-overlay"></div>
+    <div class="modal-container modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fas fa-exclamation-circle"></i>
+          Confirm Action
+        </h3>
+        <button class="modal-close" id="closeConfirmModal" type="button">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
 
-  {{> footer}}
+      <div class="modal-body">
+        <p id="confirmModalMessage">Are you sure you want to continue?</p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelConfirmModal" type="button">Cancel</button>
+        <button class="btn btn-danger" id="acceptConfirmModal" type="button">Confirm</button>
+      </div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
 </body>
 </html>

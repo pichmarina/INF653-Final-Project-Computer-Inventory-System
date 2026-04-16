@@ -1,86 +1,190 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{title}} | {{appName}}</title>
-  <link rel="stylesheet" href="/css/style.css" />
-</head>
-
-<body>
-  {{> navbar}}
-
-  <main class="container">
-    <section class="card page-header-card">
-      <h1>{{title}}</h1>
-      <p>Overview of the Computer Inventory System and quick access to key sections.</p>
-
-      <section class="stats-grid">
-        <div class="mini-card stat-box">
-          <h3>Total Users</h3>
-          <p class="stat-number">{{stats.totalUsers}}</p>
-        </div>
-
-        <div class="mini-card stat-box">
-          <h3>Total Items</h3>
-          <p class="stat-number">{{stats.totalItems}}</p>
-        </div>
-
-        <div class="mini-card stat-box">
-          <h3>Available Items</h3>
-          <p class="stat-number">{{stats.availableItems}}</p>
-        </div>
-
-        <div class="mini-card stat-box">
-          <h3>Deployed Items</h3>
-          <p class="stat-number">{{stats.deployedItems}}</p>
-        </div>
-      </section>
-    </section>
-
-    <section class="card">
-      <h2>Quick Access</h2>
-      <div class="grid">
-        {{#each quickLinks}}
-        <a href="{{this.href}}" class="mini-card quick-link-card">
-          <h3>{{this.title}}</h3>
-          <p>{{this.description}}</p>
-        </a>
-        {{/each}}
+<div class="page-wrapper">
+  <!-- Welcome Section -->
+  <div class="welcome-section">
+    <div class="welcome-content">
+      <div class="welcome-avatar">
+        {{firstChar displayName}}
       </div>
-    </section>
-
-    <section class="card">
-      <h2>Recent Activity</h2>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th>Action</th>
-              <th>User</th>
-              <th>Date</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {{#each recentActivity}}
-            <tr>
-              <td>{{this.itemName}}</td>
-              <td>{{this.action}}</td>
-              <td>{{this.user}}</td>
-              <td>{{this.date}}</td>
-              <td><span class="status-badge">{{this.status}}</span></td>
-            </tr>
-            {{/each}}
-          </tbody>
-        </table>
+      <div class="welcome-text">
+        <h1 class="welcome-title">Welcome back, {{displayName}}!</h1>
+        <p class="welcome-subtitle">Here's what's happening with your inventory
+          today</p>
       </div>
-    </section>
-  </main>
+    </div>
+    <div class="welcome-actions">
+      <a href="/inventory" class="btn btn-primary">
+        <i class="fas fa-boxes"></i>
+        View Inventory
+      </a>
+      <a href="/transactions" class="btn btn-outline">
+        <i class="fas fa-exchange-alt"></i>
+        Check-In/Out
+      </a>
+    </div>
+  </div>
 
-  {{> footer}}
-</body>
+  <!-- Quick Stats -->
+  <div class="dashboard-stats">
+    <div class="dashboard-stat-card">
+      <div class="stat-card-bg">
+        <i class="fas fa-boxes"></i>
+      </div>
+      <div class="stat-card-content">
+        <span class="stat-card-value" id="totalItems">-</span>
+        <span class="stat-card-label">Total Items</span>
+      </div>
+    </div>
+    <div class="dashboard-stat-card">
+      <div class="stat-card-bg">
+        <i class="fas fa-user-check"></i>
+      </div>
+      <div class="stat-card-content">
+        <span class="stat-card-value" id="deployedItems">-</span>
+        <span class="stat-card-label">In Use</span>
+      </div>
+    </div>
+    <div class="dashboard-stat-card">
+      <div class="stat-card-bg">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stat-card-content">
+        <span class="stat-card-value" id="availableItems">-</span>
+        <span class="stat-card-label">Available</span>
+      </div>
+    </div>
+    <div class="dashboard-stat-card">
+      <div class="stat-card-bg">
+        <i class="fas fa-tools"></i>
+      </div>
+      <div class="stat-card-content">
+        <span class="stat-card-value" id="maintenanceItems">-</span>
+        <span class="stat-card-label">Maintenance</span>
+      </div>
+    </div>
+  </div>
 
-</html>
+  <!-- Navigation Cards - Quick Access to All Pages -->
+  <div class="section-header">
+    <h2 class="section-title">
+      <i class="fas fa-compass"></i>
+      Quick Navigation
+    </h2>
+  </div>
+
+  <div class="nav-cards-grid">
+    <a href="/inventory" class="nav-card">
+      <div class="nav-card-icon blue">
+        <i class="fas fa-boxes"></i>
+      </div>
+      <div class="nav-card-content">
+        <h4>Inventory</h4>
+        <p>Manage all computer hardware and peripherals</p>
+      </div>
+      <div class="nav-card-arrow">
+        <i class="fas fa-chevron-right"></i>
+      </div>
+    </a>
+
+    <a href="/transactions" class="nav-card">
+      <div class="nav-card-icon green">
+        <i class="fas fa-exchange-alt"></i>
+      </div>
+      <div class="nav-card-content">
+        <h4>Check-In / Check-Out</h4>
+        <p>Assign items to users or process returns</p>
+      </div>
+      <div class="nav-card-arrow">
+        <i class="fas fa-chevron-right"></i>
+      </div>
+    </a>
+
+    <a href="/history" class="nav-card">
+      <div class="nav-card-icon purple">
+        <i class="fas fa-history"></i>
+      </div>
+      <div class="nav-card-content">
+        <h4>Asset History</h4>
+        <p>View complete transaction audit trails</p>
+      </div>
+      <div class="nav-card-arrow">
+        <i class="fas fa-chevron-right"></i>
+      </div>
+    </a>
+
+    <a href="/reports" class="nav-card">
+      <div class="nav-card-icon orange">
+        <i class="fas fa-chart-bar"></i>
+      </div>
+      <div class="nav-card-content">
+        <h4>Reports</h4>
+        <p>Generate insights and analytics</p>
+      </div>
+      <div class="nav-card-arrow">
+        <i class="fas fa-chevron-right"></i>
+      </div>
+    </a>
+
+    {{! Always show admin cards for testing }}
+    {{#if (isAdmin user)}}
+      <a href="/users" class="nav-card admin-card">
+        <div class="nav-card-icon red">
+          <i class="fas fa-users-cog"></i>
+        </div>
+        <div class="nav-card-content">
+          <h4>User Management</h4>
+          <p>Create users, assign roles, manage access</p>
+        </div>
+        <div class="nav-card-arrow">
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </a>
+
+      <a href="/keys" class="nav-card admin-card">
+        <div class="nav-card-icon yellow">
+          <i class="fas fa-key"></i>
+        </div>
+        <div class="nav-card-content">
+          <h4>API Keys</h4>
+          <p>Generate and manage API access keys</p>
+        </div>
+        <div class="nav-card-arrow">
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </a>
+    {{/if}}
+  </div>
+</div>
+
+<script>
+  async function fetchDashboardData() { try { const response = await
+  fetch('/api/reports/summary', { credentials: 'same-origin' }); if
+  (!response.ok) { throw new Error(`HTTP ${response.status}`); } const result =
+  await response.json(); if (result.success && result.data) { const data =
+  result.data; const total = data.total ?? 0; const deployed = data.deployed ??
+  0; const available = data.available ?? 0; const maintenance = data.maintenance
+  ?? 0; const totalItems = document.getElementById('totalItems'); const
+  deployedItems = document.getElementById('deployedItems'); const availableItems
+  = document.getElementById('availableItems'); const maintenanceItems =
+  document.getElementById('maintenanceItems'); const navAvailableCount =
+  document.getElementById('navAvailableCount'); const navInUseCount =
+  document.getElementById('navInUseCount'); const navMaintenanceCount =
+  document.getElementById('navMaintenanceCount'); const mobileAvailableCount =
+  document.getElementById('mobileAvailableCount'); const mobileInUseCount =
+  document.getElementById('mobileInUseCount'); const mobileMaintenanceCount =
+  document.getElementById('mobileMaintenanceCount'); if (mobileAvailableCount)
+  mobileAvailableCount.textContent = available; if (mobileInUseCount)
+  mobileInUseCount.textContent = deployed; if (mobileMaintenanceCount)
+  mobileMaintenanceCount.textContent = maintenance; if (totalItems)
+  totalItems.textContent = total; if (deployedItems) deployedItems.textContent =
+  deployed; if (availableItems) availableItems.textContent = available; if
+  (maintenanceItems) maintenanceItems.textContent = maintenance; if
+  (navAvailableCount) navAvailableCount.textContent = available; if
+  (navInUseCount) navInUseCount.textContent = deployed; if (navMaintenanceCount)
+  navMaintenanceCount.textContent = maintenance; } else { throw new
+  Error('Invalid summary response'); } } catch (error) { console.error('Failed
+  to fetch dashboard data:', error); const fallbackIds = [ 'totalItems',
+  'deployedItems', 'availableItems', 'maintenanceItems', 'navAvailableCount',
+  'navInUseCount', 'navMaintenanceCount' ]; fallbackIds.forEach((id) => { const
+  el = document.getElementById(id); if (el) el.textContent = '0'; }); } }
+  fetchDashboardData();
+</script>

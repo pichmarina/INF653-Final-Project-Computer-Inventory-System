@@ -1,5 +1,6 @@
 const Item = require("../models/Item");
 const Transaction = require("../models/Transaction");
+const User = require("../models/User");
 
 async function checkoutItem(req, res, next) {
   try {
@@ -14,10 +15,33 @@ async function checkoutItem(req, res, next) {
       });
     }
 
+    if (item.isDeleted) {
+      return res.status(404).json({
+        success: false,
+        message: "Item not found",
+      });
+    }
+
     if (item.status === "Maintenance" || item.status === "Retired") {
       return res.status(400).json({
         success: false,
         message: "This item cannot be checked out",
+      });
+    }
+
+    if (item.status !== "Available") {
+      return res.status(400).json({
+        success: false,
+        message: "Item is not available for checkout",
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
       });
     }
 
@@ -29,7 +53,7 @@ async function checkoutItem(req, res, next) {
       item: item._id,
       user: userId,
       action: "checkout",
-      documentPath: req.file ? `/uploads/${req.file.filename}` : null,
+      documentPath: req.file ? req.file.path : "",
       notes,
       checkoutDate: new Date(),
     });
@@ -46,7 +70,7 @@ async function checkoutItem(req, res, next) {
 
 async function checkinItem(req, res, next) {
   try {
-    const { itemId, userId, notes } = req.body;
+    const { itemId, notes } = req.body;
 
     const item = await Item.findById(itemId);
 
@@ -57,15 +81,38 @@ async function checkinItem(req, res, next) {
       });
     }
 
+    if (item.isDeleted) {
+      return res.status(404).json({
+        success: false,
+        message: "Item not found",
+      });
+    }
+
+    if (item.status !== "In-Use") {
+      return res.status(400).json({
+        success: false,
+        message: "Only items currently in use can be checked in",
+      });
+    }
+
+    const checkedInUser = item.assignedTo;
+
+    if (!checkedInUser) {
+      return res.status(400).json({
+        success: false,
+        message: "No assigned user found for this item",
+      });
+    }
+    
     item.status = "Available";
     item.assignedTo = null;
     await item.save();
 
     const transaction = await Transaction.create({
       item: item._id,
-      user: userId,
+      user: checkedInUser,
       action: "checkin",
-      documentPath: req.file ? `/uploads/${req.file.filename}` : null,
+      documentPath: req.file ? req.file.path : "",
       notes,
       checkinDate: new Date(),
     });

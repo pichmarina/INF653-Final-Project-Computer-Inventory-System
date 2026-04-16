@@ -1,56 +1,55 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{title}} | {{appName}}</title>
-  <link rel="stylesheet" href="/css/style.css" />
-</head>
-
-<body>
-  {{> navbar}}
-
-  <main class="container">
-    <section class="card page-header-card">
-      <h1>{{title}}</h1>
-      <p>Track item check-in, check-out, maintenance, and inventory movement history.</p>
-    </section>
-
-    <section class="card">
-      <h2>Transaction History</h2>
-      <p>Recent item movement and status activity.</p>
-
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Item Name</th>
-              <th>Asset Tag</th>
-              <th>Action</th>
-              <th>User</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            {{#each historyRows}}
-            <tr>
-              <td>{{this.date}}</td>
-              <td>{{this.itemName}}</td>
-              <td>{{this.assetTag}}</td>
-              <td><span class="status-badge">{{this.action}}</span></td>
-              <td>{{this.user}}</td>
-              <td>{{this.notes}}</td>
-            </tr>
-            {{/each}}
-          </tbody>
-        </table>
+<div class="page-wrapper">
+  <div class="page-header-modern">
+    <div class="page-header-content">
+      <div class="page-header-left">
+        <span class="page-eyebrow">Audit</span>
+        <h1 class="page-heading">Asset History</h1>
+        <p class="page-description">View complete transaction history and audit trails for all items</p>
       </div>
-    </section>
-  </main>
+    </div>
+  </div>
 
-  {{> footer}}
-</body>
-
-</html>
+  <div class="data-card">
+    <div class="data-card-header">
+      <div class="data-card-header-left">
+        <h3 class="data-card-title">
+          <i class="fas fa-history"></i>
+          Transaction History
+        </h3>
+      </div>
+      <div class="data-card-header-right">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search history...">
+        </div>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Item</th>
+            <th>Action</th>
+            <th>User</th>
+            <th>Notes</th>
+            <th>Document</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="6" class="table-empty">
+              <div class="empty-state">
+                <div class="empty-state-icon">
+                  <i class="fas fa-history"></i>
+                </div>
+                <h4>No history yet</h4>
+                <p>Transaction history will appear here once items are checked in or out</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

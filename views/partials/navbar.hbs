@@ -1,12 +1,100 @@
-<header class="navbar">
-  <div class="container nav-inner">
-    <a href="/dashboard" class="brand">{{appName}}</a>
+<header class="top-navbar">
+  <div class="navbar-left">
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="page-title-wrapper">
+      <h1 class="page-title">{{title}}</h1>
+    </div>
+  </div>
 
-    <nav class="nav-links">
-      <a href="/login">Login</a>
-      <a href="/dashboard">Dashboard</a>
-      <a href="/reports">Reports</a>
-      <a href="/history">History</a>
-    </nav>
+  <div class="navbar-right">
+    <div class="quick-stats">
+      <div class="quick-stat">
+        <span class="quick-stat-icon available"><i class="fas fa-check-circle"></i></span>
+        <span class="quick-stat-label">
+          Available:
+          <strong id="navAvailableCount">0</strong>
+        </span>
+      </div>
+
+      <div class="quick-stat">
+        <span class="quick-stat-icon in-use"><i class="fas fa-user-check"></i></span>
+        <span class="quick-stat-label">
+          In Use:
+          <strong id="navInUseCount">0</strong>
+        </span>
+      </div>
+
+      <div class="quick-stat">
+        <span class="quick-stat-icon maintenance"><i class="fas fa-tools"></i></span>
+        <span class="quick-stat-label">
+          Maintenance:
+          <strong id="navMaintenanceCount">0</strong>
+        </span>
+      </div>
+    </div>
+
+    <div class="navbar-divider"></div>
+
+    <div class="navbar-actions">
+      <button
+        class="action-btn"
+        id="themeToggleBtn"
+        type="button"
+        title="Toggle dark mode"
+        aria-label="Toggle dark mode"
+      >
+        <i class="fas fa-moon" id="themeToggleIcon"></i>
+      </button>
+
+      <button
+        class="action-btn"
+        id="helpBtn"
+        type="button"
+        title="Page Help"
+        aria-label="Open page help"
+      >
+        <i class="fas fa-question-circle"></i>
+      </button>
+    </div>
   </div>
 </header>
+<div class="modal" id="helpModal">
+  <div class="modal-overlay"></div>
+  <div class="modal-container modal-sm">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <i class="fas fa-life-ring"></i>
+        Page Help
+      </h3>
+      <button class="modal-close" id="closeHelpModal" type="button">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body" id="helpModalBody">
+      <div class="dropdown-empty">Loading help...</div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="closeHelpModalFooter" type="button">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+<div class="mobile-status-bar">
+  <div class="mobile-status-pill">
+    <span class="quick-stat-icon available"><i class="fas fa-check-circle"></i></span>
+    <span>Available: <strong id="mobileAvailableCount">0</strong></span>
+  </div>
+  <div class="mobile-status-pill">
+    <span class="quick-stat-icon in-use"><i class="fas fa-user-check"></i></span>
+    <span>In Use: <strong id="mobileInUseCount">0</strong></span>
+  </div>
+  <div class="mobile-status-pill">
+    <span class="quick-stat-icon maintenance"><i class="fas fa-tools"></i></span>
+    <span>Maintenance: <strong id="mobileMaintenanceCount">0</strong></span>
+  </div>
+</div>
