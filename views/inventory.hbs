@@ -24,14 +24,13 @@
         </h3>
       </div>
       <div class="data-card-header-right">
-        <div class="search-box">
+        <div class="search-input-wrapper">
           <i class="fas fa-search"></i>
-          <input type="text" placeholder="Search items...">
+          <input type="text" id="inventorySearch" placeholder="Search items..." autocomplete="off">
+          <button type="button" id="clearInventorySearch" class="hidden">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
-        <button class="btn btn-outline btn-sm">
-          <i class="fas fa-filter"></i>
-          Filter
-        </button>
       </div>
     </div>
     <div class="table-wrapper">
@@ -135,5 +134,29 @@
       url.searchParams.delete("success");
       window.history.replaceState({}, "", url);
     }
+  }
+
+  const inventorySearch = document.getElementById('inventorySearch');
+  const clearInventorySearch = document.getElementById('clearInventorySearch');
+
+  if (inventorySearch) {
+    inventorySearch.addEventListener('input', function () {
+      const term = this.value.toLowerCase();
+      clearInventorySearch.classList.toggle('hidden', !term);
+      document.querySelectorAll('.data-table tbody tr').forEach(function (row) {
+        row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+      });
+    });
+  }
+
+  if (clearInventorySearch) {
+    clearInventorySearch.addEventListener('click', function () {
+      inventorySearch.value = '';
+      this.classList.add('hidden');
+      document.querySelectorAll('.data-table tbody tr').forEach(function (row) {
+        row.style.display = '';
+      });
+      inventorySearch.focus();
+    });
   }
 </script>

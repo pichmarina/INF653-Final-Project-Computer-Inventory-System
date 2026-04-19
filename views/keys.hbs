@@ -105,9 +105,12 @@
         <span class="data-card-count">{{keyCount}} active keys</span>
       </div>
       <div class="data-card-header-right">
-        <div class="search-box">
+        <div class="search-input-wrapper">
           <i class="fas fa-search"></i>
-          <input type="text" id="keySearch" placeholder="Search keys..." />
+          <input type="text" id="keySearch" placeholder="Search keys..." autocomplete="off" />
+          <button type="button" id="clearKeySearch" class="hidden">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
       </div>
     </div>
@@ -259,15 +262,28 @@
   if (overlay) overlay.addEventListener('click', closeModal);
 
   const keySearch = document.getElementById('keySearch');
+  const clearKeySearch = document.getElementById('clearKeySearch');
   if (keySearch) {
     keySearch.addEventListener('input', function () {
       const searchTerm = this.value.toLowerCase();
+      clearKeySearch.classList.toggle('hidden', !searchTerm);
       const rows = document.querySelectorAll('#keysTable tbody tr');
 
       rows.forEach((row) => {
         const text = row.textContent.toLowerCase();
         row.style.display = text.includes(searchTerm) ? '' : 'none';
       });
+    });
+  }
+
+  if (clearKeySearch) {
+    clearKeySearch.addEventListener('click', function () {
+      keySearch.value = '';
+      this.classList.add('hidden');
+      document.querySelectorAll('#keysTable tbody tr').forEach(function (row) {
+        row.style.display = '';
+      });
+      keySearch.focus();
     });
   }
 
