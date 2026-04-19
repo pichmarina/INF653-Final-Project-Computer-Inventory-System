@@ -10,6 +10,7 @@
   </div>
 
   <div class="dashboard-grid">
+    <!-- Inventory Status Card -->
     <div class="dashboard-card">
       <div class="dashboard-card-header">
         <h3 class="dashboard-card-title">
@@ -18,29 +19,17 @@
         </h3>
       </div>
       <div class="dashboard-card-body">
-        {{#if (eq reportType "summary")}}
-          <div>
-            <h4>Inventory Summary</h4>
-            <table class="table">
-              <tr><th>Total Items</th><td>{{summary.total}}</td></tr>
-              <tr><th>Deployed</th><td>{{summary.deployed}}</td></tr>
-              <tr><th>Available</th><td>{{summary.available}}</td></tr>
-            </table>
-            <a href="/reports" class="btn btn-close-reports">Close</a>
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <i class="fas fa-chart-pie"></i>
           </div>
-        {{else}}
-          <div class="empty-state">
-            <div class="empty-state-icon">
-              <i class="fas fa-chart-pie"></i>
-            </div>
-            <h4>Inventory Summary</h4>
-            <p>View total vs deployed assets</p>
-            <a href="/reports/summary" class="btn btn-primary">
-              <i class="fas fa-eye"></i>
-              View Report
-            </a>
-          </div>
-        {{/if}}
+          <h4>Inventory Summary</h4>
+          <p>View total vs deployed assets</p>
+          <button class="btn btn-primary" id="openSummaryModal">
+            <i class="fas fa-eye"></i>
+            View Report
+          </button>
+        </div>
       </div>
     </div>
 
@@ -53,42 +42,17 @@
         </h3>
       </div>
       <div class="dashboard-card-body">
-        {{#if (eq reportType "aging")}}
-          <div>
-            <h4>Items Older Than 3 Years</h4>
-            {{#if agingItems.length}}
-              <table class="table">
-                <thead>
-                  <tr><th>Name</th><th>Acquired</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                  {{#each agingItems}}
-                    <tr>
-                      <td>{{this.name}}</td>
-                      <td>{{formatDate this.dateAcquired}}</td>
-                      <td>{{this.status}}</td>
-                    </tr>
-                  {{/each}}
-                </tbody>
-              </table>
-            {{else}}
-              <p>No items older than 3 years.</p>
-            {{/if}}
-            <a href="/reports" class="btn btn-close-reports">Close</a>
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <i class="fas fa-clock"></i>
           </div>
-        {{else}}
-          <div class="empty-state">
-            <div class="empty-state-icon">
-              <i class="fas fa-clock"></i>
-            </div>
-            <h4>Aging Report</h4>
-            <p>Items older than 3 years</p>
-            <a href="/reports/aging" class="btn btn-primary">
-              <i class="fas fa-eye"></i>
-              View Report
-            </a>
-          </div>
-        {{/if}}
+          <h4>Aging Report</h4>
+          <p>Items older than 3 years</p>
+          <button class="btn btn-primary" id="openAgingModal">
+            <i class="fas fa-eye"></i>
+            View Report
+          </button>
+        </div>
       </div>
     </div>
 
@@ -101,48 +65,17 @@
         </h3>
       </div>
       <div class="dashboard-card-body">
-        {{#if (eq reportType "byUser")}}
-          <div>
-            <h4>Assets Assigned to Users</h4>
-            <table class="table">
-              <thead>
-                <tr><th>User</th><th>Email</th><th>Assigned Items</th></tr>
-              </thead>
-              <tbody>
-                {{#each assetsByUser}}
-                  <tr>
-                    <td>{{this.user.name}}</td>
-                    <td>{{this.user.email}}</td>
-                    <td>
-                      {{#if this.items.length}}
-                        <ul>
-                          {{#each this.items}}
-                            <li>{{this.name}}</li>
-                          {{/each}}
-                        </ul>
-                      {{else}}
-                        <span class="text-muted">No assets assigned</span>
-                      {{/if}}
-                    </td>
-                  </tr>
-                {{/each}}
-              </tbody>
-            </table>
-            <a href="/reports" class="btn btn-close-reports">Close</a>
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <i class="fas fa-user-tag"></i>
           </div>
-        {{else}}
-          <div class="empty-state">
-            <div class="empty-state-icon">
-              <i class="fas fa-user-tag"></i>
-            </div>
-            <h4>User Assignment</h4>
-            <p>View assets assigned to each user</p>
-            <a href="/reports/by-user" class="btn btn-primary">
-              <i class="fas fa-eye"></i>
-              View Report
-            </a>
-          </div>
-        {{/if}}
+          <h4>User Assignment</h4>
+          <p>View assets assigned to each user</p>
+          <button class="btn btn-primary" id="openByUserModal">
+            <i class="fas fa-eye"></i>
+            View Report
+          </button>
+        </div>
       </div>
     </div>
 
@@ -170,41 +103,190 @@
     </div>
   </div>
 
+  <!-- Inventory Summary Modal -->
+  <div class="modal report-modal" id="summaryModal" style="display:none;">
+    <div class="modal-overlay" data-close="summaryModal"></div>
+    <div class="modal-container modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fas fa-chart-pie"></i>
+          Inventory Summary
+        </h3>
+        <button class="modal-close" data-close="summaryModal" type="button">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table class="data-table" style="width:100%;">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Total Items</td><td>{{summary.total}}</td></tr>
+            <tr><td>Deployed (In Use)</td><td>{{summary.deployed}}</td></tr>
+            <tr><td>Available</td><td>{{summary.available}}</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" data-close="summaryModal" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Asset Aging Modal -->
+  <div class="modal report-modal" id="agingModal" style="display:none;">
+    <div class="modal-overlay" data-close="agingModal"></div>
+    <div class="modal-container modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fas fa-clock"></i>
+          Aging Report
+        </h3>
+        <button class="modal-close" data-close="agingModal" type="button">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        {{#if agingItems.length}}
+          <table class="data-table" style="width:100%;">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Date Acquired</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each agingItems}}
+                <tr>
+                  <td>{{this.name}}</td>
+                  <td>{{formatDate this.dateAcquired}}</td>
+                  <td>{{this.status}}</td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        {{else}}
+          <p style="color:var(--text-muted);">No items older than 3 years.</p>
+        {{/if}}
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" data-close="agingModal" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assets by User Modal -->
+  <div class="modal report-modal" id="byUserModal" style="display:none;">
+    <div class="modal-overlay" data-close="byUserModal"></div>
+    <div class="modal-container modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fas fa-user-tag"></i>
+          Assets Assigned to Users
+        </h3>
+        <button class="modal-close" data-close="byUserModal" type="button">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table class="data-table" style="width:100%;">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Assigned Items</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each assetsByUser}}
+              <tr>
+                <td>{{this.user.name}}</td>
+                <td>{{this.user.email}}</td>
+                <td>
+                  {{#if this.items.length}}
+                    <ul style="margin:0;padding-left:16px;">
+                      {{#each this.items}}
+                        <li>{{this.name}}</li>
+                      {{/each}}
+                    </ul>
+                  {{else}}
+                    <span style="color:var(--text-muted);">No assets assigned</span>
+                  {{/if}}
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" data-close="byUserModal" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Export Modal -->
   <div class="modal" id="exportModal" style="display:none;">
-    <div class="modal-overlay" id="closeExportModal"></div>
+    <div class="modal-overlay" data-close="exportModal"></div>
     <div class="modal-container modal-sm">
       <div class="modal-header">
         <h3 class="modal-title">
           <i class="fas fa-file-export"></i>
           Export Reports
         </h3>
-        <button class="modal-close" id="closeExportModalBtn" type="button">
+        <button class="modal-close" data-close="exportModal" type="button">
           <i class="fas fa-times"></i>
         </button>
       </div>
       <div class="modal-body">
-        <button class="btn btn-outline w-100 mb-2" onclick="window.location='/reports/export/summary'">
+        <button class="btn btn-outline" style="width:100%;margin-bottom:8px;" onclick="window.location='/reports/export/summary'">
           <i class="fas fa-chart-pie"></i> Download Inventory Summary
         </button>
-        <button class="btn btn-outline w-100 mb-2" onclick="window.location='/reports/export/aging'">
+        <button class="btn btn-outline" style="width:100%;margin-bottom:8px;" onclick="window.location='/reports/export/aging'">
           <i class="fas fa-clock"></i> Download Aging Report
         </button>
-        <button class="btn btn-outline w-100" onclick="window.location='/reports/export/by-user'">
+        <button class="btn btn-outline" style="width:100%;" onclick="window.location='/reports/export/by-user'">
           <i class="fas fa-user-tag"></i> Download Assets by User
         </button>
       </div>
     </div>
   </div>
 </div>
+
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    var exportModal = document.getElementById('exportModal');
-    var openBtn = document.getElementById('openExportModal');
-    var closeBtn = document.getElementById('closeExportModalBtn');
-    var overlay = document.getElementById('closeExportModal');
-    if (openBtn) openBtn.onclick = function() { exportModal.style.display = 'flex'; };
-    if (closeBtn) closeBtn.onclick = function() { exportModal.style.display = 'none'; };
-    if (overlay) overlay.onclick = function() { exportModal.style.display = 'none'; };
+  document.addEventListener('DOMContentLoaded', function () {
+    function openModal(id) {
+      var m = document.getElementById(id);
+      if (m) { m.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+    }
+    function closeModal(id) {
+      var m = document.getElementById(id);
+      if (m) { m.style.display = 'none'; document.body.style.overflow = ''; }
+    }
+
+    var openMap = {
+      openSummaryModal: 'summaryModal',
+      openAgingModal:   'agingModal',
+      openByUserModal:  'byUserModal',
+      openExportModal:  'exportModal'
+    };
+    Object.keys(openMap).forEach(function (btnId) {
+      var btn = document.getElementById(btnId);
+      if (btn) btn.addEventListener('click', function () { openModal(openMap[btnId]); });
+    });
+
+    document.querySelectorAll('[data-close]').forEach(function (el) {
+      el.addEventListener('click', function () { closeModal(el.getAttribute('data-close')); });
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        ['summaryModal', 'agingModal', 'byUserModal', 'exportModal'].forEach(closeModal);
+      }
+    });
   });
 </script>

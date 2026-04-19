@@ -237,6 +237,39 @@ async function exportReport(req, res, next) {
   }
 }
 
+// Render Reports page with all data pre-loaded for modal popups
+async function renderReportsPage(req, res, next) {
+  try {
+    // Summary
+    const total = await Item.countDocuments({ isDeleted: false });
+    const deployed = await Item.countDocuments({ isDeleted: false, status: "In-Use" });
+    const available = total - deployed;
+
+    // Aging (older than 3 years)
+    const threeYearsAgo = new Date();
+    threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
+    const agingItems = await Item.find({ isDeleted: false, dateAcquired: { $lt: threeYearsAgo } }).lean();
+
+    // Assets by User
+    const users = await User.find({ isDeleted: false }).lean();
+    const allItems = await Item.find({ isDeleted: false }).populate("assignedTo", "name email").lean();
+    const assetsByUser = users.map(user => ({
+      user,
+      items: allItems.filter(item => item.assignedTo && String(item.assignedTo._id) === String(user._id))
+    }));
+
+    res.render("reports", {
+      title: "Reports",
+      user: req.user,
+      summary: { total, deployed, available },
+      agingItems,
+      assetsByUser
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getSummaryReport,
   getDashboardData,
@@ -245,5 +278,6 @@ module.exports = {
   renderSummaryReportPage,
   renderAgingReportPage,
   renderAssetsByUserReportPage,
+  renderReportsPage,
   exportReport
 };

@@ -10,6 +10,7 @@ const {
   renderSummaryReportPage,
   renderAgingReportPage,
   renderAssetsByUserReportPage,
+  renderReportsPage,
 } = require("../controllers/reportController");
 const { exportReport } = require("../controllers/reportController");
 const { renderHistoryPage } = require("../controllers/transactionController");
@@ -38,12 +39,7 @@ router.get("/transactions", requireViewAuth, (req, res) => {
 
 router.get("/history", requireViewAuth, renderHistoryPage);
 
-router.get("/reports", requireViewAuth, (req, res) => {
-  res.render("reports", {
-    title: "Reports",
-    user: req.user,
-  });
-});
+router.get("/reports", requireViewAuth, renderReportsPage);
 
 router.get("/reports/summary", requireViewAuth, renderSummaryReportPage);
 router.get("/reports/aging", requireViewAuth, renderAgingReportPage);
