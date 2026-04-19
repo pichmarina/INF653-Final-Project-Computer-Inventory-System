@@ -293,11 +293,19 @@ document.addEventListener("DOMContentLoaded", function () {
         themeToggleIcon.classList.remove("fa-moon");
         themeToggleIcon.classList.add("fa-sun");
       }
+      if (themeToggleBtn) {
+        themeToggleBtn.title = "Light mode";
+        themeToggleBtn.setAttribute("aria-label", "Light mode");
+      }
     } else {
       body.classList.remove("dark-mode");
       if (themeToggleIcon) {
         themeToggleIcon.classList.remove("fa-sun");
         themeToggleIcon.classList.add("fa-moon");
+      }
+      if (themeToggleBtn) {
+        themeToggleBtn.title = "Dark mode";
+        themeToggleBtn.setAttribute("aria-label", "Dark mode");
       }
     }
   }
@@ -732,20 +740,39 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Sidebar collapse
-  if (sidebarToggle && sidebar) {
-    sidebarToggle.addEventListener("click", function () {
-      sidebar.classList.toggle("collapsed");
-      body.classList.toggle("sidebar-collapsed");
-
-      const icon = this.querySelector("i");
-      if (!icon) return;
-
-      if (sidebar.classList.contains("collapsed")) {
+  function setSidebarCollapsed(collapsed) {
+    if (collapsed) {
+      sidebar.classList.add("collapsed");
+      body.classList.add("sidebar-collapsed");
+    } else {
+      sidebar.classList.remove("collapsed");
+      body.classList.remove("sidebar-collapsed");
+    }
+    const icon = sidebarToggle ? sidebarToggle.querySelector("i") : null;
+    if (icon) {
+      if (collapsed) {
         icon.classList.remove("fa-chevron-left");
         icon.classList.add("fa-chevron-right");
       } else {
         icon.classList.remove("fa-chevron-right");
         icon.classList.add("fa-chevron-left");
+      }
+    }
+  }
+
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener("click", function () {
+      setSidebarCollapsed(!sidebar.classList.contains("collapsed"));
+    });
+  }
+
+  // Click the brand logo to expand when collapsed
+  const brandEl = sidebar ? sidebar.querySelector(".brand") : null;
+  if (brandEl && sidebar) {
+    brandEl.style.cursor = "pointer";
+    brandEl.addEventListener("click", function () {
+      if (sidebar.classList.contains("collapsed")) {
+        setSidebarCollapsed(false);
       }
     });
   }
@@ -874,9 +901,14 @@ document.addEventListener("DOMContentLoaded", function () {
       document.body.appendChild(tooltip);
 
       const rect = this.getBoundingClientRect();
-      tooltip.style.left =
-        rect.left + rect.width / 2 - tooltip.offsetWidth / 2 + "px";
-      tooltip.style.top = rect.top - tooltip.offsetHeight - 8 + "px";
+      let ttTop = rect.top - tooltip.offsetHeight - 8;
+      if (ttTop < 4) {
+        ttTop = rect.bottom + 8;
+      }
+      let ttLeft = rect.left + rect.width / 2 - tooltip.offsetWidth / 2;
+      ttLeft = Math.max(8, Math.min(ttLeft, window.innerWidth - tooltip.offsetWidth - 8));
+      tooltip.style.left = ttLeft + "px";
+      tooltip.style.top = ttTop + "px";
 
       this._tooltip = tooltip;
     });
@@ -925,6 +957,34 @@ document.addEventListener("DOMContentLoaded", function () {
       setBodyLocked(false);
     }
   });
+
+  // Update navbar quick stats on every page
+  async function updateNavbarStats() {
+    try {
+      const response = await fetch("/api/reports/summary", {
+        credentials: "same-origin",
+      });
+      if (!response.ok) return;
+      const result = await response.json();
+      if (!result.success || !result.data) return;
+      const { available, deployed, maintenance } = result.data;
+      const navAvailable = document.getElementById("navAvailableCount");
+      const navInUse = document.getElementById("navInUseCount");
+      const navMaintenance = document.getElementById("navMaintenanceCount");
+      if (navAvailable) navAvailable.textContent = available ?? 0;
+      if (navInUse) navInUse.textContent = deployed ?? 0;
+      if (navMaintenance) navMaintenance.textContent = maintenance ?? 0;
+      const mobileAvailable = document.getElementById("mobileAvailableCount");
+      const mobileInUse = document.getElementById("mobileInUseCount");
+      const mobileMaintenance = document.getElementById("mobileMaintenanceCount");
+      if (mobileAvailable) mobileAvailable.textContent = available ?? 0;
+      if (mobileInUse) mobileInUse.textContent = deployed ?? 0;
+      if (mobileMaintenance) mobileMaintenance.textContent = maintenance ?? 0;
+    } catch (e) {
+      // silently ignore on pages without auth
+    }
+  }
+  updateNavbarStats();
 });
 
 // Helper functions

@@ -473,7 +473,12 @@ input, select, textarea {
 }
 
 .sidebar.collapsed .sidebar-toggle {
-  transform: rotate(180deg);
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
 }
 
 .sidebar-nav {
@@ -749,6 +754,13 @@ input, select, textarea {
   text-overflow: ellipsis;
 }
 
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
 
 .navbar-right {
   display: flex;
@@ -3002,9 +3014,11 @@ body.dark-mode .welcome-section {
 
 .tooltip {
   position: fixed;
-  padding: 8px 12px;
-  background: var(--gray-900);
-  color: white;
+  padding: 6px 10px;
+  background: #f8fafc;
+  color: #1e293b;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   font-size: 0.75rem;
   font-weight: 500;
   border-radius: var(--radius);
@@ -3014,6 +3028,13 @@ body.dark-mode .welcome-section {
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+body.dark-mode .tooltip {
+  background: #1e293b;
+  color: #f1f5f9;
+  border-color: #334155;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 /* ========================================
@@ -4016,23 +4037,20 @@ body.dark-mode .action-btn:hover {
 @media (max-width: 767px) {
   .top-navbar {
     height: auto;
-    min-height: 64px;
-    padding: 10px 14px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-areas:
-      "left right"
-      "stats stats";
+    min-height: 56px;
+    padding: 8px 14px;
+    display: flex;
     align-items: center;
-    gap: 10px 12px;
+    justify-content: space-between;
+    gap: 8px;
   }
 
   .navbar-left {
-    grid-area: left;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     min-width: 0;
+    flex: 1;
   }
 
   .page-title-wrapper {
@@ -4052,7 +4070,6 @@ body.dark-mode .action-btn:hover {
   }
 
   .navbar-right {
-    grid-area: right;
     display: flex;
     align-items: center;
     justify-content: flex-end;
