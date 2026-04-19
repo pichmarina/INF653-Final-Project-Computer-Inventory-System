@@ -80,12 +80,23 @@
   </nav>
 
   <div class="sidebar-footer">
-    <div class="user-card">
+    <button
+      type="button"
+      class="user-card user-card-trigger {{#if (eq currentPath '/profile')}}active{{/if}}"
+      id="profileCardTrigger"
+      aria-label="Open account menu"
+      aria-expanded="false"
+      aria-controls="profilePopover"
+    >
       <div class="user-avatar">
-        {{#if user.name}}
-          {{firstChar user.name}}
+        {{#if user.avatarPath}}
+          <img src="{{user.avatarPath}}" alt="{{user.name}}" class="user-avatar-image">
         {{else}}
-          <i class="fas fa-user"></i>
+          {{#if user.name}}
+            {{firstChar user.name}}
+          {{else}}
+            <i class="fas fa-user"></i>
+          {{/if}}
         {{/if}}
       </div>
       <div class="user-info">
@@ -94,7 +105,45 @@
           <span class="role-badge role-{{toLowerCase user.role}}">{{user.role}}</span>
         </span>
       </div>
+    </button>
+
+    <div class="profile-popover" id="profilePopover" hidden>
+      <div class="profile-popover-header">
+        <div class="user-avatar profile-popover-avatar">
+          {{#if user.avatarPath}}
+            <img src="{{user.avatarPath}}" alt="{{user.name}}" class="user-avatar-image">
+          {{else}}
+            {{#if user.name}}
+              {{firstChar user.name}}
+            {{else}}
+              <i class="fas fa-user"></i>
+            {{/if}}
+          {{/if}}
+        </div>
+        <div class="profile-popover-info">
+          <span class="profile-popover-name">{{user.name}}</span>
+          <span class="profile-popover-email">{{user.email}}</span>
+        </div>
+      </div>
+      <div class="profile-popover-actions">
+        <a href="/profile" class="btn btn-outline btn-sm profile-popover-link">
+          <i class="fas fa-user-circle"></i>
+          View Profile
+        </a>
+        <form
+          action="/api/auth/logout"
+          method="POST"
+          class="profile-popover-logout-form"
+          data-confirm-message="Are you sure you want to log out?"
+        >
+          <button type="submit" class="btn btn-outline btn-sm profile-popover-logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            Sign Out
+          </button>
+        </form>
+      </div>
     </div>
+
     <form
       action="/api/auth/logout"
       method="POST"
@@ -103,6 +152,7 @@
     >
       <button type="submit" class="logout-btn" title="Logout">
         <i class="fas fa-sign-out-alt"></i>
+        <span class="logout-text">Logout</span>
       </button>
     </form>
   </div>

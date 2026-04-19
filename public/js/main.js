@@ -8,6 +8,21 @@ document.addEventListener("DOMContentLoaded", function () {
   const sidebarToggle = document.getElementById("sidebarToggle");
   const mobileMenuToggle = document.getElementById("mobileMenuToggle");
   const sidebarOverlay = document.getElementById("sidebarOverlay");
+  const profileCardTrigger = document.getElementById("profileCardTrigger");
+  const profilePopover = document.getElementById("profilePopover");
+  const profileAvatarInput = document.getElementById("profileAvatarInput");
+  const profileAvatarPreview = document.getElementById("profileAvatarPreview");
+  const profileAvatarFileName = document.getElementById(
+    "profileAvatarFileName",
+  );
+  const clearProfileAvatarButton = document.getElementById(
+    "clearProfileAvatarButton",
+  );
+  const passwordToggleButtons = document.querySelectorAll(
+    "[data-password-toggle]",
+  );
+  const profileForm = document.getElementById("profileForm");
+  const avatarChangedInput = document.getElementById("avatarChanged");
 
   // Theme
   const themeToggleBtn = document.getElementById("themeToggleBtn");
@@ -72,6 +87,128 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function setBodyLocked(locked) {
     body.style.overflow = locked ? "hidden" : "";
+  }
+
+  function isMobileViewport() {
+    return window.matchMedia("(max-width: 1023px)").matches;
+  }
+
+  function closeProfilePopover() {
+    if (!profilePopover || !profileCardTrigger) return;
+
+    profilePopover.hidden = true;
+    profileCardTrigger.setAttribute("aria-expanded", "false");
+  }
+
+  function openProfilePopover() {
+    if (!profilePopover || !profileCardTrigger) return;
+
+    profilePopover.hidden = false;
+    profileCardTrigger.setAttribute("aria-expanded", "true");
+  }
+
+  const profileAvatarInitialMarkup = profileAvatarPreview
+    ? profileAvatarPreview.innerHTML
+    : "";
+  const profileAvatarInitialFileName = profileAvatarFileName
+    ? profileAvatarFileName.textContent
+    : "";
+  const profileAvatarInitialAltText = profileAvatarPreview
+    ? profileAvatarPreview.querySelector("img")?.alt || "Profile photo preview"
+    : "Profile photo preview";
+
+  function resetProfileAvatarPreview() {
+    if (profileAvatarPreview) {
+      profileAvatarPreview.innerHTML = profileAvatarInitialMarkup;
+    }
+
+    if (profileAvatarInput) {
+      profileAvatarInput.value = "";
+    }
+
+    if (profileAvatarFileName) {
+      profileAvatarFileName.textContent = profileAvatarInitialFileName;
+    }
+
+    if (avatarChangedInput) {
+      avatarChangedInput.value = "false";
+    }
+  }
+
+  if (profileAvatarInput && profileAvatarPreview) {
+    profileAvatarInput.addEventListener("change", function () {
+      const file = this.files && this.files[0] ? this.files[0] : null;
+
+      if (!file) {
+        resetProfileAvatarPreview();
+        return;
+      }
+
+      if (!file.type.startsWith("image/")) {
+        resetProfileAvatarPreview();
+        if (profileAvatarFileName) {
+          profileAvatarFileName.textContent = "Please choose an image file.";
+        }
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function () {
+        const dataUrl = reader.result;
+        profileAvatarPreview.innerHTML = "";
+
+        const previewImage = document.createElement("img");
+        previewImage.src = dataUrl;
+        previewImage.alt = profileAvatarInitialAltText;
+        previewImage.className = "profile-avatar-preview-image";
+        profileAvatarPreview.appendChild(previewImage);
+
+        if (profileAvatarFileName) {
+          profileAvatarFileName.textContent = file.name;
+        }
+
+        if (avatarChangedInput) {
+          avatarChangedInput.value = "true";
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  if (clearProfileAvatarButton) {
+    clearProfileAvatarButton.addEventListener("click", function () {
+      resetProfileAvatarPreview();
+    });
+  }
+
+  passwordToggleButtons.forEach((toggleButton) => {
+    toggleButton.addEventListener("click", function () {
+      const group = this.closest(".form-group");
+      const passwordInput = group?.querySelector("[data-password-field]");
+      if (!passwordInput) return;
+
+      const isHidden = passwordInput.type === "password";
+      passwordInput.type = isHidden ? "text" : "password";
+      this.setAttribute(
+        "aria-label",
+        isHidden ? "Hide password" : "Show password",
+      );
+
+      const icon = this.querySelector("i");
+      if (icon) {
+        icon.classList.toggle("fa-eye", !isHidden);
+        icon.classList.toggle("fa-eye-slash", isHidden);
+      }
+    });
+  });
+
+  if (profileForm && avatarChangedInput) {
+    profileForm.addEventListener("submit", function () {
+      if (avatarChangedInput.value === "true" && profileAvatarFileName) {
+        profileAvatarFileName.textContent =
+          profileAvatarFileName.textContent || "Uploading photo...";
+      }
+    });
   }
 
   function updateStatusToggleLabel(input, checked) {
@@ -317,7 +454,7 @@ document.addEventListener("DOMContentLoaded", function () {
     themeToggleBtn.addEventListener("click", function () {
       const isDark = body.classList.contains("dark-mode");
       const nextTheme = isDark ? "light" : "dark";
-      localStorage.setItem("cis-theme", nextTheme);
+        localStorage.setItem("cis-theme", nextTheme);
       applyTheme(nextTheme);
     });
   }
@@ -740,17 +877,26 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Sidebar collapse
-  function setSidebarCollapsed(collapsed) {
-    if (collapsed) {
-      sidebar.classList.add("collapsed");
-      body.classList.add("sidebar-collapsed");
-    } else {
-      sidebar.classList.remove("collapsed");
-      body.classList.remove("sidebar-collapsed");
-    }
-    const icon = sidebarToggle ? sidebarToggle.querySelector("i") : null;
-    if (icon) {
-      if (collapsed) {
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener("click", function () {
+      if (isMobileViewport()) {
+        const shouldOpen = !sidebar.classList.contains("mobile-open");
+
+        closeProfilePopover();
+        sidebar.classList.toggle("mobile-open", shouldOpen);
+        sidebarOverlay?.classList.toggle("active", shouldOpen);
+        setBodyLocked(shouldOpen);
+        return;
+      }
+
+      closeProfilePopover();
+      sidebar.classList.toggle("collapsed");
+      body.classList.toggle("sidebar-collapsed");
+
+      const icon = this.querySelector("i");
+      if (!icon) return;
+
+      if (sidebar.classList.contains("collapsed")) {
         icon.classList.remove("fa-chevron-left");
         icon.classList.add("fa-chevron-right");
       } else {
@@ -780,9 +926,19 @@ document.addEventListener("DOMContentLoaded", function () {
   // Mobile menu
   if (mobileMenuToggle && sidebar && sidebarOverlay) {
     mobileMenuToggle.addEventListener("click", function () {
+      sidebar.classList.remove("collapsed");
+      body.classList.remove("sidebar-collapsed");
       sidebar.classList.toggle("mobile-open");
       sidebarOverlay.classList.toggle("active");
       setBodyLocked(sidebar.classList.contains("mobile-open"));
+
+      if (sidebarToggle) {
+        const toggleIcon = sidebarToggle.querySelector("i");
+        if (toggleIcon) {
+          toggleIcon.classList.remove("fa-chevron-right");
+          toggleIcon.classList.add("fa-chevron-left");
+        }
+      }
     });
   }
 
@@ -791,18 +947,28 @@ document.addEventListener("DOMContentLoaded", function () {
       sidebar.classList.remove("mobile-open");
       sidebarOverlay.classList.remove("active");
       setBodyLocked(false);
+      closeProfilePopover();
     });
   }
 
-  // Auto-hide alerts
-  const alerts = document.querySelectorAll(".alert-dismissible");
-  alerts.forEach((alert) => {
-    setTimeout(() => {
-      alert.style.opacity = "0";
-      alert.style.transform = "translateY(-10px)";
-      setTimeout(() => alert.remove(), 300);
-    }, 5000);
-  });
+  if (profileCardTrigger && profilePopover) {
+    profileCardTrigger.addEventListener("click", function (e) {
+      e.stopPropagation();
+
+      const isOpen = !profilePopover.hidden;
+      if (isOpen) {
+        closeProfilePopover();
+      } else {
+        openProfilePopover();
+      }
+    });
+
+    profilePopover.addEventListener("click", function (e) {
+      e.stopPropagation();
+    });
+  }
+
+  // Keep dismissible alerts visible until users close them or leave the page.
 
   // Table hover
   const tableRows = document.querySelectorAll(".data-table tbody tr");
@@ -895,9 +1061,17 @@ document.addEventListener("DOMContentLoaded", function () {
   const tooltipTriggers = document.querySelectorAll("[title]");
   tooltipTriggers.forEach((trigger) => {
     trigger.addEventListener("mouseenter", function () {
+      const titleText = this.getAttribute("title") || this.dataset.title;
+      if (!titleText) {
+        return;
+      }
+
+      this.dataset.title = titleText;
+      this.removeAttribute("title");
+
       const tooltip = document.createElement("div");
       tooltip.className = "tooltip";
-      tooltip.textContent = this.getAttribute("title");
+      tooltip.textContent = titleText;
       document.body.appendChild(tooltip);
 
       const rect = this.getBoundingClientRect();
@@ -917,6 +1091,10 @@ document.addEventListener("DOMContentLoaded", function () {
       if (this._tooltip) {
         this._tooltip.remove();
         this._tooltip = null;
+      }
+
+      if (this.dataset.title && !this.getAttribute("title")) {
+        this.setAttribute("title", this.dataset.title);
       }
     });
   });
@@ -940,6 +1118,8 @@ document.addEventListener("DOMContentLoaded", function () {
       ) {
         closeNotifications();
       }
+
+      closeProfilePopover();
     }
 
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
@@ -985,6 +1165,18 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
   updateNavbarStats();
+
+  document.addEventListener("click", function (e) {
+    if (!profilePopover || !profileCardTrigger) return;
+
+    if (
+      !profilePopover.hidden &&
+      !profilePopover.contains(e.target) &&
+      !profileCardTrigger.contains(e.target)
+    ) {
+      closeProfilePopover();
+    }
+  });
 });
 
 // Helper functions

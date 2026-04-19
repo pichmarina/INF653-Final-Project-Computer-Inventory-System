@@ -1,7 +1,13 @@
 const express = require("express");
+const fs = require("fs/promises");
 const router = express.Router();
 const { requireViewAuth } = require("../middleware/authMiddleware");
 const { requireAdminView } = require("../middleware/roleMiddleware");
+const avatarUpload = require("../middleware/avatarUploadMiddleware");
+const {
+  renderProfilePage,
+  updateProfile,
+} = require("../controllers/authController");
 const { renderUsersPage } = require("../controllers/userController");
 const { renderKeysPage } = require("../controllers/apiKeyController");
 const { getDashboardData } = require("../controllers/reportController");
@@ -15,6 +21,26 @@ const {
 const { exportReport } = require("../controllers/reportController");
 const { renderHistoryPage } = require("../controllers/transactionController");
 
+function handleProfileAvatarUpload(req, res, next) {
+  avatarUpload.single("avatar")(req, res, function (error) {
+    if (!error) {
+      next();
+      return;
+    }
+
+    if (req.file?.path) {
+      fs.unlink(req.file.path).catch(() => {});
+    }
+
+    req.query = {
+      ...req.query,
+      error: error.message || "Could not upload the selected profile photo",
+    };
+
+    renderProfilePage(req, res, next);
+  });
+}
+
 router.get("/login", (req, res) => {
   res.render("login", {
     title: "Login",
@@ -22,6 +48,13 @@ router.get("/login", (req, res) => {
 });
 
 router.get("/dashboard", requireViewAuth, getDashboardData);
+router.get("/profile", requireViewAuth, renderProfilePage);
+router.post(
+  "/profile",
+  requireViewAuth,
+  handleProfileAvatarUpload,
+  updateProfile,
+);
 
 router.get("/inventory", requireViewAuth, (req, res) => {
   res.render("inventory", {
