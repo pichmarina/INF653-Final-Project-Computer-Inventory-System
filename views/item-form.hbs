@@ -1,57 +1,204 @@
-<section class="card">
-  <h1>{{#if isEdit}}Edit Item{{else}}Add Item{{/if}}</h1>
-  <p>{{#if isEdit}}Update item information below.{{else}}Enter the item details below.{{/if}}</p>
-  
-  {{#if isEdit}}
-    <p><strong>Editing item ID:</strong> {{itemId}}</p>
-  {{/if}}
+<div class="page-wrapper">
+  <div class="page-header-modern">
+    <div class="page-header-content">
+      <div class="page-header-left">
+        <span class="page-eyebrow">Assets</span>
+        <h1 class="page-heading">{{#if isEdit}}Edit Item{{else}}Add Item{{/if}}</h1>
+        <p class="page-description">
+          {{#if isEdit}}
+            Update the item information below.
+          {{else}}
+            Enter the item details below.
+          {{/if}}
+        </p>
+      </div>
+    </div>
+  </div>
 
-  <form
-    class="form"
-    method="POST"
-    enctype="multipart/form-data"
-    action="{{#if isEdit}}/api/items/{{itemId}}?_method=PUT{{else}}/api/items{{/if}}"
-  >
-    <div class="form-group">
-      <label for="itemId">Item ID</label>
-      <input type="text" id="itemId" name="itemId" placeholder="Enter item ID" />
+  <div class="data-card">
+    <div class="data-card-header">
+      <div class="data-card-header-left">
+        <h3 class="data-card-title">
+          <i class="fas fa-box-open"></i>
+          {{#if isEdit}}Item Details{{else}}New Item Details{{/if}}
+        </h3>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label for="serialNumber">Serial Number</label>
-      <input type="text" id="serialNumber" name="serialNumber" placeholder="Enter serial number" />
-    </div>
+    <div class="data-card-body">
+      {{#if isEdit}}
+        <div class="alert alert-info custom-alert-info">
+          <i class="fas fa-info-circle"></i>
+          <span>Editing item ID: {{itemId}}</span>
+        </div>
+      {{/if}}
 
-    <div class="form-group">
-      <label for="brand">Brand</label>
-      <input type="text" id="brand" name="brand" placeholder="Enter brand" />
-    </div>
+      {{#if formError}}
+        <div class="alert alert-error custom-alert-error">
+          <i class="fas fa-exclamation-circle"></i>
+          <span>{{formError}}</span>
+        </div>
+      {{/if}}
 
-    <div class="form-group">
-      <label for="model">Model</label>
-      <input type="text" id="model" name="model" placeholder="Enter model" />
-    </div>
+      <form
+        class="modern-form"
+        method="POST"
+        enctype="multipart/form-data"
+        action="{{#if isEdit}}/api/items/{{itemId}}?_method=PUT{{else}}/api/items{{/if}}"
+        novalidate
+      >
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="itemId" class="form-label">Item ID</label>
+            <input
+              type="text"
+              id="itemId"
+              name="itemId"
+              class="form-input"
+              placeholder="Enter item ID"
+              value="{{item.itemId}}"
+            />
+          </div>
 
-    <div class="form-group">
-      <label for="category">Category</label>
-      <input type="text" id="category" name="category" placeholder="Enter category" />
-    </div>
+          <div class="form-group">
+            <label for="serialNumber" class="form-label">Serial Number</label>
+            <input
+              type="text"
+              id="serialNumber"
+              name="serialNumber"
+              class="form-input"
+              placeholder="Enter serial number"
+              value="{{item.serialNumber}}"
+              required
+            />
+          </div>
 
-    <div class="form-group">
-      <label for="classification">Classification</label>
-      <input type="text" id="classification" name="classification" placeholder="Computer or Peripheral" />
-    </div>
+          <div class="form-group">
+            <label for="brand" class="form-label">Brand</label>
+            <input
+              type="text"
+              id="brand"
+              name="brand"
+              class="form-input"
+              placeholder="Enter brand"
+              value="{{item.brand}}"
+              required
+            />
+          </div>
 
-    <div class="form-group">
-      <label for="dateAcquired">Date Acquired</label>
-      <input type="date" id="dateAcquired" name="dateAcquired" />
-    </div>
+          <div class="form-group">
+            <label for="model" class="form-label">Model</label>
+            <input
+              type="text"
+              id="model"
+              name="model"
+              class="form-input"
+              placeholder="Enter model"
+              value="{{item.model}}"
+              required
+            />
+          </div>
 
-    <div class="form-group">
-      <label for="document">Upload Document</label>
-      <input type="file" id="document" name="document" />
-    </div>
+          <div class="form-group">
+            <label for="category" class="form-label">Category</label>
+            <input
+              type="text"
+              id="category"
+              name="category"
+              class="form-input"
+              placeholder="Enter category"
+              value="{{item.category}}"
+              required
+            />
+          </div>
 
-    <button type="submit" class="btn">{{#if isEdit}}Update Item{{else}}Create Item{{/if}}</button>
-  </form>
-</section>
+          <div class="form-group">
+            <label for="classification" class="form-label">Classification</label>
+            <select id="classification" name="classification" class="form-input" required>
+              <option value="">Select classification</option>
+              <option value="Computer" {{#if (eq item.classification "Computer")}}selected{{/if}}>Computer</option>
+              <option value="Peripheral" {{#if (eq item.classification "Peripheral")}}selected{{/if}}>Peripheral</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="status" class="form-label">Status</label>
+            <select id="status" name="status" class="form-input" required>
+              <option value="">Select status</option>
+              <option value="Available" {{#if (eq item.status "Available")}}selected{{/if}}>Available</option>
+              <option value="In-Use" {{#if (eq item.status "In-Use")}}selected{{/if}}>In-Use</option>
+              <option value="Maintenance" {{#if (eq item.status "Maintenance")}}selected{{/if}}>Maintenance</option>
+              <option value="Retired" {{#if (eq item.status "Retired")}}selected{{/if}}>Retired</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="dateAcquired" class="form-label">Date Acquired</label>
+            <input
+              type="date"
+              id="dateAcquired"
+              name="dateAcquired"
+              class="form-input"
+              value="{{item.dateAcquired}}"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="document" class="form-label">Upload Document</label>
+            <input
+              type="file"
+              id="document"
+              name="document"
+              class="form-input"
+            />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <a href="/inventory" class="btn btn-outline">Cancel</a>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i>
+            {{#if isEdit}}Update Item{{else}}Create Item{{/if}}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const itemForm = document.querySelector(".modern-form");
+
+  if (itemForm) {
+    itemForm.addEventListener("submit", function (e) {
+      const requiredFields = itemForm.querySelectorAll("[required]");
+
+      requiredFields.forEach((field) => {
+        field.classList.remove("input-error");
+        const oldError = field.parentElement.querySelector(".field-error");
+        if (oldError) oldError.remove();
+      });
+
+      let hasError = false;
+
+      requiredFields.forEach((field) => {
+        const value = field.value.trim();
+
+        if (!value) {
+          hasError = true;
+          field.classList.add("input-error");
+
+          const error = document.createElement("div");
+          error.className = "field-error";
+          error.textContent = "Required";
+          field.parentElement.appendChild(error);
+        }
+      });
+
+      if (hasError) {
+        e.preventDefault();
+      }
+    });
+  }
+</script>

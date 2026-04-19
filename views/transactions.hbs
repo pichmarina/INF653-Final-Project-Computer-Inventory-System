@@ -1,4 +1,4 @@
-<div class="page-wrapper">
+<div class="page-wrapper"> 
   <div class="page-header-modern">
     <div class="page-header-content">
       <div class="page-header-left">
@@ -18,17 +18,68 @@
         </h3>
       </div>
       <div class="dashboard-card-body">
-        <div class="empty-state">
-          <div class="empty-state-icon">
-            <i class="fas fa-sign-out-alt"></i>
+        <form
+          class="modern-form"
+          method="POST"
+          enctype="multipart/form-data"
+          action="/api/transactions/checkout"
+          novalidate
+        >
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="checkoutItemId" class="form-label">Item</label>
+              <select id="checkoutItemId" name="itemId" class="form-input" required>
+                <option value="">Select available item</option>
+                {{#each availableItems}}
+                  <option value="{{this._id}}">
+                    {{this.itemId}} - {{this.brand}} {{this.model}} ({{this.serialNumber}})
+                  </option>
+                {{/each}}
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="checkoutUserId" class="form-label">User</label>
+              <select id="checkoutUserId" name="userId" class="form-input" required>
+                <option value="">Select user</option>
+                {{#each users}}
+                  <option value="{{this._id}}">
+                    {{this.name}} - {{this.email}}
+                  </option>
+                {{/each}}
+              </select>
+            </div>
+
+            <div class="form-group form-group-full">
+              <label for="checkoutDocument" class="form-label">Upload Document *</label>
+              <input
+                type="file"
+                id="checkoutDocument"
+                name="document"
+                class="form-input"
+                data-required-file="true"
+              />
+            </div>
+
+            <div class="form-group form-group-full">
+              <label for="checkoutNotes" class="form-label">Notes (Optional)</label>
+              <textarea
+                id="checkoutNotes"
+                name="notes"
+                class="form-input form-textarea"
+                placeholder="Optional notes"
+                rows="4"
+              ></textarea>
+            </div>
           </div>
-          <h4>Check Out</h4>
-          <p>Assign an available item to a user</p>
-          <button class="btn btn-primary" onclick="alert('Check Out - To be implemented by Person 2')">
-            <i class="fas fa-plus"></i>
-            New Check Out
-          </button>
-        </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-sign-out-alt"></i>
+              Check Out
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -40,18 +91,130 @@
         </h3>
       </div>
       <div class="dashboard-card-body">
-        <div class="empty-state">
-          <div class="empty-state-icon">
-            <i class="fas fa-sign-in-alt"></i>
+        <form
+          class="modern-form"
+          method="POST"
+          enctype="multipart/form-data"
+          action="/api/transactions/checkin"
+          novalidate
+        >
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="checkinItemId" class="form-label">Item</label>
+              <select id="checkinItemId" name="itemId" class="form-input" required>
+                <option value="">Select checked-out item</option>
+                {{#each inUseItems}}
+                  <option value="{{this._id}}">
+                    {{this.itemId}} - {{this.brand}} {{this.model}} ({{this.serialNumber}})
+                  </option>
+                {{/each}}
+              </select>
+            </div>
+
+            <div class="form-group form-group-full">
+              <label for="checkinDocument" class="form-label">Upload Document *</label>
+              <input
+                type="file"
+                id="checkinDocument"
+                name="document"
+                class="form-input"
+                data-required-file="true"
+              />
+            </div>
+
+            <div class="form-group form-group-full">
+              <label for="checkinNotes" class="form-label">Notes (Optional)</label>
+              <textarea
+                id="checkinNotes"
+                name="notes"
+                class="form-input form-textarea"
+                placeholder="Optional notes"
+                rows="4"
+              ></textarea>
+            </div>
           </div>
-          <h4>Check In</h4>
-          <p>Process a returned item</p>
-          <button class="btn btn-primary" onclick="alert('Check In - To be implemented by Person 2')">
-            <i class="fas fa-plus"></i>
-            New Check In
-          </button>
-        </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-sign-in-alt"></i>
+              Check In
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const success = params.get("success");
+
+  if (success) {
+    const message =
+      success === "checkout"
+        ? "Item checked out successfully"
+        : success === "checkin"
+        ? "Item checked in successfully"
+        : "";
+
+    if (message) {
+      const popup = document.createElement("div");
+      popup.textContent = message;
+      popup.className = "success-toast";
+      document.body.appendChild(popup);
+
+      setTimeout(() => {
+        popup.classList.add("show");
+      }, 10);
+
+      setTimeout(() => {
+        popup.classList.remove("show");
+        setTimeout(() => popup.remove(), 300);
+      }, 2500);
+
+      const url = new URL(window.location);
+      url.searchParams.delete("success");
+      window.history.replaceState({}, "", url);
+    }
+  }
+</script>
+
+<script>
+  document.querySelectorAll(".modern-form").forEach((form) => {
+    form.addEventListener("submit", function (e) {
+      let hasError = false;
+
+      form.querySelectorAll(".field-error").forEach((el) => el.remove());
+      form.querySelectorAll(".input-error").forEach((el) => el.classList.remove("input-error"));
+
+      form.querySelectorAll("select[required], input[required], textarea[required]").forEach((field) => {
+        if (!field.value.trim()) {
+          hasError = true;
+          field.classList.add("input-error");
+
+          const error = document.createElement("div");
+          error.className = "field-error";
+          error.textContent = "Required";
+          field.parentElement.appendChild(error);
+        }
+      });
+
+      form.querySelectorAll('[data-required-file="true"]').forEach((field) => {
+        if (!field.files || field.files.length === 0) {
+          hasError = true;
+          field.classList.add("input-error");
+
+          const error = document.createElement("div");
+          error.className = "field-error";
+          error.textContent = "Document is required";
+          field.parentElement.appendChild(error);
+        }
+      });
+
+      if (hasError) {
+        e.preventDefault();
+      }
+    });
+  });
+</script>

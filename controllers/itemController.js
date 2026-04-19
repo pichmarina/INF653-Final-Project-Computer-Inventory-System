@@ -44,13 +44,9 @@ async function createItem(req, res, next) {
       itemData.uploadPath = req.file.path;
     }
 
-    const item = await Item.create(itemData);
+    await Item.create(itemData);
 
-    res.status(201).json({
-      success: true,
-      message: "Item created successfully",
-      data: item,
-    });
+    return res.redirect("/inventory?success=added");
   } catch (error) {
     next(error);
   }
@@ -58,7 +54,7 @@ async function createItem(req, res, next) {
 
 async function updateItem(req, res, next) {
   try {
-    const updateData = req.body; 
+    const updateData = req.body;
 
     if (req.file) {
       updateData.uploadPath = req.file.path;
@@ -80,11 +76,7 @@ async function updateItem(req, res, next) {
       });
     }
 
-    res.json({
-      success: true,
-      message: "Item updated successfully",
-      data: item,
-    });
+    return res.redirect("/inventory?success=updated");
   } catch (error) {
     next(error);
   }
@@ -105,28 +97,27 @@ async function softDeleteItem(req, res, next) {
       });
     }
 
-    res.json({
-      success: true,
-      message: "Item soft deleted",
-      data: item,
-    });
+    return res.redirect("/inventory?success=deleted");
   } catch (error) {
     next(error);
   }
 }
 
-async function renderItemsPage(req, res, next) {
+const renderItemsPage = async (req, res, next) => {
   try {
-    const items = await Item.find({ isDeleted: false }).populate("assignedTo", "name email");
-    res.render("items", {
-      title: "Inventory List",
-      items,
+    const items = await Item.find({ isDeleted: false })
+      .populate("assignedTo", "name email")
+      .lean();
+
+    res.render("inventory", {
+      title: "Inventory Management",
       user: req.user,
+      items,
     });
   } catch (error) {
     next(error);
   }
-}
+};
 
 module.exports = {
   getItems,
