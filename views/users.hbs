@@ -110,11 +110,12 @@
           </div>
         </form>
 
-        <details class="filter-dropdown">
+        <details class="filter-dropdown" id="userFilterDropdown">
           <summary class="btn btn-outline btn-sm filter-trigger-btn">
             <span class="filter-summary-left">
               <i class="fas fa-sliders-h"></i>
               <span>Filter</span>
+              <span class="filter-active-count" id="userFilterActiveCount" hidden>0</span>
             </span>
             <i class="fas fa-chevron-down filter-summary-arrow"></i>
           </summary>
@@ -127,14 +128,14 @@
               </a>
             </div>
 
-            <form method="GET" action="/users" class="filter-form">
+            <form method="GET" action="/users" class="filter-form" id="usersFilterForm">
               <input type="hidden" name="q" value="{{filters.q}}">
 
               <details class="filter-section">
                 <summary class="filter-section-toggle">
                   <span class="filter-section-left">
                     <i class="fas fa-toggle-on"></i>
-                    <span>
+                    <span id="statusFilterLabel">
                       {{#if (eq filters.status "active")}}Active
                       {{else if (eq filters.status "disabled")}}Disabled
                       {{else}}All Statuses
@@ -166,7 +167,7 @@
                 <summary class="filter-section-toggle">
                   <span class="filter-section-left">
                     <i class="fas fa-user-tag"></i>
-                    <span>
+                    <span id="roleFilterLabel">
                       {{#if (eq filters.role "Admin")}}Admin
                       {{else if (eq filters.role "Technician")}}Technician
                       {{else}}All Roles
@@ -229,9 +230,19 @@
               </div>
             </td>
             <td class="table-cell-role">
-              <form action="/api/users/{{_id}}/role?_method=PATCH" method="POST" class="role-form">
+              <form
+                action="/api/users/{{_id}}/role?_method=PATCH"
+                method="POST"
+                class="role-form"
+                data-user-name="{{name}}"
+              >
                 <input type="hidden" name="_method" value="PATCH">
-                <select name="role" class="role-select" onchange="this.form.submit()">
+                <select
+                  name="role"
+                  class="role-select"
+                  data-current-role="{{role}}"
+                  onchange="handleRoleChange(this)"
+                >
                   <option value="Admin" {{#if (eq role 'Admin')}}selected{{/if}}>Admin</option>
                   <option value="Technician" {{#if (eq role 'Technician')}}selected{{/if}}>Technician</option>
                 </select>
@@ -479,17 +490,171 @@
   if (overlay) overlay.addEventListener('click', closeModal);
 
   const userSearch = document.getElementById('userSearch');
-  if (userSearch) {
-    userSearch.addEventListener('input', function() {
-      const searchTerm = this.value.toLowerCase();
-      const rows = document.querySelectorAll('#usersTable tbody tr');
+  const usersToolbarForm = document.querySelector('.users-toolbar-form');
+  const usersFilterForm = document.getElementById('usersFilterForm');
+  const userFilterDropdown = document.getElementById('userFilterDropdown');
+  const filterActiveCount = document.getElementById('userFilterActiveCount');
+  const filterClearLink = document.querySelector('.filter-clear-link');
+  const statusFilterLabel = document.getElementById('statusFilterLabel');
+  const roleFilterLabel = document.getElementById('roleFilterLabel');
+  let pendingRoleChange = null;
 
-      rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(searchTerm) ? '' : 'none';
-      });
+  function selectedRadioValue(form, name) {
+    const checked = form?.querySelector(`input[name="${name}"]:checked`);
+    return checked ? checked.value : 'all';
+  }
+
+  function statusDisplayText(status) {
+    if (status === 'active') return 'Active';
+    if (status === 'disabled') return 'Disabled';
+    return 'All Statuses';
+  }
+
+  function roleDisplayText(role) {
+    if (role === 'Admin') return 'Admin';
+    if (role === 'Technician') return 'Technician';
+    return 'All Roles';
+  }
+
+  function updateFilterSummary() {
+    if (!usersFilterForm) return;
+
+    const status = selectedRadioValue(usersFilterForm, 'status');
+    const role = selectedRadioValue(usersFilterForm, 'role');
+
+    if (statusFilterLabel) {
+      statusFilterLabel.textContent = statusDisplayText(status);
+    }
+
+    if (roleFilterLabel) {
+      roleFilterLabel.textContent = roleDisplayText(role);
+    }
+
+    let activeCount = 0;
+    if (status !== 'all') activeCount += 1;
+    if (role !== 'all') activeCount += 1;
+
+    if (filterActiveCount) {
+      filterActiveCount.textContent = String(activeCount);
+      filterActiveCount.hidden = activeCount === 0;
+    }
+
+    const triggerBtn = userFilterDropdown?.querySelector('.filter-trigger-btn');
+    if (triggerBtn) {
+      triggerBtn.classList.toggle('has-active-filters', activeCount > 0);
+    }
+  }
+
+  if (usersFilterForm) {
+    usersFilterForm.addEventListener('change', updateFilterSummary);
+
+    usersFilterForm.addEventListener('submit', function () {
+      const queryInput = this.querySelector('input[name="q"]');
+      if (queryInput && userSearch) {
+        queryInput.value = userSearch.value.trim();
+      }
     });
   }
+
+  if (filterClearLink) {
+    filterClearLink.addEventListener('click', function (event) {
+      event.preventDefault();
+      const searchQuery = userSearch ? encodeURIComponent(userSearch.value.trim()) : '';
+      window.location.href = `/users?q=${searchQuery}&status=all&role=all`;
+    });
+  }
+
+  if (userSearch && usersToolbarForm) {
+    let searchDebounceTimer = null;
+
+    userSearch.addEventListener('input', function () {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        usersToolbarForm.submit();
+      }, 400);
+    });
+  }
+
+  updateFilterSummary();
+
+  window.handleRoleChange = function (select) {
+    const form = select?.form;
+    if (!form) return;
+
+    const previousRole = select.dataset.currentRole || '';
+    const nextRole = select.value;
+
+    if (!previousRole || previousRole === nextRole) {
+      return;
+    }
+
+    const userName = form.dataset.userName || 'this user';
+    const message = `Change ${userName}'s role from ${previousRole} to ${nextRole}?`;
+
+    pendingRoleChange = {
+      select,
+      previousRole,
+      nextRole,
+      confirmed: false,
+    };
+
+    form.setAttribute('data-confirm-message', message);
+
+    const sharedConfirmModal = document.getElementById('confirmModal');
+    const sharedConfirmAcceptBtn = document.getElementById('acceptConfirmModal');
+
+    if (sharedConfirmModal && sharedConfirmAcceptBtn) {
+      const cleanup = () => {
+        sharedConfirmAcceptBtn.removeEventListener('click', handleConfirmAccept);
+        confirmModalObserver.disconnect();
+      };
+
+      const handleConfirmAccept = () => {
+        if (!pendingRoleChange || pendingRoleChange.select !== select) return;
+
+        pendingRoleChange.confirmed = true;
+        select.dataset.currentRole = nextRole;
+      };
+
+      const confirmModalObserver = new MutationObserver(() => {
+        const isOpen = sharedConfirmModal.classList.contains('active');
+
+        if (isOpen) return;
+
+        if (
+          pendingRoleChange &&
+          pendingRoleChange.select === select &&
+          !pendingRoleChange.confirmed
+        ) {
+          select.value = previousRole;
+          select.dataset.currentRole = previousRole;
+        }
+
+        if (pendingRoleChange && pendingRoleChange.select === select) {
+          pendingRoleChange = null;
+        }
+
+        cleanup();
+      });
+
+      sharedConfirmAcceptBtn.addEventListener('click', handleConfirmAccept);
+      confirmModalObserver.observe(sharedConfirmModal, {
+        attributes: true,
+        attributeFilter: ['class'],
+      });
+    }
+
+    if (typeof form.requestSubmit === 'function') {
+      form.requestSubmit();
+      return;
+    }
+
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+    const shouldContinue = form.dispatchEvent(submitEvent);
+    if (shouldContinue) {
+      form.submit();
+    }
+  };
 
   const userDetailsModal = document.getElementById('userDetailsModal');
   const closeUserDetailsModalBtn = document.getElementById('closeUserDetailsModal');
