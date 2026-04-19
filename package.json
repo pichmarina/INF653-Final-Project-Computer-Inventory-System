@@ -17,12 +17,17 @@
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+<<<<<<< HEAD
     "express-handlebars": "^9.0.1",
+=======
+    "express-handlebars": "^8.0.3",
+>>>>>>> origin/demo
     "express-rate-limit": "^8.3.1",
     "handlebars": "^4.7.9",
     "hbs": "^4.2.0",
 
     "helmet": "^8.1.0",
+    "json2csv": "^6.0.0-alpha.2",
     "jsonwebtoken": "^9.0.3",
     "method-override": "^3.0.0",
     "mongodb": "^7.1.1",

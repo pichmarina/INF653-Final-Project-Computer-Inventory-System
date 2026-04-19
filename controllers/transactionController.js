@@ -143,8 +143,40 @@ async function getItemHistory(req, res, next) {
   }
 }
 
+async function renderHistoryPage(req, res, next) {
+  try {
+    const transactions = await Transaction.find({})
+      .populate("item", "name brand model serialNumber")
+      .populate("user", "name email")
+      .sort({ createdAt: -1 });
+
+    const history = transactions.map(tx => ({
+      date: tx.createdAt ? tx.createdAt.toISOString().slice(0, 10) : "",
+      time: tx.createdAt ? tx.createdAt.toTimeString().slice(0, 5) : "",
+      itemName: tx.item ? `${tx.item.brand || ""} ${tx.item.model || ""}`.trim() || tx.item.name : "Unknown Item",
+      serialNumber: tx.item ? tx.item.serialNumber || "" : "",
+      action: tx.action === "checkout" ? "Checked Out" : "Checked In",
+      actionClass: tx.action === "checkout" ? "badge-warning" : "badge-success",
+      userName: tx.user ? tx.user.name : "Unknown User",
+      userEmail: tx.user ? tx.user.email : "",
+      notes: tx.notes || "",
+      documentPath: tx.documentPath || "",
+    }));
+
+    res.render("history", {
+      title: "Asset History",
+      user: req.user,
+      history,
+      hasHistory: history.length > 0,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   checkoutItem,
   checkinItem,
   getItemHistory,
+  renderHistoryPage,
 };
