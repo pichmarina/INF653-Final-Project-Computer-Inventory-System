@@ -7,10 +7,10 @@
         <p class="page-description">Manage all computer hardware and peripherals in your organization</p>
       </div>
       <div class="page-header-right">
-        <button class="btn btn-primary" onclick="alert('Add Item - To be implemented by Person 2')">
+        <a href="/items/new" class="btn btn-primary">
           <i class="fas fa-plus"></i>
           Add Item
-        </button>
+        </a>
       </div>
     </div>
   </div>
@@ -49,23 +49,83 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td colspan="8" class="table-empty">
-              <div class="empty-state">
-                <div class="empty-state-icon">
-                  <i class="fas fa-boxes"></i>
+          {{#if items.length}}
+            {{#each items}}
+              <tr>
+                <td>{{this.itemId}}</td>
+                <td>{{this.serialNumber}}</td>
+                <td>{{this.model}}</td>
+                <td>{{this.brand}}</td>
+                <td>{{this.category}}</td>
+                <td>{{this.status}}</td>
+                <td>
+                  {{#if this.assignedTo}}
+                    {{this.assignedTo.name}}
+                  {{else}}
+                    —
+                  {{/if}}
+                </td>
+                <td>
+                  <a href="/items/{{this._id}}" class="btn btn-outline btn-sm">View</a>
+                  <a href="/items/{{this._id}}/edit" class="btn btn-outline btn-sm">Edit</a>
+                </td>
+              </tr>
+            {{/each}}
+          {{else}}
+            <tr>
+              <td colspan="8" class="table-empty">
+                <div class="empty-state">
+                  <div class="empty-state-icon">
+                    <i class="fas fa-boxes"></i>
+                  </div>
+                  <h4>No items found</h4>
+                  <p>Inventory items will appear here once added</p>
+                  <a href="/items/new" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Add First Item
+                  </a>
                 </div>
-                <h4>No items found</h4>
-                <p>Inventory items will appear here once added</p>
-                <button class="btn btn-primary" onclick="alert('Add Item - To be implemented by Person 2')">
-                  <i class="fas fa-plus"></i>
-                  Add First Item
-                </button>
-              </div>
-            </td>
-          </tr>
+              </td>
+            </tr>
+          {{/if}}
         </tbody>
       </table>
     </div>
   </div>
 </div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const success = params.get("success");
+
+  if (success) {
+    const message =
+      success === "added"
+        ? "Item added successfully"
+        : success === "updated"
+        ? "Item updated successfully"
+        : success === "deleted"
+        ? "Item deleted successfully"
+        : "";
+
+    if (message) {
+      const popup = document.createElement("div");
+      popup.textContent = message;
+      popup.className = "success-toast";
+      document.body.appendChild(popup);
+
+      setTimeout(() => {
+        popup.classList.add("show");
+      }, 10);
+
+      setTimeout(() => {
+        popup.classList.remove("show");
+        setTimeout(() => popup.remove(), 300);
+      }, 2500);
+
+      const url = new URL(window.location);
+      url.searchParams.delete("success");
+      window.history.replaceState({}, "", url);
+    }
+  }
+</script>

@@ -1,23 +1,69 @@
-<section class="card">
-  <h1>Check In Item</h1>
-  <p>Return an in-use item back to available status.</p>
+<div class="page-wrapper">
+  <div class="page-header-modern">
+    <div class="page-header-content">
+      <div class="page-header-left">
+        <span class="page-eyebrow">Transactions</span>
+        <h1 class="page-heading">Check In Item</h1>
+        <p class="page-description">Return an item that is currently in use.</p>
+      </div>
+    </div>
+  </div>
 
-  <form class="form" method="POST" enctype="multipart/form-data" action="/api/transactions/checkin">
-    <div class="form-group">
-      <label for="itemId">Item ID</label>
-      <input type="text" id="itemId" name="itemId" placeholder="Enter item ID" />
+  <div class="data-card">
+    <div class="data-card-header">
+      <div class="data-card-header-left">
+        <h3 class="data-card-title">
+          <i class="fas fa-arrow-down"></i>
+          Check-In Details
+        </h3>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label for="notes">Notes</label>
-      <input type="text" id="notes" name="notes" placeholder="Enter return notes" />
-    </div>
+    <div class="data-card-body">
+      <form class="modern-form" method="POST" enctype="multipart/form-data" action="/api/transactions/checkin">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="itemId" class="form-label">Item ID</label>
+            <input
+              type="text"
+              id="itemId"
+              name="itemId"
+              class="form-input"
+              placeholder="Enter Mongo item ID"
+              required
+            />
+          </div>
 
-    <div class="form-group">
-      <label for="document">Return Inspection Document</label>
-      <input type="file" id="document" name="document" />
-    </div>
+          <div class="form-group form-group-full">
+            <label for="document" class="form-label">Upload Document</label>
+            <input
+              type="file"
+              id="document"
+              name="document"
+              class="form-input"
+            />
+          </div>
 
-    <button type="submit" class="btn">Check In</button>
-  </form>
-</section>
+          <div class="form-group form-group-full">
+            <label for="notes" class="form-label">Notes</label>
+            <textarea
+              id="notes"
+              name="notes"
+              class="form-input form-textarea"
+              placeholder="Optional notes"
+              rows="4"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <a href="/transactions" class="btn btn-outline">Cancel</a>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-arrow-down"></i>
+            Check In
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

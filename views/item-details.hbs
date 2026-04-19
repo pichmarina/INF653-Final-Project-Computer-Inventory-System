@@ -1,38 +1,138 @@
-<section class="card">
-  <h1>Item Details</h1>
-  <p>Detailed information for the selected inventory item.</p>
+<div class="page-wrapper">
+  <div class="page-header-modern">
+    <div class="page-header-content">
+      <div class="page-header-left">
+        <span class="page-eyebrow">Assets</span>
+        <h1 class="page-heading">Item Details</h1>
+        <p class="page-description">Detailed information for the selected inventory item.</p>
+      </div>
 
-  <div class="grid">
-    <div class="mini-card">
-      <strong>Item ID</strong>
-      <p>{{itemId}}</p>
-    </div>
-    <div class="mini-card">
-      <strong>Brand</strong>
-      <p>Dell</p>
-    </div>
-    <div class="mini-card">
-      <strong>Model</strong>
-      <p>Latitude 5420</p>
-    </div>
-    <div class="mini-card">
-      <strong>Category</strong>
-      <p>Laptop</p>
-    </div>
-    <div class="mini-card">
-      <strong>Status</strong>
-      <p>Available</p>
-    </div>
-    <div class="mini-card">
-      <strong>Assigned To</strong>
-      <p>—</p>
+      <div class="page-header-right">
+        <a href="/items/{{itemId}}/edit" class="btn btn-primary">
+          <i class="fas fa-pen"></i>
+          Edit Item
+        </a>
+      </div>
     </div>
   </div>
 
-  <div style="margin-top: 20px;">
-    <a href="/items/{{itemId}}/edit" class="btn" style="text-decoration: none; display: inline-block;">Edit Item</a>
-  </div>
+  <div class="details-grid">
+    <div class="data-card">
+      <div class="data-card-header">
+        <div class="data-card-header-left">
+          <h3 class="data-card-title">
+            <i class="fas fa-box-open"></i>
+            Item Overview
+          </h3>
+        </div>
+      </div>
 
-  <form method="POST" action="/api/items/{{itemId}}?_method=DELETE" style="margin-top: 12px;">
-    <button type="submit" class="btn">Delete Item</button>
-  </form>
+      <div class="data-card-body">
+        <div class="details-list">
+          <div class="details-row">
+            <span class="details-label">Item ID</span>
+            <span class="details-value">{{item.itemId}}</span>
+          </div>
+
+          <div class="details-row">
+            <span class="details-label">Serial Number</span>
+            <span class="details-value">{{item.serialNumber}}</span>
+          </div>
+
+          <div class="details-row">
+            <span class="details-label">Brand</span>
+            <span class="details-value">{{item.brand}}</span>
+          </div>
+
+          <div class="details-row">
+            <span class="details-label">Model</span>
+            <span class="details-value">{{item.model}}</span>
+          </div>
+
+          <div class="details-row">
+            <span class="details-label">Category</span>
+            <span class="details-value">{{item.category}}</span>
+          </div>
+
+          <div class="details-row">
+            <span class="details-label">Classification</span>
+            <span class="details-value">{{item.classification}}</span>
+          </div>
+
+          <div class="details-row">
+            <span class="details-label">Date Acquired</span>
+            <span class="details-value">{{formatDate item.dateAcquired}}</span>
+          </div>
+
+          <div class="details-row">
+            <span class="details-label">Status</span>
+            <span class="details-value">
+              <span class="status-badge
+                {{#if (eq item.status "Available")}}status-available{{/if}}
+                {{#if (eq item.status "In-Use")}}status-inuse{{/if}}
+                {{#if (eq item.status "Maintenance")}}status-maintenance{{/if}}
+                {{#if (eq item.status "Retired")}}status-retired{{/if}}
+              ">
+                {{item.status}}
+              </span>
+            </span>
+          </div>
+
+          <div class="details-row">
+            <span class="details-label">Assigned To</span>
+            <span class="details-value">
+              {{#if item.assignedTo}}
+                {{item.assignedTo.name}} {{#if item.assignedTo.email}}({{item.assignedTo.email}}){{/if}}
+              {{else}}
+                —
+              {{/if}}
+            </span>
+          </div>
+
+          <div class="details-row">
+            <span class="details-label">Document</span>
+            <span class="details-value">
+              {{#if item.uploadPath}}
+                <a href="/{{item.uploadPath}}" target="_blank" class="btn btn-outline btn-sm">View File</a>
+              {{else}}
+                —
+              {{/if}}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-card">
+      <div class="data-card-header">
+        <div class="data-card-header-left">
+          <h3 class="data-card-title">
+            <i class="fas fa-cogs"></i>
+            Actions
+          </h3>
+        </div>
+      </div>
+
+      <div class="data-card-body">
+        <div class="details-actions">
+          <a href="/items/{{itemId}}/edit" class="btn btn-primary">
+            <i class="fas fa-pen"></i>
+            Edit Item
+          </a>
+
+          <a href="/inventory" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i>
+            Back to Inventory
+          </a>
+
+          <form method="POST" action="/api/items/{{itemId}}?_method=DELETE" onsubmit="return confirm('Delete this item?');">
+            <button type="submit" class="btn btn-danger">
+              <i class="fas fa-trash"></i>
+              Delete Item
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

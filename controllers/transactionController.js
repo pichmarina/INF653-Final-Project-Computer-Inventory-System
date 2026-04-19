@@ -2,46 +2,67 @@ const Item = require("../models/Item");
 const Transaction = require("../models/Transaction");
 const User = require("../models/User");
 
+async function getTransactionPageData(req) {
+  const items = await Item.find({ isDeleted: false }).lean();
+  const users = await User.find({}).lean();
+
+  const availableItems = items.filter((item) => item.status === "Available");
+  const inUseItems = items.filter((item) => item.status === "In-Use");
+
+  return {
+    title: "Check-Out / Check-In",
+    user: req.user,
+    users,
+    availableItems,
+    inUseItems,
+  };
+}
+
 async function checkoutItem(req, res, next) {
   try {
     const { itemId, userId, notes } = req.body;
 
-    const item = await Item.findById(itemId);
-
-    if (!item) {
-      return res.status(404).json({
-        success: false,
-        message: "Item not found",
+    if (!req.file) {
+      const pageData = await getTransactionPageData(req);
+      return res.status(400).render("transactions", {
+        ...pageData,
+        formError: "Upload document is required for check-out.",
       });
     }
 
-    if (item.isDeleted) {
-      return res.status(404).json({
-        success: false,
-        message: "Item not found",
+    const item = await Item.findById(itemId);
+
+    if (!item || item.isDeleted) {
+      const pageData = await getTransactionPageData(req);
+      return res.status(404).render("transactions", {
+        ...pageData,
+        formError: "Item not found.",
       });
     }
 
     if (item.status === "Maintenance" || item.status === "Retired") {
-      return res.status(400).json({
-        success: false,
-        message: "This item cannot be checked out",
+      const pageData = await getTransactionPageData(req);
+      return res.status(400).render("transactions", {
+        ...pageData,
+        formError: "This item cannot be checked out.",
       });
     }
 
     if (item.status !== "Available") {
-      return res.status(400).json({
-        success: false,
-        message: "Item is not available for checkout",
+      const pageData = await getTransactionPageData(req);
+      return res.status(400).render("transactions", {
+        ...pageData,
+        formError: "Item is not available for checkout.",
       });
     }
 
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
+      const pageData = await getTransactionPageData(req);
+      return res.status(404).render("transactions", {
+        ...pageData,
+        formError: "User not found.",
       });
     }
 
@@ -49,20 +70,16 @@ async function checkoutItem(req, res, next) {
     item.assignedTo = userId;
     await item.save();
 
-    const transaction = await Transaction.create({
+    await Transaction.create({
       item: item._id,
       user: userId,
       action: "checkout",
-      documentPath: req.file ? req.file.path : "",
+      documentPath: req.file.path,
       notes,
       checkoutDate: new Date(),
     });
 
-    res.status(201).json({
-      success: true,
-      message: "Item checked out successfully",
-      data: transaction,
-    });
+    return res.redirect("/transactions?success=checkout");
   } catch (error) {
     next(error);
   }
@@ -72,56 +89,56 @@ async function checkinItem(req, res, next) {
   try {
     const { itemId, notes } = req.body;
 
-    const item = await Item.findById(itemId);
-
-    if (!item) {
-      return res.status(404).json({
-        success: false,
-        message: "Item not found",
+    if (!req.file) {
+      const pageData = await getTransactionPageData(req);
+      return res.status(400).render("transactions", {
+        ...pageData,
+        formError: "Upload document is required for check-in.",
       });
     }
 
-    if (item.isDeleted) {
-      return res.status(404).json({
-        success: false,
-        message: "Item not found",
+    const item = await Item.findById(itemId);
+
+    if (!item || item.isDeleted) {
+      const pageData = await getTransactionPageData(req);
+      return res.status(404).render("transactions", {
+        ...pageData,
+        formError: "Item not found.",
       });
     }
 
     if (item.status !== "In-Use") {
-      return res.status(400).json({
-        success: false,
-        message: "Only items currently in use can be checked in",
+      const pageData = await getTransactionPageData(req);
+      return res.status(400).render("transactions", {
+        ...pageData,
+        formError: "Only items currently in use can be checked in.",
       });
     }
 
     const checkedInUser = item.assignedTo;
 
     if (!checkedInUser) {
-      return res.status(400).json({
-        success: false,
-        message: "No assigned user found for this item",
+      const pageData = await getTransactionPageData(req);
+      return res.status(400).render("transactions", {
+        ...pageData,
+        formError: "No assigned user found for this item.",
       });
     }
-    
+
     item.status = "Available";
     item.assignedTo = null;
     await item.save();
 
-    const transaction = await Transaction.create({
+    await Transaction.create({
       item: item._id,
       user: checkedInUser,
       action: "checkin",
-      documentPath: req.file ? req.file.path : "",
+      documentPath: req.file.path,
       notes,
       checkinDate: new Date(),
     });
 
-    res.status(201).json({
-      success: true,
-      message: "Item checked in successfully",
-      data: transaction,
-    });
+    return res.redirect("/transactions?success=checkin");
   } catch (error) {
     next(error);
   }
@@ -150,7 +167,7 @@ async function renderHistoryPage(req, res, next) {
       .populate("user", "name email")
       .sort({ createdAt: -1 });
 
-    const history = transactions.map(tx => ({
+    const history = transactions.map((tx) => ({
       date: tx.createdAt ? tx.createdAt.toISOString().slice(0, 10) : "",
       time: tx.createdAt ? tx.createdAt.toTimeString().slice(0, 5) : "",
       itemName: tx.item ? `${tx.item.brand || ""} ${tx.item.model || ""}`.trim() || tx.item.name : "Unknown Item",
