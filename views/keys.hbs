@@ -276,18 +276,28 @@
     if (!keyValueEl) return;
 
     const keyValue = keyValueEl.textContent;
-    navigator.clipboard.writeText(keyValue).then(() => {
-      const btn = document.querySelector('.copy-btn');
-      if (!btn) return;
+    const btn = document.querySelector('.copy-btn');
+    if (!btn) return;
 
-      const originalHTML = btn.innerHTML;
-      btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-      btn.classList.add('copied');
+    const originalHTML = btn.innerHTML;
 
-      setTimeout(() => {
-        btn.innerHTML = originalHTML;
+    navigator.clipboard.writeText(keyValue)
+      .then(() => {
+        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        btn.classList.add('copied');
+
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+          btn.classList.remove('copied');
+        }, 2000);
+      })
+      .catch(() => {
+        btn.innerHTML = '<i class="fas fa-times"></i> Copy failed';
         btn.classList.remove('copied');
-      }, 2000);
-    });
+
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+        }, 2000);
+      });
   }
 </script>

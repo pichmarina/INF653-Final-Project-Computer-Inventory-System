@@ -11,16 +11,6 @@
           today</p>
       </div>
     </div>
-    <div class="welcome-actions">
-      <a href="/inventory" class="btn btn-primary">
-        <i class="fas fa-boxes"></i>
-        View Inventory
-      </a>
-      <a href="/transactions" class="btn btn-outline">
-        <i class="fas fa-exchange-alt"></i>
-        Check-In/Out
-      </a>
-    </div>
   </div>
 
   <!-- Quick Stats -->
@@ -30,7 +20,7 @@
         <i class="fas fa-boxes"></i>
       </div>
       <div class="stat-card-content">
-        <span class="stat-card-value">{{stats.totalItems}}</span>
+        <span class="stat-card-value" id="totalItems">{{stats.totalItems}}</span>
         <span class="stat-card-label">Total Items</span>
       </div>
     </div>
@@ -39,7 +29,7 @@
         <i class="fas fa-user-check"></i>
       </div>
       <div class="stat-card-content">
-        <span class="stat-card-value">{{stats.deployedItems}}</span>
+        <span class="stat-card-value" id="deployedItems">{{stats.deployedItems}}</span>
         <span class="stat-card-label">In Use</span>
       </div>
     </div>
@@ -48,7 +38,7 @@
         <i class="fas fa-check-circle"></i>
       </div>
       <div class="stat-card-content">
-        <span class="stat-card-value">{{stats.availableItems}}</span>
+        <span class="stat-card-value" id="availableItems">{{stats.availableItems}}</span>
         <span class="stat-card-label">Available</span>
       </div>
     </div>
@@ -57,44 +47,10 @@
         <i class="fas fa-tools"></i>
       </div>
       <div class="stat-card-content">
-        <span class="stat-card-value">{{stats.maintenanceItems}}</span>
+        <span class="stat-card-value" id="maintenanceItems">{{stats.maintenanceItems}}</span>
         <span class="stat-card-label">Maintenance</span>
       </div>
     </div>
-  </div>
-
-  <!-- Recent Activity -->
-  <div class="section-header">
-    <h2 class="section-title">
-      <i class="fas fa-history"></i>
-      Recent Activity
-    </h2>
-  </div>
-  <div class="recent-activity-table-wrapper">
-    <table class="recent-activity-table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Item</th>
-          <th>Action</th>
-          <th>User</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{#each recentActivity}}
-        <tr>
-          <td>{{date}}</td>
-          <td>{{itemName}}</td>
-          <td>{{action}}</td>
-          <td>{{user}}</td>
-          <td>{{status}}</td>
-        </tr>
-        {{else}}
-        <tr><td colspan="5">No recent activity</td></tr>
-        {{/each}}
-      </tbody>
-    </table>
   </div>
 
   <!-- Navigation Cards - Quick Access to All Pages -->

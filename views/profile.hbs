@@ -1,0 +1,230 @@
+<div class="page-wrapper">
+  <div class="page-header-modern">
+    <div class="page-header-content">
+      <div class="page-header-left">
+        <span class="page-eyebrow">Account</span>
+        <h1 class="page-heading">My Profile</h1>
+        <p class="page-description">Review your account data and update your personal settings</p>
+      </div>
+    </div>
+  </div>
+
+  {{#if successMessage}}
+    <div class="alert alert-success alert-dismissible">
+      <i class="fas fa-check-circle"></i>
+      <span>{{successMessage}}</span>
+      <button class="alert-close" onclick="this.parentElement.remove()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  {{/if}}
+
+  {{#if errorMessage}}
+    <div class="alert alert-error alert-dismissible">
+      <i class="fas fa-exclamation-circle"></i>
+      <span>{{errorMessage}}</span>
+      <button class="alert-close" onclick="this.parentElement.remove()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  {{/if}}
+
+  <div class="profile-layout">
+    <section class="profile-hero-card">
+      <div class="profile-hero-main">
+        <div class="profile-avatar-stack">
+          <div class="user-avatar profile-avatar-large" id="profileAvatarPreview">
+            {{#if user.avatarPath}}
+              <img src="{{user.avatarPath}}" alt="{{user.name}}" class="profile-avatar-image">
+            {{else}}
+              {{#if user.name}}
+                {{firstChar user.name}}
+              {{else}}
+                <i class="fas fa-user"></i>
+              {{/if}}
+            {{/if}}
+          </div>
+          <div class="profile-avatar-actions">
+            <input
+              type="file"
+              id="profileAvatarInput"
+              name="avatar"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              class="profile-file-input"
+              form="profileForm"
+            >
+            <div class="profile-file-actions profile-file-actions-top">
+              <label class="btn btn-outline btn-sm profile-avatar-button" for="profileAvatarInput">
+                <i class="fas fa-camera"></i>
+                Choose Photo
+              </label>
+              <button type="button" class="btn btn-outline btn-sm" id="clearProfileAvatarButton">
+                Reset
+              </button>
+              <button type="submit" class="btn btn-primary btn-sm profile-avatar-save" data-save-photo-button form="profileForm">
+                <i class="fas fa-cloud-upload-alt"></i>
+                Save Photo
+              </button>
+            </div>
+            <span class="profile-avatar-hint">JPG, PNG, WEBP, or GIF. Max 5 MB.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-quick-grid">
+        <div class="profile-mini-card">
+          <span class="profile-mini-label">Member since</span>
+          <span class="profile-mini-value">{{formatDate user.createdAt}}</span>
+        </div>
+        <div class="profile-mini-card">
+          <span class="profile-mini-label">Last updated</span>
+          <span class="profile-mini-value">{{formatDate user.updatedAt}}</span>
+        </div>
+        <div class="profile-mini-card">
+          <span class="profile-mini-label">Account role</span>
+          <span class="profile-mini-value">{{user.role}}</span>
+        </div>
+        <div class="profile-mini-card">
+          <span class="profile-mini-label">Status</span>
+          <span class="profile-mini-value">{{#if user.isEnabled}}Enabled{{else}}Disabled{{/if}}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="profile-settings-card data-card">
+      <div class="data-card-header">
+        <div class="data-card-header-left">
+          <h3 class="data-card-title">
+            <i class="fas fa-user-gear"></i>
+            Profile Settings
+          </h3>
+        </div>
+      </div>
+
+      <form
+        action="/profile"
+        method="POST"
+        enctype="multipart/form-data"
+        class="profile-form"
+        id="profileForm"
+        data-confirm-message="Save your profile changes?"
+      >
+        <input type="hidden" name="avatarChanged" id="avatarChanged" value="false">
+
+        <div class="profile-form-section">
+          <h4 class="profile-section-title">Personal details</h4>
+          <p class="profile-section-copy">These are the live account values used across the app.</p>
+
+          <div class="profile-form-grid">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input
+                type="text"
+                name="name"
+                class="form-input {{#if errors.name}}input-error{{/if}}"
+                value="{{formValues.name}}"
+                required
+              >
+              {{#if errors.name}}
+                <span class="form-error">{{errors.name}}</span>
+              {{/if}}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input
+                type="email"
+                name="email"
+                class="form-input {{#if errors.email}}input-error{{/if}}"
+                value="{{formValues.email}}"
+                required
+              >
+              {{#if errors.email}}
+                <span class="form-error">{{errors.email}}</span>
+              {{/if}}
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-form-section">
+          <h4 class="profile-section-title">Security</h4>
+          <p class="profile-section-copy">Use this area to change your password. Leave it blank if you only want to update your profile details or photo.</p>
+
+          <div class="profile-form-grid">
+            <div class="form-group">
+              <label class="form-label">Current Password</label>
+              <div class="input-with-action">
+                <input
+                  type="password"
+                  name="currentPassword"
+                  class="form-input {{#if errors.currentPassword}}input-error{{/if}}"
+                  placeholder="Enter current password"
+                  data-password-field
+                >
+                <button type="button" class="input-action-btn" data-password-toggle aria-label="Show current password">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              {{#if errors.currentPassword}}
+                <span class="form-error">{{errors.currentPassword}}</span>
+              {{/if}}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <div class="input-with-action">
+                <input
+                  type="password"
+                  name="newPassword"
+                  class="form-input {{#if errors.newPassword}}input-error{{/if}}"
+                  placeholder="Minimum 6 characters"
+                  data-password-field
+                >
+                <button type="button" class="input-action-btn" data-password-toggle aria-label="Show new password">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              {{#if errors.newPassword}}
+                <span class="form-error">{{errors.newPassword}}</span>
+              {{/if}}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Confirm New Password</label>
+              <div class="input-with-action">
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  class="form-input {{#if errors.confirmPassword}}input-error{{/if}}"
+                  placeholder="Re-enter new password"
+                  data-password-field
+                >
+                <button type="button" class="input-action-btn" data-password-toggle aria-label="Show confirm password">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              {{#if errors.confirmPassword}}
+                <span class="form-error">{{errors.confirmPassword}}</span>
+              {{/if}}
+            </div>
+          </div>
+
+          <p class="profile-security-note">Passwords are stored securely and can only be changed after verifying your current password.</p>
+        </div>
+
+        <div class="profile-actions">
+          <a href="/dashboard" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i>
+            Back to Dashboard
+          </a>
+          <div class="profile-actions-right">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save"></i>
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </form>
+    </section>
+  </div>
+</div>
