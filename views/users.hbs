@@ -98,7 +98,7 @@
           <input type="hidden" name="role" value="{{filters.role}}">
           <input type="hidden" name="status" value="{{filters.status}}">
 
-          <div class="search-box">
+          <div class="search-input-wrapper">
             <i class="fas fa-search"></i>
             <input
               type="text"
@@ -106,7 +106,11 @@
               name="q"
               placeholder="Search users..."
               value="{{filters.q}}"
+              autocomplete="off"
             >
+            <button type="button" id="clearUserSearch" class="hidden">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
         </form>
 
@@ -564,15 +568,37 @@
     });
   }
 
-  if (userSearch && usersToolbarForm) {
-    let searchDebounceTimer = null;
+  if (userSearch) {
+    const clearUserSearch = document.getElementById('clearUserSearch');
+    const usersTable = document.getElementById('usersTable');
+
+    if (clearUserSearch && userSearch.value) clearUserSearch.classList.remove('hidden');
+
+    function filterUsersTable(term) {
+      if (!usersTable) return;
+      const rows = usersTable.querySelectorAll('tbody tr');
+      rows.forEach(function (row) {
+        row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+      });
+    }
 
     userSearch.addEventListener('input', function () {
-      clearTimeout(searchDebounceTimer);
-      searchDebounceTimer = setTimeout(() => {
-        usersToolbarForm.submit();
-      }, 400);
+      const term = this.value.toLowerCase();
+      if (clearUserSearch) clearUserSearch.classList.toggle('hidden', !this.value);
+      filterUsersTable(term);
     });
+
+    if (clearUserSearch) {
+      clearUserSearch.addEventListener('click', function () {
+        userSearch.value = '';
+        clearUserSearch.classList.add('hidden');
+        filterUsersTable('');
+        userSearch.focus();
+      });
+    }
+
+    // Run filter on load in case search value is pre-filled from URL
+    if (userSearch.value) filterUsersTable(userSearch.value.toLowerCase());
   }
 
   updateFilterSummary();

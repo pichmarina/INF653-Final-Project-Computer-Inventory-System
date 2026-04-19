@@ -105,9 +105,12 @@
         <span class="data-card-count">{{keyCount}} active keys</span>
       </div>
       <div class="data-card-header-right">
-        <div class="search-box">
+        <div class="search-input-wrapper">
           <i class="fas fa-search"></i>
-          <input type="text" id="keySearch" placeholder="Search keys..." />
+          <input type="text" id="keySearch" placeholder="Search keys..." autocomplete="off">
+          <button type="button" id="clearKeySearch" class="hidden">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
       </div>
     </div>
@@ -259,6 +262,7 @@
   if (overlay) overlay.addEventListener('click', closeModal);
 
   const keySearch = document.getElementById('keySearch');
+  const clearKeySearch = document.getElementById('clearKeySearch');
   if (keySearch) {
     keySearch.addEventListener('input', function () {
       const searchTerm = this.value.toLowerCase();
@@ -268,7 +272,16 @@
         const text = row.textContent.toLowerCase();
         row.style.display = text.includes(searchTerm) ? '' : 'none';
       });
+      if (clearKeySearch) clearKeySearch.classList.toggle('hidden', !this.value);
     });
+
+    if (clearKeySearch) {
+      clearKeySearch.addEventListener('click', function () {
+        keySearch.value = '';
+        keySearch.dispatchEvent(new Event('input'));
+        keySearch.focus();
+      });
+    }
   }
 
   function copyApiKey() {

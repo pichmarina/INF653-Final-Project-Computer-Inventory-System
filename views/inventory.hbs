@@ -24,9 +24,12 @@
         </h3>
       </div>
       <div class="data-card-header-right">
-        <div class="search-box">
+        <div class="search-input-wrapper">
           <i class="fas fa-search"></i>
-          <input type="text" placeholder="Search items...">
+          <input type="text" id="inventorySearch" placeholder="Search items..." autocomplete="off">
+          <button type="button" id="clearInventorySearch" class="hidden">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
         <button class="btn btn-outline btn-sm">
           <i class="fas fa-filter"></i>
@@ -69,3 +72,25 @@
     </div>
   </div>
 </div>
+
+<script>
+  var invSearch = document.getElementById('inventorySearch');
+  var clearInvSearch = document.getElementById('clearInventorySearch');
+  var invTable = document.querySelector('.data-table');
+  if (invSearch && invTable) {
+    invSearch.addEventListener('input', function () {
+      var term = this.value.toLowerCase();
+      invTable.querySelectorAll('tbody tr').forEach(function (row) {
+        row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+      });
+      if (clearInvSearch) clearInvSearch.classList.toggle('hidden', !this.value);
+    });
+    if (clearInvSearch) {
+      clearInvSearch.addEventListener('click', function () {
+        invSearch.value = '';
+        invSearch.dispatchEvent(new Event('input'));
+        invSearch.focus();
+      });
+    }
+  }
+</script>
