@@ -454,7 +454,7 @@ document.addEventListener("DOMContentLoaded", function () {
     themeToggleBtn.addEventListener("click", function () {
       const isDark = body.classList.contains("dark-mode");
       const nextTheme = isDark ? "light" : "dark";
-        localStorage.setItem("cis-theme", nextTheme);
+      localStorage.setItem("cis-theme", nextTheme);
       applyTheme(nextTheme);
     });
   }
@@ -877,6 +877,24 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Sidebar collapse
+  function setSidebarCollapsed(collapsed) {
+    if (!sidebar) return;
+
+    sidebar.classList.toggle("collapsed", collapsed);
+    body.classList.toggle("sidebar-collapsed", collapsed);
+
+    const icon = sidebarToggle?.querySelector("i");
+    if (!icon) return;
+
+    if (collapsed) {
+      icon.classList.remove("fa-chevron-left");
+      icon.classList.add("fa-chevron-right");
+    } else {
+      icon.classList.remove("fa-chevron-right");
+      icon.classList.add("fa-chevron-left");
+    }
+  }
+
   if (sidebarToggle && sidebar) {
     sidebarToggle.addEventListener("click", function () {
       if (isMobileViewport()) {
@@ -890,24 +908,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       closeProfilePopover();
-      sidebar.classList.toggle("collapsed");
-      body.classList.toggle("sidebar-collapsed");
-
-      const icon = this.querySelector("i");
-      if (!icon) return;
-
-      if (sidebar.classList.contains("collapsed")) {
-        icon.classList.remove("fa-chevron-left");
-        icon.classList.add("fa-chevron-right");
-      } else {
-        icon.classList.remove("fa-chevron-right");
-        icon.classList.add("fa-chevron-left");
-      }
-    }
-  }
-
-  if (sidebarToggle && sidebar) {
-    sidebarToggle.addEventListener("click", function () {
       setSidebarCollapsed(!sidebar.classList.contains("collapsed"));
     });
   }
@@ -1080,7 +1080,10 @@ document.addEventListener("DOMContentLoaded", function () {
         ttTop = rect.bottom + 8;
       }
       let ttLeft = rect.left + rect.width / 2 - tooltip.offsetWidth / 2;
-      ttLeft = Math.max(8, Math.min(ttLeft, window.innerWidth - tooltip.offsetWidth - 8));
+      ttLeft = Math.max(
+        8,
+        Math.min(ttLeft, window.innerWidth - tooltip.offsetWidth - 8),
+      );
       tooltip.style.left = ttLeft + "px";
       tooltip.style.top = ttTop + "px";
 
@@ -1156,7 +1159,9 @@ document.addEventListener("DOMContentLoaded", function () {
       if (navMaintenance) navMaintenance.textContent = maintenance ?? 0;
       const mobileAvailable = document.getElementById("mobileAvailableCount");
       const mobileInUse = document.getElementById("mobileInUseCount");
-      const mobileMaintenance = document.getElementById("mobileMaintenanceCount");
+      const mobileMaintenance = document.getElementById(
+        "mobileMaintenanceCount",
+      );
       if (mobileAvailable) mobileAvailable.textContent = available ?? 0;
       if (mobileInUse) mobileInUse.textContent = deployed ?? 0;
       if (mobileMaintenance) mobileMaintenance.textContent = maintenance ?? 0;
