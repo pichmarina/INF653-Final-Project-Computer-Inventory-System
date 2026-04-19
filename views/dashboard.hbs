@@ -11,16 +11,6 @@
           today</p>
       </div>
     </div>
-    <div class="welcome-actions">
-      <a href="/inventory" class="btn btn-primary">
-        <i class="fas fa-boxes"></i>
-        View Inventory
-      </a>
-      <a href="/transactions" class="btn btn-outline">
-        <i class="fas fa-exchange-alt"></i>
-        Check-In/Out
-      </a>
-    </div>
   </div>
 
   <!-- Quick Stats -->
@@ -30,7 +20,7 @@
         <i class="fas fa-boxes"></i>
       </div>
       <div class="stat-card-content">
-        <span class="stat-card-value" id="totalItems">-</span>
+        <span class="stat-card-value" id="totalItems">{{stats.totalItems}}</span>
         <span class="stat-card-label">Total Items</span>
       </div>
     </div>
@@ -39,7 +29,7 @@
         <i class="fas fa-user-check"></i>
       </div>
       <div class="stat-card-content">
-        <span class="stat-card-value" id="deployedItems">-</span>
+        <span class="stat-card-value" id="deployedItems">{{stats.deployedItems}}</span>
         <span class="stat-card-label">In Use</span>
       </div>
     </div>
@@ -48,7 +38,7 @@
         <i class="fas fa-check-circle"></i>
       </div>
       <div class="stat-card-content">
-        <span class="stat-card-value" id="availableItems">-</span>
+        <span class="stat-card-value" id="availableItems">{{stats.availableItems}}</span>
         <span class="stat-card-label">Available</span>
       </div>
     </div>
@@ -57,7 +47,7 @@
         <i class="fas fa-tools"></i>
       </div>
       <div class="stat-card-content">
-        <span class="stat-card-value" id="maintenanceItems">-</span>
+        <span class="stat-card-value" id="maintenanceItems">{{stats.maintenanceItems}}</span>
         <span class="stat-card-label">Maintenance</span>
       </div>
     </div>

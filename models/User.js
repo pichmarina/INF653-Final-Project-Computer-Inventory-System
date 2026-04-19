@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema(
       enum: ["Admin", "Technician"],
       default: "Technician",
     },
+    avatarPath: {
+      type: String,
+      default: null,
+    },
     isEnabled: {
       type: Boolean,
       default: true,
@@ -32,7 +36,7 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("User", userSchema);

@@ -115,10 +115,24 @@ async function softDeleteItem(req, res, next) {
   }
 }
 
+async function renderItemsPage(req, res, next) {
+  try {
+    const items = await Item.find({ isDeleted: false }).populate("assignedTo", "name email");
+    res.render("items", {
+      title: "Inventory List",
+      items,
+      user: req.user,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getItems,
   getItemById,
   createItem,
   updateItem,
   softDeleteItem,
+  renderItemsPage,
 };
