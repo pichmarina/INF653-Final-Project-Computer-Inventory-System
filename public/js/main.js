@@ -89,6 +89,10 @@ document.addEventListener("DOMContentLoaded", function () {
     body.style.overflow = locked ? "hidden" : "";
   }
 
+  function isMobileViewport() {
+    return window.matchMedia("(max-width: 1023px)").matches;
+  }
+
   function closeProfilePopover() {
     if (!profilePopover || !profileCardTrigger) return;
 
@@ -867,6 +871,17 @@ document.addEventListener("DOMContentLoaded", function () {
   // Sidebar collapse
   if (sidebarToggle && sidebar) {
     sidebarToggle.addEventListener("click", function () {
+      if (isMobileViewport()) {
+        const shouldOpen = !sidebar.classList.contains("mobile-open");
+
+        closeProfilePopover();
+        sidebar.classList.toggle("mobile-open", shouldOpen);
+        sidebarOverlay?.classList.toggle("active", shouldOpen);
+        setBodyLocked(shouldOpen);
+        return;
+      }
+
+      closeProfilePopover();
       sidebar.classList.toggle("collapsed");
       body.classList.toggle("sidebar-collapsed");
 
@@ -886,9 +901,19 @@ document.addEventListener("DOMContentLoaded", function () {
   // Mobile menu
   if (mobileMenuToggle && sidebar && sidebarOverlay) {
     mobileMenuToggle.addEventListener("click", function () {
+      sidebar.classList.remove("collapsed");
+      body.classList.remove("sidebar-collapsed");
       sidebar.classList.toggle("mobile-open");
       sidebarOverlay.classList.toggle("active");
       setBodyLocked(sidebar.classList.contains("mobile-open"));
+
+      if (sidebarToggle) {
+        const toggleIcon = sidebarToggle.querySelector("i");
+        if (toggleIcon) {
+          toggleIcon.classList.remove("fa-chevron-right");
+          toggleIcon.classList.add("fa-chevron-left");
+        }
+      }
     });
   }
 
