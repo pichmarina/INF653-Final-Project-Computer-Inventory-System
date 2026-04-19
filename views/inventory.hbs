@@ -57,7 +57,16 @@
                 <td>{{this.model}}</td>
                 <td>{{this.brand}}</td>
                 <td>{{this.category}}</td>
-                <td>{{this.status}}</td>
+                <td>
+                  <span class="status-badge
+                    {{#if (eq this.status "Available")}}status-available{{/if}}
+                    {{#if (eq this.status "In-Use")}}status-inuse{{/if}}
+                    {{#if (eq this.status "Maintenance")}}status-maintenance{{/if}}
+                    {{#if (eq this.status "Retired")}}status-retired{{/if}}
+                  ">
+                    {{this.status}}
+                  </span>
+                </td>
                 <td>
                   {{#if this.assignedTo}}
                     {{this.assignedTo.name}}

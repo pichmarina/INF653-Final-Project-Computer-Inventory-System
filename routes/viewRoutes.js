@@ -71,7 +71,7 @@ router.get("/items/new", requireViewAuth, (req, res) => {
     title: "Add Item",
     isEdit: false,
     user: req.user,
-    item: {},
+    item: { status: "Available" },
   });
 });
 

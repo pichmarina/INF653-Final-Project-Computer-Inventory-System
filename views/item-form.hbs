@@ -122,6 +122,17 @@
           </div>
 
           <div class="form-group">
+            <label for="status" class="form-label">Status</label>
+            <select id="status" name="status" class="form-input" required>
+              <option value="">Select status</option>
+              <option value="Available" {{#if (eq item.status "Available")}}selected{{/if}}>Available</option>
+              <option value="In-Use" {{#if (eq item.status "In-Use")}}selected{{/if}}>In-Use</option>
+              <option value="Maintenance" {{#if (eq item.status "Maintenance")}}selected{{/if}}>Maintenance</option>
+              <option value="Retired" {{#if (eq item.status "Retired")}}selected{{/if}}>Retired</option>
+            </select>
+          </div>
+
+          <div class="form-group">
             <label for="dateAcquired" class="form-label">Date Acquired</label>
             <input
               type="date"
