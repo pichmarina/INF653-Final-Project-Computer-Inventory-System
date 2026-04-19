@@ -109,8 +109,8 @@
               Back to Inventory
             </a>
 
-            <form method="POST" action="/api/items/{{itemId}}?_method=DELETE" onsubmit="return confirm('Delete this item?');">
-              <button type="submit" class="btn btn-danger">
+            <form id="deleteItemForm" method="POST" action="/api/items/{{itemId}}?_method=DELETE">
+              <button type="button" id="deleteItemBtn" class="btn btn-danger">
                 <i class="fas fa-trash"></i>
                 Delete Item
               </button>
@@ -118,7 +118,6 @@
           </div>
         </div>
 
-        <!-- EDIT MODE -->
         <div id="editMode" style="display:none;">
           {{#if formError}}
             <div class="alert alert-error custom-alert-error">
@@ -251,58 +250,107 @@
 </div>
 
 <script>
-  const editToggleBtn = document.getElementById("editToggleBtn");
-  const cancelEditBtn = document.getElementById("cancelEditBtn");
-  const viewMode = document.getElementById("viewMode");
-  const editMode = document.getElementById("editMode");
+  document.addEventListener("DOMContentLoaded", () => {
+    const editToggleBtn = document.getElementById("editToggleBtn");
+    const cancelEditBtn = document.getElementById("cancelEditBtn");
+    const viewMode = document.getElementById("viewMode");
+    const editMode = document.getElementById("editMode");
 
-  if (editToggleBtn && viewMode && editMode) {
-    editToggleBtn.addEventListener("click", () => {
-      viewMode.style.display = "none";
-      editMode.style.display = "block";
-      editToggleBtn.style.display = "none";
-    });
-  }
-
-  if (cancelEditBtn && viewMode && editMode && editToggleBtn) {
-    cancelEditBtn.addEventListener("click", () => {
-      editMode.style.display = "none";
-      viewMode.style.display = "block";
-      editToggleBtn.style.display = "inline-flex";
-    });
-  }
-
-  const detailEditForm = document.querySelector("#editMode .modern-form");
-
-  if (detailEditForm) {
-    detailEditForm.addEventListener("submit", function (e) {
-      const requiredFields = detailEditForm.querySelectorAll("[required]");
-
-      requiredFields.forEach((field) => {
-        field.classList.remove("input-error");
-        const oldError = field.parentElement.querySelector(".field-error");
-        if (oldError) oldError.remove();
+    if (editToggleBtn && viewMode && editMode) {
+      editToggleBtn.addEventListener("click", () => {
+        viewMode.style.display = "none";
+        editMode.style.display = "block";
+        editToggleBtn.style.display = "none";
       });
+    }
 
-      let hasError = false;
+    if (cancelEditBtn && viewMode && editMode && editToggleBtn) {
+      cancelEditBtn.addEventListener("click", () => {
+        editMode.style.display = "none";
+        viewMode.style.display = "block";
+        editToggleBtn.style.display = "inline-flex";
+      });
+    }
 
-      requiredFields.forEach((field) => {
-        const value = field.value.trim();
+    const detailEditForm = document.querySelector("#editMode .modern-form");
 
-        if (!value) {
-          hasError = true;
-          field.classList.add("input-error");
+    if (detailEditForm) {
+      detailEditForm.addEventListener("submit", function (e) {
+        const requiredFields = detailEditForm.querySelectorAll("[required]");
 
-          const error = document.createElement("div");
-          error.className = "field-error";
-          error.textContent = "Required";
-          field.parentElement.appendChild(error);
+        requiredFields.forEach((field) => {
+          field.classList.remove("input-error");
+          const oldError = field.parentElement.querySelector(".field-error");
+          if (oldError) oldError.remove();
+        });
+
+        let hasError = false;
+
+        requiredFields.forEach((field) => {
+          const value = field.value.trim();
+
+          if (!value) {
+            hasError = true;
+            field.classList.add("input-error");
+
+            const error = document.createElement("div");
+            error.className = "field-error";
+            error.textContent = "Required";
+            field.parentElement.appendChild(error);
+          }
+        });
+
+        if (hasError) {
+          e.preventDefault();
         }
       });
+    }
 
-      if (hasError) {
-        e.preventDefault();
+    const deleteItemBtn = document.getElementById("deleteItemBtn");
+    const deleteItemForm = document.getElementById("deleteItemForm");
+
+    const confirmModal = document.getElementById("confirmModal");
+    const confirmModalMessage = document.getElementById("confirmModalMessage");
+    const cancelConfirmModal = document.getElementById("cancelConfirmModal");
+    const acceptConfirmModal = document.getElementById("acceptConfirmModal");
+    const closeConfirmModal = document.getElementById("closeConfirmModal");
+    const confirmModalOverlay = document.getElementById("confirmModalOverlay");
+
+    if (
+      deleteItemBtn &&
+      deleteItemForm &&
+      confirmModal &&
+      confirmModalMessage &&
+      cancelConfirmModal &&
+      acceptConfirmModal &&
+      closeConfirmModal
+    ) {
+      let pendingAction = null;
+
+      const openModal = () => {
+        confirmModalMessage.textContent = "Are you sure you want to delete this item?";
+        confirmModal.style.display = "flex";
+        pendingAction = () => deleteItemForm.submit();
+      };
+
+      const closeModal = () => {
+        confirmModal.style.display = "none";
+        pendingAction = null;
+      };
+
+      deleteItemBtn.addEventListener("click", openModal);
+      cancelConfirmModal.addEventListener("click", closeModal);
+      closeConfirmModal.addEventListener("click", closeModal);
+
+      if (confirmModalOverlay) {
+        confirmModalOverlay.addEventListener("click", closeModal);
       }
-    });
-  }
+
+      acceptConfirmModal.addEventListener("click", () => {
+        if (pendingAction) {
+          pendingAction();
+        }
+      });
+    }
+  });
 </script>
