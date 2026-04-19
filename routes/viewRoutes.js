@@ -121,6 +121,10 @@ router.get("/items/:id", requireViewAuth, async (req, res, next) => {
       });
     }
 
+    if (item.dateAcquired) {
+      item.dateAcquired = new Date(item.dateAcquired).toISOString().split("T")[0];
+    }
+
     res.render("item-details", {
       title: "Item Details",
       itemId: req.params.id,
