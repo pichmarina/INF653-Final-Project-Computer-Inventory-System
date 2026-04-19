@@ -446,7 +446,7 @@ document.addEventListener("DOMContentLoaded", function () {
     themeToggleBtn.addEventListener("click", function () {
       const isDark = body.classList.contains("dark-mode");
       const nextTheme = isDark ? "light" : "dark";
-      localStorage.setItem("cis-theme", nextTheme);
+        localStorage.setItem("cis-theme", nextTheme);
       applyTheme(nextTheme);
     });
   }
@@ -943,15 +943,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Auto-hide alerts
-  const alerts = document.querySelectorAll(".alert-dismissible");
-  alerts.forEach((alert) => {
-    setTimeout(() => {
-      alert.style.opacity = "0";
-      alert.style.transform = "translateY(-10px)";
-      setTimeout(() => alert.remove(), 300);
-    }, 5000);
-  });
+  // Keep dismissible alerts visible until users close them or leave the page.
 
   // Table hover
   const tableRows = document.querySelectorAll(".data-table tbody tr");
@@ -1044,9 +1036,17 @@ document.addEventListener("DOMContentLoaded", function () {
   const tooltipTriggers = document.querySelectorAll("[title]");
   tooltipTriggers.forEach((trigger) => {
     trigger.addEventListener("mouseenter", function () {
+      const titleText = this.getAttribute("title") || this.dataset.title;
+      if (!titleText) {
+        return;
+      }
+
+      this.dataset.title = titleText;
+      this.removeAttribute("title");
+
       const tooltip = document.createElement("div");
       tooltip.className = "tooltip";
-      tooltip.textContent = this.getAttribute("title");
+      tooltip.textContent = titleText;
       document.body.appendChild(tooltip);
 
       const rect = this.getBoundingClientRect();
@@ -1061,6 +1061,10 @@ document.addEventListener("DOMContentLoaded", function () {
       if (this._tooltip) {
         this._tooltip.remove();
         this._tooltip = null;
+      }
+
+      if (this.dataset.title && !this.getAttribute("title")) {
+        this.setAttribute("title", this.dataset.title);
       }
     });
   });

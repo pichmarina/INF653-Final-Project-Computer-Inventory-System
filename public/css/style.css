@@ -288,6 +288,34 @@ body.dark-mode .copy-btn {
   color: white;
 }
 
+body.dark-mode .alert-key {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.14) 0%,
+    rgba(146, 64, 14, 0.1) 100%
+  );
+  border-color: rgba(245, 158, 11, 0.35);
+  color: var(--text-primary);
+}
+
+body.dark-mode .alert-key-header {
+  color: #fbbf24;
+}
+
+body.dark-mode .alert-key-message {
+  color: var(--text-secondary);
+}
+
+body.dark-mode .alert-key .alert-close {
+  color: var(--text-muted);
+  opacity: 0.9;
+}
+
+body.dark-mode .alert-key .alert-close:hover {
+  color: var(--text-primary);
+  background: rgba(148, 163, 184, 0.16);
+}
+
 /* Reset & Base */
 *,
 *::before,
@@ -3653,6 +3681,13 @@ body.dark-mode .welcome-section {
   text-overflow: ellipsis;
 }
 
+body.dark-mode .tooltip {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.45);
+}
+
 /* ========================================
    Skeleton Loading
 ======================================== */
@@ -5548,4 +5583,52 @@ body.dark-mode .action-btn:hover {
   background: #fff !important;
   border-radius: 20px !important;
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22) !important;
+}
+
+body.dark-mode #confirmModal .modal-container,
+body.dark-mode #userDetailsModal .modal-container,
+body.dark-mode #addUserModal .modal-container {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.55) !important;
+}
+
+body.dark-mode #confirmModal .modal-header,
+body.dark-mode #userDetailsModal .modal-header,
+body.dark-mode #addUserModal .modal-header {
+  border-bottom-color: var(--border-color) !important;
+}
+
+body.dark-mode #confirmModal .modal-body,
+body.dark-mode #userDetailsModal .modal-body,
+body.dark-mode #addUserModal .modal-body {
+  background: var(--bg-card) !important;
+}
+
+body.dark-mode #confirmModal .modal-footer,
+body.dark-mode #addUserModal .modal-footer {
+  background: var(--gray-50) !important;
+  border-top-color: var(--border-color) !important;
+}
+
+body.dark-mode #confirmModal .modal-title,
+body.dark-mode #userDetailsModal .modal-title,
+body.dark-mode #addUserModal .modal-title,
+body.dark-mode #userDetailsModal .form-label,
+body.dark-mode #addUserModal .form-label,
+body.dark-mode #confirmModalMessage {
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode #confirmModal .modal-close,
+body.dark-mode #userDetailsModal .modal-close,
+body.dark-mode #addUserModal .modal-close {
+  color: var(--text-muted) !important;
+}
+
+body.dark-mode #confirmModal .modal-close:hover,
+body.dark-mode #userDetailsModal .modal-close:hover,
+body.dark-mode #addUserModal .modal-close:hover {
+  background: var(--gray-100) !important;
+  color: var(--text-primary) !important;
 }
