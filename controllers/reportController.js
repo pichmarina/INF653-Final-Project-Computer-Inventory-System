@@ -11,12 +11,14 @@ async function getSummaryReport(req, res, next) {
       status: "In-Use",
     });
 
+    const maintenance = await Item.countDocuments({ isDeleted: false, status: "Maintenance" });
     res.json({
       success: true,
       data: {
         total,
         deployed,
         available: total - deployed,
+        maintenance,
       },
     });
   } catch (error) {
@@ -117,10 +119,11 @@ async function renderAssetsByUserReportPage(req, res, next) {
 async function getDashboardData(req, res, next) {
   try {
     // Stats
-    const [totalItems, deployedItems, availableItems, totalUsers] = await Promise.all([
+    const [totalItems, deployedItems, availableItems, maintenanceItems, totalUsers] = await Promise.all([
       Item.countDocuments({ isDeleted: false }),
       Item.countDocuments({ isDeleted: false, status: "In-Use" }),
       Item.countDocuments({ isDeleted: false, status: "Available" }),
+      Item.countDocuments({ isDeleted: false, status: "Maintenance" }),
       User.countDocuments({ isDeleted: false }),
     ]);
 
@@ -161,11 +164,14 @@ async function getDashboardData(req, res, next) {
 
     res.render("dashboard", {
       title: "Dashboard",
+      user: req.user,
+      displayName: req.user?.name || "User",
       stats: {
         totalUsers,
         totalItems,
         availableItems,
         deployedItems,
+        maintenanceItems,
       },
       quickLinks,
       recentActivity: activity,
