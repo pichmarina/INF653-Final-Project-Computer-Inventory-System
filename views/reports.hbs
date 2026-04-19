@@ -9,284 +9,162 @@
     </div>
   </div>
 
-  <div class="dashboard-grid">
-    <!-- Inventory Status Card -->
-    <div class="dashboard-card">
-      <div class="dashboard-card-header">
-        <h3 class="dashboard-card-title">
-          <i class="fas fa-chart-pie"></i>
-          Inventory Status
-        </h3>
-      </div>
-      <div class="dashboard-card-body">
-        <div class="empty-state">
-          <div class="empty-state-icon">
-            <i class="fas fa-chart-pie"></i>
-          </div>
-          <h4>Inventory Summary</h4>
-          <p>View total vs deployed assets</p>
-          <button class="btn btn-primary" id="openSummaryModal">
-            <i class="fas fa-eye"></i>
-            View Report
-          </button>
-        </div>
-      </div>
-    </div>
+  <!-- Accordion Sections -->
+  <div class="report-accordion">
 
-    <!-- Asset Aging Card -->
-    <div class="dashboard-card">
-      <div class="dashboard-card-header">
-        <h3 class="dashboard-card-title">
-          <i class="fas fa-clock"></i>
-          Asset Aging
-        </h3>
-      </div>
-      <div class="dashboard-card-body">
-        <div class="empty-state">
-          <div class="empty-state-icon">
-            <i class="fas fa-clock"></i>
-          </div>
-          <h4>Aging Report</h4>
-          <p>Items older than 3 years</p>
-          <button class="btn btn-primary" id="openAgingModal">
-            <i class="fas fa-eye"></i>
-            View Report
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Assets by User Card -->
-    <div class="dashboard-card">
-      <div class="dashboard-card-header">
-        <h3 class="dashboard-card-title">
-          <i class="fas fa-user-tag"></i>
-          Assets by User
-        </h3>
-      </div>
-      <div class="dashboard-card-body">
-        <div class="empty-state">
-          <div class="empty-state-icon">
-            <i class="fas fa-user-tag"></i>
-          </div>
-          <h4>User Assignment</h4>
-          <p>View assets assigned to each user</p>
-          <button class="btn btn-primary" id="openByUserModal">
-            <i class="fas fa-eye"></i>
-            View Report
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Export Data Card -->
-    <div class="dashboard-card">
-      <div class="dashboard-card-header">
-        <h3 class="dashboard-card-title">
-          <i class="fas fa-file-export"></i>
-          Export Data
-        </h3>
-      </div>
-      <div class="dashboard-card-body">
-        <div class="empty-state">
-          <div class="empty-state-icon">
-            <i class="fas fa-file-export"></i>
-          </div>
-          <h4>Export Reports</h4>
-          <p>Download reports in various formats</p>
-          <button class="btn btn-primary" id="openExportModal">
-            <i class="fas fa-download"></i>
-            Export
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Inventory Summary Modal -->
-  <div class="modal report-modal" id="summaryModal" style="display:none;">
-    <div class="modal-overlay" data-close="summaryModal"></div>
-    <div class="modal-container modal-lg">
-      <div class="modal-header">
-        <h3 class="modal-title">
+    <!-- Inventory Summary -->
+    <div class="report-section" id="section-summary">
+      <button class="report-toggle-btn" type="button" aria-expanded="true" data-target="body-summary">
+        <span class="report-section-title">
           <i class="fas fa-chart-pie"></i>
           Inventory Summary
-        </h3>
-        <button class="modal-close" data-close="summaryModal" type="button">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="modal-body">
-        <table class="data-table" style="width:100%;">
-          <thead>
-            <tr>
-              <th>Metric</th>
-              <th>Count</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td>Total Items</td><td>{{summary.total}}</td></tr>
-            <tr><td>Deployed (In Use)</td><td>{{summary.deployed}}</td></tr>
-            <tr><td>Available</td><td>{{summary.available}}</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" data-close="summaryModal" type="button">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Asset Aging Modal -->
-  <div class="modal report-modal" id="agingModal" style="display:none;">
-    <div class="modal-overlay" data-close="agingModal"></div>
-    <div class="modal-container modal-lg">
-      <div class="modal-header">
-        <h3 class="modal-title">
-          <i class="fas fa-clock"></i>
-          Aging Report
-        </h3>
-        <button class="modal-close" data-close="agingModal" type="button">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="modal-body">
-        {{#if agingItems.length}}
-          <table class="data-table" style="width:100%;">
+        </span>
+        <i class="fas fa-chevron-down report-chevron"></i>
+      </button>
+      <div class="report-section-body" id="body-summary">
+        <div class="table-wrapper">
+          <table class="data-table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Date Acquired</th>
-                <th>Status</th>
+                <th>Metric</th>
+                <th>Count</th>
               </tr>
             </thead>
             <tbody>
-              {{#each agingItems}}
+              <tr><td>Total Items</td><td>{{summary.total}}</td></tr>
+              <tr><td>Deployed (In Use)</td><td>{{summary.deployed}}</td></tr>
+              <tr><td>Available</td><td>{{summary.available}}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="report-section-footer">
+          <a href="/reports/export/summary" class="btn btn-outline">
+            <i class="fas fa-download"></i> Download CSV
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Asset Aging -->
+    <div class="report-section" id="section-aging">
+      <button class="report-toggle-btn" type="button" aria-expanded="true" data-target="body-aging">
+        <span class="report-section-title">
+          <i class="fas fa-clock"></i>
+          Asset Aging
+          <span class="report-section-badge">Items older than 3 years</span>
+        </span>
+        <i class="fas fa-chevron-down report-chevron"></i>
+      </button>
+      <div class="report-section-body" id="body-aging">
+        {{#if agingItems.length}}
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
                 <tr>
-                  <td>{{this.name}}</td>
-                  <td>{{formatDate this.dateAcquired}}</td>
-                  <td>{{this.status}}</td>
+                  <th>Name</th>
+                  <th>Date Acquired</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#each agingItems}}
+                  <tr>
+                    <td>{{this.name}}</td>
+                    <td>{{formatDate this.dateAcquired}}</td>
+                    <td>{{this.status}}</td>
+                  </tr>
+                {{/each}}
+              </tbody>
+            </table>
+          </div>
+        {{else}}
+          <p class="report-empty">No items older than 3 years.</p>
+        {{/if}}
+        <div class="report-section-footer">
+          <a href="/reports/export/aging" class="btn btn-outline">
+            <i class="fas fa-download"></i> Download CSV
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assets by User -->
+    <div class="report-section" id="section-byuser">
+      <button class="report-toggle-btn" type="button" aria-expanded="true" data-target="body-byuser">
+        <span class="report-section-title">
+          <i class="fas fa-user-tag"></i>
+          Assets by User
+        </span>
+        <i class="fas fa-chevron-down report-chevron"></i>
+      </button>
+      <div class="report-section-body" id="body-byuser">
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Assigned Items</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each assetsByUser}}
+                <tr>
+                  <td>{{this.user.name}}</td>
+                  <td>{{this.user.email}}</td>
+                  <td>
+                    {{#if this.items.length}}
+                      <ul class="report-items-list">
+                        {{#each this.items}}
+                          <li>{{this.name}}</li>
+                        {{/each}}
+                      </ul>
+                    {{else}}
+                      <span style="color:var(--text-muted);">No assets assigned</span>
+                    {{/if}}
+                  </td>
                 </tr>
               {{/each}}
             </tbody>
           </table>
-        {{else}}
-          <p style="color:var(--text-muted);">No items older than 3 years.</p>
-        {{/if}}
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" data-close="agingModal" type="button">Close</button>
+        </div>
+        <div class="report-section-footer">
+          <a href="/reports/export/by-user" class="btn btn-outline">
+            <i class="fas fa-download"></i> Download CSV
+          </a>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Assets by User Modal -->
-  <div class="modal report-modal" id="byUserModal" style="display:none;">
-    <div class="modal-overlay" data-close="byUserModal"></div>
-    <div class="modal-container modal-lg">
-      <div class="modal-header">
-        <h3 class="modal-title">
-          <i class="fas fa-user-tag"></i>
-          Assets Assigned to Users
-        </h3>
-        <button class="modal-close" data-close="byUserModal" type="button">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="modal-body">
-        <table class="data-table" style="width:100%;">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Email</th>
-              <th>Assigned Items</th>
-            </tr>
-          </thead>
-          <tbody>
-            {{#each assetsByUser}}
-              <tr>
-                <td>{{this.user.name}}</td>
-                <td>{{this.user.email}}</td>
-                <td>
-                  {{#if this.items.length}}
-                    <ul style="margin:0;padding-left:16px;">
-                      {{#each this.items}}
-                        <li>{{this.name}}</li>
-                      {{/each}}
-                    </ul>
-                  {{else}}
-                    <span style="color:var(--text-muted);">No assets assigned</span>
-                  {{/if}}
-                </td>
-              </tr>
-            {{/each}}
-          </tbody>
-        </table>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" data-close="byUserModal" type="button">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Export Modal -->
-  <div class="modal" id="exportModal" style="display:none;">
-    <div class="modal-overlay" data-close="exportModal"></div>
-    <div class="modal-container modal-sm">
-      <div class="modal-header">
-        <h3 class="modal-title">
-          <i class="fas fa-file-export"></i>
-          Export Reports
-        </h3>
-        <button class="modal-close" data-close="exportModal" type="button">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="modal-body">
-        <button class="btn btn-outline" style="width:100%;margin-bottom:8px;" onclick="window.location='/reports/export/summary'">
-          <i class="fas fa-chart-pie"></i> Download Inventory Summary
-        </button>
-        <button class="btn btn-outline" style="width:100%;margin-bottom:8px;" onclick="window.location='/reports/export/aging'">
-          <i class="fas fa-clock"></i> Download Aging Report
-        </button>
-        <button class="btn btn-outline" style="width:100%;" onclick="window.location='/reports/export/by-user'">
-          <i class="fas fa-user-tag"></i> Download Assets by User
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+  </div><!-- end .report-accordion -->
+</div><!-- end .page-wrapper -->
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    function openModal(id) {
-      var m = document.getElementById(id);
-      if (m) { m.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
-    }
-    function closeModal(id) {
-      var m = document.getElementById(id);
-      if (m) { m.style.display = 'none'; document.body.style.overflow = ''; }
-    }
+    document.querySelectorAll('.report-toggle-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var expanded = btn.getAttribute('aria-expanded') === 'true';
+        var bodyId = btn.getAttribute('data-target');
+        var body = document.getElementById(bodyId);
+        if (!body) return;
 
-    var openMap = {
-      openSummaryModal: 'summaryModal',
-      openAgingModal:   'agingModal',
-      openByUserModal:  'byUserModal',
-      openExportModal:  'exportModal'
-    };
-    Object.keys(openMap).forEach(function (btnId) {
-      var btn = document.getElementById(btnId);
-      if (btn) btn.addEventListener('click', function () { openModal(openMap[btnId]); });
-    });
-
-    document.querySelectorAll('[data-close]').forEach(function (el) {
-      el.addEventListener('click', function () { closeModal(el.getAttribute('data-close')); });
-    });
-
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') {
-        ['summaryModal', 'agingModal', 'byUserModal', 'exportModal'].forEach(closeModal);
-      }
+        if (expanded) {
+          body.style.maxHeight = body.scrollHeight + 'px';
+          requestAnimationFrame(function () {
+            body.style.maxHeight = '0';
+          });
+          btn.setAttribute('aria-expanded', 'false');
+          btn.classList.add('collapsed');
+        } else {
+          body.style.maxHeight = body.scrollHeight + 'px';
+          body.addEventListener('transitionend', function handler() {
+            body.style.maxHeight = 'none';
+            body.removeEventListener('transitionend', handler);
+          });
+          btn.setAttribute('aria-expanded', 'true');
+          btn.classList.remove('collapsed');
+        }
+      });
     });
   });
 </script>
