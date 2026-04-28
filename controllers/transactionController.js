@@ -1,6 +1,7 @@
 const Item = require("../models/Item");
 const Transaction = require("../models/Transaction");
 const User = require("../models/User");
+const { getItemDisplayName } = require("../utils/itemDisplayName");
 const fs = require("fs/promises");
 const path = require("path");
 const {
@@ -17,9 +18,38 @@ const ALLOWED_TRANSACTION_DOC_EXTENSIONS = new Set([
   ".png",
 ]);
 
+function wantsJsonResponse(req) {
+  const accept = req.get("accept") || "";
+  return req.is("application/json") || accept.includes("application/json");
+}
+
+function formatDuration(startDate, endDate) {
+  if (!startDate || !endDate) return "-";
+
+  const durationMs = new Date(endDate).getTime() - new Date(startDate).getTime();
+  if (!Number.isFinite(durationMs) || durationMs < 0) return "-";
+
+  const totalHours = Math.max(Math.floor(durationMs / (1000 * 60 * 60)), 0);
+  const days = Math.floor(totalHours / 24);
+  const hours = totalHours % 24;
+
+  if (days > 0 && hours > 0) return `${days}d ${hours}h`;
+  if (days > 0) return `${days}d`;
+  if (hours > 0) return `${hours}h`;
+
+  const minutes = Math.max(Math.floor(durationMs / (1000 * 60)), 0);
+  return minutes > 0 ? `${minutes}m` : "Less than 1m";
+}
+
+function getSuccessMessage(query = {}) {
+  if (query.success === "checkout") return "Item checked out successfully.";
+  if (query.success === "checkin") return "Item checked in successfully.";
+  return null;
+}
+
 async function getTransactionPageData(req) {
   const items = await Item.find({ isDeleted: false }).lean();
-  const users = await User.find({}).lean();
+  const users = await User.find({ isDeleted: false, isEnabled: true }).lean();
 
   const availableItems = items.filter((item) => item.status === "Available");
   const inUseItems = items.filter((item) => item.status === "In-Use");
@@ -32,6 +62,7 @@ async function getTransactionPageData(req) {
     inUseItems,
     availableCount: availableItems.length,
     inUseCount: inUseItems.length,
+    successMessage: getSuccessMessage(req.query),
   };
 }
 
@@ -70,6 +101,13 @@ function isSupportedTransactionDocument(file) {
 }
 
 async function renderTransactionError(req, res, statusCode, formError, scope) {
+  if (wantsJsonResponse(req)) {
+    return res.status(statusCode).json({
+      success: false,
+      message: formError,
+    });
+  }
+
   const pageData = await getTransactionPageData(req);
 
   return res.status(statusCode).render("transactions", {
@@ -156,13 +194,13 @@ async function checkoutItem(req, res, next) {
 
     const user = await User.findById(userId);
 
-    if (!user) {
+    if (!user || user.isDeleted || !user.isEnabled) {
       await deleteUploadedFile(req.file.path);
       return renderTransactionError(
         req,
         res,
         404,
-        "User not found.",
+        "User not found or is disabled.",
         "checkout",
       );
     }
@@ -171,7 +209,7 @@ async function checkoutItem(req, res, next) {
     item.assignedTo = userId;
     await item.save();
 
-    await Transaction.create({
+    const transaction = await Transaction.create({
       item: item._id,
       user: userId,
       action: "checkout",
@@ -179,6 +217,17 @@ async function checkoutItem(req, res, next) {
       notes,
       checkoutDate: new Date(),
     });
+
+    if (wantsJsonResponse(req)) {
+      return res.status(201).json({
+        success: true,
+        message: "Item checked out successfully",
+        data: {
+          item,
+          transaction,
+        },
+      });
+    }
 
     return res.redirect("/transactions?success=checkout");
   } catch (error) {
@@ -263,7 +312,7 @@ async function checkinItem(req, res, next) {
     item.assignedTo = null;
     await item.save();
 
-    await Transaction.create({
+    const transaction = await Transaction.create({
       item: item._id,
       user: checkedInUser,
       action: "checkin",
@@ -271,6 +320,17 @@ async function checkinItem(req, res, next) {
       notes,
       checkinDate: new Date(),
     });
+
+    if (wantsJsonResponse(req)) {
+      return res.status(201).json({
+        success: true,
+        message: "Item checked in successfully",
+        data: {
+          item,
+          transaction,
+        },
+      });
+    }
 
     return res.redirect("/transactions?success=checkin");
   } catch (error) {
@@ -297,26 +357,73 @@ async function getItemHistory(req, res, next) {
 async function renderHistoryPage(req, res, next) {
   try {
     const transactions = await Transaction.find({})
-      .populate("item", "name brand model serialNumber")
+      .populate("item", "itemId brand model serialNumber")
       .populate("user", "name email")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: 1 });
 
-    const history = transactions.map((tx) => ({
-      transactionId: tx._id ? tx._id.toString() : "",
-      date: tx.createdAt ? tx.createdAt.toISOString().slice(0, 10) : "",
-      time: tx.createdAt ? tx.createdAt.toTimeString().slice(0, 5) : "",
-      itemName: tx.item
-        ? `${tx.item.brand || ""} ${tx.item.model || ""}`.trim() || tx.item.name
-        : "Unknown Item",
-      serialNumber: tx.item ? tx.item.serialNumber || "" : "",
-      action: tx.action === "checkout" ? "Checked Out" : "Checked In",
-      actionClass: tx.action === "checkout" ? "badge-warning" : "badge-success",
-      userName: tx.user ? tx.user.name : "Unknown User",
-      userEmail: tx.user ? tx.user.email : "",
-      notes: tx.notes || "",
-      documentPath: getUploadUrl(tx.documentPath),
-      documentUrl: tx._id ? `/documents/transactions/${tx._id.toString()}` : "",
-    }));
+    const openCheckouts = new Map();
+    const durationByTransactionId = new Map();
+
+    transactions.forEach((tx) => {
+      const itemId = tx.item?._id ? tx.item._id.toString() : "";
+      const userId = tx.user?._id ? tx.user._id.toString() : "";
+      const pairKey = `${itemId}:${userId}`;
+
+      if (tx.action === "checkout") {
+        openCheckouts.set(pairKey, tx);
+        return;
+      }
+
+      const checkoutTx = openCheckouts.get(pairKey);
+      if (!checkoutTx) return;
+
+      durationByTransactionId.set(
+        tx._id.toString(),
+        `Returned after ${formatDuration(
+          checkoutTx.checkoutDate || checkoutTx.createdAt,
+          tx.checkinDate || tx.createdAt,
+        )}`,
+      );
+      durationByTransactionId.set(checkoutTx._id.toString(), "Checkout recorded");
+      openCheckouts.delete(pairKey);
+    });
+
+    openCheckouts.forEach((checkoutTx) => {
+      durationByTransactionId.set(
+        checkoutTx._id.toString(),
+        `In use for ${formatDuration(checkoutTx.checkoutDate || checkoutTx.createdAt, new Date())}`,
+      );
+    });
+
+    const history = transactions.reverse().map((tx) => {
+      const transactionId = tx._id ? tx._id.toString() : "";
+      const fallbackDuration =
+        tx.action === "checkout"
+          ? `In use for ${formatDuration(tx.checkoutDate || tx.createdAt, new Date())}`
+          : "Return recorded";
+
+      const durationLabel =
+        durationByTransactionId.get(transactionId) || fallbackDuration;
+
+      return {
+        transactionId,
+        date: tx.createdAt ? tx.createdAt.toISOString().slice(0, 10) : "",
+        time: tx.createdAt ? tx.createdAt.toTimeString().slice(0, 5) : "",
+        itemName: tx.item
+          ? getItemDisplayName(tx.item)
+          : "Unknown Item",
+        serialNumber: tx.item ? tx.item.serialNumber || "" : "",
+        action: tx.action === "checkout" ? "Checked Out" : "Checked In",
+        actionClass: tx.action === "checkout" ? "badge-warning" : "badge-success",
+        userName: tx.user ? tx.user.name : "Unknown User",
+        userEmail: tx.user ? tx.user.email : "",
+        duration: durationLabel,
+        durationLabel,
+        notes: tx.notes || "",
+        documentPath: getUploadUrl(tx.documentPath),
+        documentUrl: transactionId ? `/documents/transactions/${transactionId}` : "",
+      };
+    });
 
     res.render("history", {
       title: "Asset History",

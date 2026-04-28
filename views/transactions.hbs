@@ -27,6 +27,18 @@
     </div>
   {{/if}}
 
+  {{#if successMessage}}
+    <div class="transaction-success-banner" role="status">
+      <span class="transaction-success-icon">
+        <i class="fas fa-circle-check" aria-hidden="true"></i>
+      </span>
+      <div>
+        <strong>Transaction complete</strong>
+        <span>{{successMessage}}</span>
+      </div>
+    </div>
+  {{/if}}
+
   <div class="transaction-layout">
     <aside
       class="transaction-mode-rail"
@@ -125,8 +137,7 @@
                     <option value="{{this._id}}">
                       {{this.itemId}}
                       -
-                      {{this.brand}}
-                      {{this.model}}
+                      {{this.displayName}}
                       ({{this.serialNumber}})
                     </option>
                   {{/each}}
@@ -247,8 +258,7 @@
                     <option value="{{this._id}}">
                       {{this.itemId}}
                       -
-                      {{this.brand}}
-                      {{this.model}}
+                      {{this.displayName}}
                       ({{this.serialNumber}})
                     </option>
                   {{/each}}

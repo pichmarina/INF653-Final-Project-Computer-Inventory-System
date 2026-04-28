@@ -134,14 +134,11 @@
               <label class="form-label">Email Address</label>
               <input
                 type="email"
-                name="email"
-                class="form-input {{#if errors.email}}input-error{{/if}}"
+                class="form-input profile-readonly-input"
                 value="{{formValues.email}}"
-                required
+                readonly
+                aria-readonly="true"
               >
-              {{#if errors.email}}
-                <span class="form-error">{{errors.email}}</span>
-              {{/if}}
             </div>
           </div>
         </div>

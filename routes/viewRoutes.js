@@ -29,6 +29,7 @@ const {
   getUploadFilename,
   getUploadUrl,
 } = require("../utils/uploadPaths");
+const { getItemDisplayName } = require("../utils/itemDisplayName");
 
 const uploadRoot = path.join(__dirname, "..", "uploads");
 
@@ -72,10 +73,18 @@ router.get("/inventory", requireViewAuth, renderItemsPage);
 router.get("/transactions", requireViewAuth, async (req, res, next) => {
   try {
     const items = await Item.find({ isDeleted: false }).lean();
-    const users = await User.find({}).lean();
+    const users = await User.find({ isDeleted: false, isEnabled: true }).lean();
 
-    const availableItems = items.filter((item) => item.status === "Available");
-    const inUseItems = items.filter((item) => item.status === "In-Use");
+    const itemsWithDisplayNames = items.map((item) => ({
+      ...item,
+      displayName: getItemDisplayName(item),
+    }));
+    const availableItems = itemsWithDisplayNames.filter(
+      (item) => item.status === "Available",
+    );
+    const inUseItems = itemsWithDisplayNames.filter(
+      (item) => item.status === "In-Use",
+    );
 
     res.render("transactions", {
       title: "Check-Out / Check-In",
@@ -85,6 +94,12 @@ router.get("/transactions", requireViewAuth, async (req, res, next) => {
       inUseItems,
       availableCount: availableItems.length,
       inUseCount: inUseItems.length,
+      successMessage:
+        req.query.success === "checkout"
+          ? "Item checked out successfully."
+          : req.query.success === "checkin"
+            ? "Item checked in successfully."
+            : null,
     });
   } catch (error) {
     next(error);
@@ -226,7 +241,10 @@ router.get("/items/:id/edit", requireViewAuth, async (req, res, next) => {
       title: "Edit Item",
       isEdit: true,
       itemId: req.params.id,
-      item,
+      item: {
+        ...item,
+        displayName: getItemDisplayName(item),
+      },
       user: req.user,
     });
   } catch (error) {
@@ -262,7 +280,10 @@ router.get("/items/:id", requireViewAuth, async (req, res, next) => {
     res.render("item-details", {
       title: "Item Details",
       itemId: req.params.id,
-      item,
+      item: {
+        ...item,
+        displayName: getItemDisplayName(item),
+      },
       user: req.user,
     });
   } catch (error) {

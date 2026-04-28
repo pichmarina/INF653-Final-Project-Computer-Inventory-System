@@ -1,9 +1,18 @@
 const Item = require("../models/Item");
+const { getItemDisplayName } = require("../utils/itemDisplayName");
 const { getStoredUploadPath } = require("../utils/uploadPaths");
+
+function wantsJsonResponse(req) {
+  const accept = req.get("accept") || "";
+  return req.is("application/json") || accept.includes("application/json");
+}
 
 async function getItems(req, res, next) {
   try {
-    const items = await Item.find({ isDeleted: false }).populate("assignedTo", "name email");
+    const items = await Item.find({ isDeleted: false }).populate(
+      "assignedTo",
+      "name email",
+    );
 
     res.json({
       success: true,
@@ -45,7 +54,15 @@ async function createItem(req, res, next) {
       itemData.uploadPath = getStoredUploadPath(req.file);
     }
 
-    await Item.create(itemData);
+    const item = await Item.create(itemData);
+
+    if (wantsJsonResponse(req)) {
+      return res.status(201).json({
+        success: true,
+        message: "Item created successfully",
+        data: item,
+      });
+    }
 
     return res.redirect("/inventory?success=added");
   } catch (error) {
@@ -77,6 +94,14 @@ async function updateItem(req, res, next) {
       });
     }
 
+    if (wantsJsonResponse(req)) {
+      return res.json({
+        success: true,
+        message: "Item updated successfully",
+        data: item,
+      });
+    }
+
     return res.redirect("/inventory?success=updated");
   } catch (error) {
     next(error);
@@ -98,6 +123,14 @@ async function softDeleteItem(req, res, next) {
       });
     }
 
+    if (wantsJsonResponse(req)) {
+      return res.json({
+        success: true,
+        message: "Item removed successfully",
+        data: item,
+      });
+    }
+
     return res.redirect("/inventory?success=deleted");
   } catch (error) {
     next(error);
@@ -113,7 +146,10 @@ const renderItemsPage = async (req, res, next) => {
     res.render("inventory", {
       title: "Inventory Management",
       user: req.user,
-      items,
+      items: items.map((item) => ({
+        ...item,
+        displayName: getItemDisplayName(item),
+      })),
     });
   } catch (error) {
     next(error);
