@@ -1,5 +1,6 @@
 const express = require("express");
 const fs = require("fs/promises");
+const path = require("path");
 const router = express.Router();
 const { requireViewAuth } = require("../middleware/authMiddleware");
 const { requireAdminView } = require("../middleware/roleMiddleware");
@@ -21,7 +22,15 @@ const {
 const { exportReport } = require("../controllers/reportController");
 const { renderHistoryPage } = require("../controllers/transactionController");
 const Item = require("../models/Item");
+const Transaction = require("../models/Transaction");
 const User = require("../models/User");
+const {
+  getUploadFilePath,
+  getUploadFilename,
+  getUploadUrl,
+} = require("../utils/uploadPaths");
+
+const uploadRoot = path.join(__dirname, "..", "uploads");
 
 function handleProfileAvatarUpload(req, res, next) {
   avatarUpload.single("avatar")(req, res, function (error) {
@@ -74,6 +83,8 @@ router.get("/transactions", requireViewAuth, async (req, res, next) => {
       users,
       availableItems,
       inUseItems,
+      availableCount: availableItems.length,
+      inUseCount: inUseItems.length,
     });
   } catch (error) {
     next(error);
@@ -81,6 +92,90 @@ router.get("/transactions", requireViewAuth, async (req, res, next) => {
 });
 
 router.get("/history", requireViewAuth, renderHistoryPage);
+
+async function sendStoredDocument(req, res, uploadPath) {
+  const normalizedStoredPath = String(uploadPath || "").replace(/\\/g, "/");
+  const safeAbsolutePath =
+    path.isAbsolute(normalizedStoredPath) &&
+    normalizedStoredPath.split("/").includes("uploads")
+      ? normalizedStoredPath
+      : "";
+  const candidatePaths = [
+    safeAbsolutePath,
+    getUploadFilePath(uploadPath, uploadRoot),
+    getUploadFilename(uploadPath)
+      ? path.join(uploadRoot, getUploadFilename(uploadPath))
+      : "",
+  ].filter(Boolean);
+
+  if (candidatePaths.length === 0) {
+    return res.status(404).render("404", {
+      title: "404 - Document Not Found",
+      user: req.user,
+    });
+  }
+
+  for (const filePath of candidatePaths) {
+    try {
+      await fs.access(filePath);
+      return res.sendFile(filePath);
+    } catch {
+      // Try the next normalized file path before returning a 404.
+    }
+  }
+
+  console.warn("Document file not found", {
+    requestedUrl: req.originalUrl,
+    storedPath: uploadPath,
+    triedPaths: candidatePaths,
+  });
+
+  return res.status(404).render("404", {
+    title: "404 - Document Not Found",
+    user: req.user,
+  });
+}
+
+router.get("/documents/items/:id", requireViewAuth, async (req, res, next) => {
+  try {
+    const item = await Item.findOne({
+      _id: req.params.id,
+      isDeleted: false,
+    }).lean();
+
+    if (!item || !item.uploadPath) {
+      return res.status(404).render("404", {
+        title: "404 - Document Not Found",
+        user: req.user,
+      });
+    }
+
+    return sendStoredDocument(req, res, item.uploadPath);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get(
+  "/documents/transactions/:id",
+  requireViewAuth,
+  async (req, res, next) => {
+    try {
+      const transaction = await Transaction.findById(req.params.id).lean();
+
+      if (!transaction || !transaction.documentPath) {
+        return res.status(404).render("404", {
+          title: "404 - Document Not Found",
+          user: req.user,
+        });
+      }
+
+      return sendStoredDocument(req, res, transaction.documentPath);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 router.get("/reports", requireViewAuth, renderReportsPage);
 
@@ -119,8 +214,13 @@ router.get("/items/:id/edit", requireViewAuth, async (req, res, next) => {
     }
 
     if (item.dateAcquired) {
-      item.dateAcquired = new Date(item.dateAcquired).toISOString().split("T")[0];
+      item.dateAcquired = new Date(item.dateAcquired)
+        .toISOString()
+        .split("T")[0];
     }
+
+    item.uploadPath = getUploadUrl(item.uploadPath);
+    item.documentUrl = item.uploadPath ? `/documents/items/${req.params.id}` : "";
 
     res.render("item-form", {
       title: "Edit Item",
@@ -151,8 +251,13 @@ router.get("/items/:id", requireViewAuth, async (req, res, next) => {
     }
 
     if (item.dateAcquired) {
-      item.dateAcquired = new Date(item.dateAcquired).toISOString().split("T")[0];
+      item.dateAcquired = new Date(item.dateAcquired)
+        .toISOString()
+        .split("T")[0];
     }
+
+    item.uploadPath = getUploadUrl(item.uploadPath);
+    item.documentUrl = item.uploadPath ? `/documents/items/${req.params.id}` : "";
 
     res.render("item-details", {
       title: "Item Details",

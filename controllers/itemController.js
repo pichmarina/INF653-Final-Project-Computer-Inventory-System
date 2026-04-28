@@ -1,4 +1,5 @@
 const Item = require("../models/Item");
+const { getStoredUploadPath } = require("../utils/uploadPaths");
 
 async function getItems(req, res, next) {
   try {
@@ -41,7 +42,7 @@ async function createItem(req, res, next) {
     const itemData = req.body;
 
     if (req.file) {
-      itemData.uploadPath = req.file.path;
+      itemData.uploadPath = getStoredUploadPath(req.file);
     }
 
     await Item.create(itemData);
@@ -57,7 +58,7 @@ async function updateItem(req, res, next) {
     const updateData = req.body;
 
     if (req.file) {
-      updateData.uploadPath = req.file.path;
+      updateData.uploadPath = getStoredUploadPath(req.file);
     }
 
     const item = await Item.findOneAndUpdate(

@@ -1,103 +1,261 @@
-<div class="page-wrapper">
-  <div class="page-header-modern">
-    <div class="page-header-content">
-      <div class="page-header-left">
-        <span class="page-eyebrow">Assets</span>
-        <h1 class="page-heading">Inventory Management</h1>
-        <p class="page-description">Manage all computer hardware and peripherals in your organization</p>
-      </div>
-      <div class="page-header-right">
-        <a href="/items/new" class="btn btn-primary">
-          <i class="fas fa-plus"></i>
-          Add Item
-        </a>
-      </div>
+<div class="inv2-page inv2-inventory-page">
+  <section class="inv2-page-head">
+    <div>
+      <span class="inv2-eyebrow">Inventory</span>
+      <h1>Asset Management</h1>
+      <p>Track computers, peripherals, assignment status, and asset documents in one place.</p>
     </div>
-  </div>
 
-  <div class="data-card">
-    <div class="data-card-header">
-      <div class="data-card-header-left">
-        <h3 class="data-card-title">
-          <i class="fas fa-boxes"></i>
-          All Items
-        </h3>
-      </div>
-      <div class="data-card-header-right">
-        <div class="search-input-wrapper">
-          <i class="fas fa-search"></i>
-          <input type="text" id="inventorySearch" placeholder="Search items..." autocomplete="off">
-          <button type="button" id="clearInventorySearch" class="hidden">
-            <i class="fas fa-times"></i>
-          </button>
+    <a href="/items/new" class="inv2-primary-btn">
+      <i class="fas fa-plus"></i>
+      Add Item
+    </a>
+  </section>
+
+  <div class="inv2-shell">
+    <section class="data-card users-table-card inventory-table-card">
+      <div class="data-card-header inventory-table-header">
+        <div class="data-card-header-left">
+          <div class="users-title-row">
+            <span class="section-icon inventory-section-icon" aria-hidden="true">
+              <i class="fas fa-boxes-stacked"></i>
+            </span>
+
+            <div class="users-title-text">
+              <h3 class="data-card-title">All Items</h3>
+              <span class="data-card-count">{{items.length}} items</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="data-card-header-right inventory-header-right">
+          <div class="inventory-toolbar-form">
+            <div class="search-input-wrapper inventory-search-wrapper">
+              <i class="fas fa-search"></i>
+              <input
+                type="text"
+                id="inventorySearch"
+                placeholder="Search items..."
+                aria-label="Search items"
+                autocomplete="off"
+              >
+              <button
+                type="button"
+                id="clearInventorySearch"
+                class="hidden"
+                aria-label="Clear search"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="filter-dropdown inventory-filter-dropdown">
+            <button type="button" class="btn btn-outline btn-sm filter-trigger-btn inventory-filter-trigger" id="inventoryFilterBtn">
+              <span class="filter-summary-left">
+                <i class="fas fa-sliders-h"></i>
+                <span>Filter</span>
+                <span class="filter-active-count" id="activeFilterCount" hidden>0</span>
+              </span>
+              <i class="fas fa-chevron-down filter-summary-arrow inv2-filter-chevron"></i>
+            </button>
+
+            <div class="filter-panel compact-filter-panel inventory-filter-panel" id="inventoryFilterPanel" hidden>
+              <div class="filter-panel-header">
+                <h4>Filters</h4>
+                <button type="button" id="clearInventoryFilters" class="filter-clear-link">
+                  Clear All
+                </button>
+              </div>
+
+              <div class="filter-form">
+                <details class="filter-section">
+                  <summary class="filter-section-toggle">
+                    <span class="filter-section-left">
+                      <i class="fas fa-toggle-on"></i>
+                      <span>Status</span>
+                    </span>
+                    <i class="fas fa-chevron-down"></i>
+                  </summary>
+
+                  <div class="filter-section-body">
+                    <label class="filter-radio-option">
+                      <input type="radio" name="inventoryStatus" value="" checked>
+                      <span>All Status</span>
+                    </label>
+
+                    <label class="filter-radio-option">
+                      <input type="radio" name="inventoryStatus" value="Available">
+                      <span>Available</span>
+                    </label>
+
+                    <label class="filter-radio-option">
+                      <input type="radio" name="inventoryStatus" value="In-Use">
+                      <span>In-Use</span>
+                    </label>
+
+                    <label class="filter-radio-option">
+                      <input type="radio" name="inventoryStatus" value="Maintenance">
+                      <span>Maintenance</span>
+                    </label>
+
+                    <label class="filter-radio-option">
+                      <input type="radio" name="inventoryStatus" value="Retired">
+                      <span>Retired</span>
+                    </label>
+                  </div>
+                </details>
+
+                <details class="filter-section">
+                  <summary class="filter-section-toggle">
+                    <span class="filter-section-left">
+                      <i class="fas fa-layer-group"></i>
+                      <span>Type</span>
+                    </span>
+                    <i class="fas fa-chevron-down"></i>
+                  </summary>
+
+                  <div class="filter-section-body">
+                    <label class="filter-radio-option">
+                      <input type="radio" name="inventoryType" value="" checked>
+                      <span>All Types</span>
+                    </label>
+
+                    <label class="filter-radio-option">
+                      <input type="radio" name="inventoryType" value="Computer">
+                      <span>Computer</span>
+                    </label>
+
+                    <label class="filter-radio-option">
+                      <input type="radio" name="inventoryType" value="Peripheral">
+                      <span>Peripheral</span>
+                    </label>
+                  </div>
+                </details>
+
+                <div class="filter-panel-actions">
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    id="applyInventoryFiltersBtn"
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="table-wrapper">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Item ID</th>
-            <th>Serial Number</th>
-            <th>Model</th>
-            <th>Brand</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Assigned To</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{#if items.length}}
-            {{#each items}}
+
+      {{#if items.length}}
+        <div class="table-wrapper inventory-table-wrapper">
+          <table class="data-table inventory-data-table" id="inventoryTable">
+            <thead>
               <tr>
-                <td>{{this.itemId}}</td>
-                <td>{{this.serialNumber}}</td>
-                <td>{{this.model}}</td>
-                <td>{{this.brand}}</td>
-                <td>{{this.category}}</td>
-                <td>
-                  <span class="status-badge
-                    {{#if (eq this.status "Available")}}status-available{{/if}}
-                    {{#if (eq this.status "In-Use")}}status-inuse{{/if}}
-                    {{#if (eq this.status "Maintenance")}}status-maintenance{{/if}}
-                    {{#if (eq this.status "Retired")}}status-retired{{/if}}
-                  ">
-                    {{this.status}}
-                  </span>
-                </td>
-                <td>
-                  {{#if this.assignedTo}}
-                    {{this.assignedTo.name}}
-                  {{else}}
-                    —
-                  {{/if}}
-                </td>
-                <td>
-                  <a href="/items/{{this._id}}" class="btn btn-outline btn-sm">View</a>
-                </td>
+                <th class="table-col-asset">Asset</th>
+                <th class="table-col-serial">Serial Number</th>
+                <th class="table-col-category">Category</th>
+                <th class="table-col-type">Type</th>
+                <th class="table-col-status">Status</th>
+                <th class="table-col-assigned">Assigned To</th>
+                <th class="table-col-actions">Action</th>
               </tr>
-            {{/each}}
-          {{else}}
-            <tr>
-              <td colspan="8" class="table-empty">
-                <div class="empty-state">
-                  <div class="empty-state-icon">
-                    <i class="fas fa-boxes"></i>
-                  </div>
-                  <h4>No items found</h4>
-                  <p>Inventory items will appear here once added</p>
-                  <a href="/items/new" class="btn btn-primary">
-                    <i class="fas fa-plus"></i>
-                    Add First Item
-                  </a>
-                </div>
-              </td>
-            </tr>
-          {{/if}}
-        </tbody>
-      </table>
-    </div>
+            </thead>
+
+            <tbody>
+              {{#each items}}
+                <tr
+                  data-status="{{this.status}}"
+                  data-classification="{{this.classification}}"
+                >
+                  <td>
+                    <div class="inv2-asset-cell">
+                      <div class="inv2-asset-text">
+                        <strong>{{this.brand}} {{this.model}}</strong>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="inv2-code">{{this.serialNumber}}</span>
+                  </td>
+
+                  <td>{{this.category}}</td>
+
+                  <td>
+                    <span class="inv2-type-pill">{{this.classification}}</span>
+                  </td>
+
+                  <td>
+                    <span class="inv2-status
+                      {{#if (eq this.status "Available")}}is-available{{/if}}
+                      {{#if (eq this.status "In-Use")}}is-inuse{{/if}}
+                      {{#if (eq this.status "Maintenance")}}is-maintenance{{/if}}
+                      {{#if (eq this.status "Retired")}}is-retired{{/if}}
+                    ">
+                      {{this.status}}
+                    </span>
+                  </td>
+
+                  <td>
+                    {{#if this.assignedTo}}
+                      <div class="inv2-assigned-user">
+                        <strong>{{this.assignedTo.name}}</strong>
+                        <span>{{this.assignedTo.email}}</span>
+                      </div>
+                    {{else}}
+                      <span class="inv2-muted">Unassigned</span>
+                    {{/if}}
+                  </td>
+
+                  <td class="table-cell-actions">
+                    <div class="action-buttons inventory-action-buttons">
+                      <a
+                        href="/items/{{this._id}}"
+                        class="action-btn-icon"
+                        title="View item"
+                        aria-label="View item"
+                      >
+                        <i class="fas fa-eye"></i>
+                      </a>
+
+                      <a
+                        href="/items/{{this._id}}/edit"
+                        class="action-btn-icon"
+                        title="Edit item"
+                        aria-label="Edit item"
+                      >
+                        <i class="fas fa-pen"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="data-card-footer inventory-table-footer">
+          <div class="pagination-info">
+            Showing <strong id="visibleItemCount">{{items.length}}</strong>
+            of <strong>{{items.length}}</strong> items
+          </div>
+        </div>
+      {{else}}
+        <div class="inv2-empty-state">
+          <div class="inv2-empty-icon">
+            <i class="fas fa-box-open"></i>
+          </div>
+          <h3>No items found</h3>
+          <p>Add your first asset to start managing your computer inventory.</p>
+          <a href="/items/new" class="inv2-primary-btn">
+            <i class="fas fa-plus"></i>
+            Add First Item
+          </a>
+        </div>
+      {{/if}}
+    </section>
   </div>
 </div>
 
@@ -121,9 +279,7 @@
       popup.className = "success-toast";
       document.body.appendChild(popup);
 
-      setTimeout(() => {
-        popup.classList.add("show");
-      }, 10);
+      setTimeout(() => popup.classList.add("show"), 10);
 
       setTimeout(() => {
         popup.classList.remove("show");
@@ -136,27 +292,129 @@
     }
   }
 
-  const inventorySearch = document.getElementById('inventorySearch');
-  const clearInventorySearch = document.getElementById('clearInventorySearch');
+  const searchInput = document.getElementById("inventorySearch");
+  const clearSearch = document.getElementById("clearInventorySearch");
+  const statusFilterInputs = Array.from(document.querySelectorAll('input[name="inventoryStatus"]'));
+  const classificationFilterInputs = Array.from(document.querySelectorAll('input[name="inventoryType"]'));
 
-  if (inventorySearch) {
-    inventorySearch.addEventListener('input', function () {
-      const term = this.value.toLowerCase();
-      clearInventorySearch.classList.toggle('hidden', !term);
-      document.querySelectorAll('.data-table tbody tr').forEach(function (row) {
-        row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
-      });
-    });
+  function getSelectedFilterValue(inputs) {
+    const selected = inputs.find((input) => input.checked);
+    return selected ? selected.value : "";
+  }
+  const rows = Array.from(document.querySelectorAll("#inventoryTable tbody tr"));
+
+  const inventoryFilterBtn = document.getElementById("inventoryFilterBtn");
+  const inventoryFilterPanel = document.getElementById("inventoryFilterPanel");
+  const clearInventoryFilters = document.getElementById("clearInventoryFilters");
+  const applyInventoryFiltersBtn = document.getElementById("applyInventoryFiltersBtn");
+  const activeFilterCount = document.getElementById("activeFilterCount");
+
+  function updateCounts() {
+    const available = rows.filter((row) => row.dataset.status === "Available").length;
+    const inUse = rows.filter((row) => row.dataset.status === "In-Use").length;
+    const maintenance = rows.filter((row) => row.dataset.status === "Maintenance").length;
+
+    const availableCount = document.getElementById("availableCount");
+    const inUseCount = document.getElementById("inUseCount");
+    const maintenanceCount = document.getElementById("maintenanceCount");
+
+    if (availableCount) availableCount.textContent = available;
+    if (inUseCount) inUseCount.textContent = inUse;
+    if (maintenanceCount) maintenanceCount.textContent = maintenance;
   }
 
-  if (clearInventorySearch) {
-    clearInventorySearch.addEventListener('click', function () {
-      inventorySearch.value = '';
-      this.classList.add('hidden');
-      document.querySelectorAll('.data-table tbody tr').forEach(function (row) {
-        row.style.display = '';
-      });
-      inventorySearch.focus();
-    });
+  function updateActiveFilterCount() {
+    let count = 0;
+
+    if (getSelectedFilterValue(statusFilterInputs)) count++;
+    if (getSelectedFilterValue(classificationFilterInputs)) count++;
+
+    if (activeFilterCount) {
+      activeFilterCount.textContent = count;
+      activeFilterCount.hidden = count === 0;
+    }
+
+    inventoryFilterBtn?.classList.toggle("has-active-filters", count > 0);
   }
+
+  function applyInventoryFilters() {
+    const term = (searchInput?.value || "").toLowerCase();
+    const status = getSelectedFilterValue(statusFilterInputs);
+    const classification = getSelectedFilterValue(classificationFilterInputs);
+    let visible = 0;
+
+    if (clearSearch) {
+      clearSearch.classList.toggle("hidden", !term);
+    }
+
+    rows.forEach((row) => {
+      const rowText = row.textContent.toLowerCase();
+      const rowStatus = row.dataset.status || "";
+      const rowClassification = row.dataset.classification || "";
+
+      const matchesSearch = !term || rowText.includes(term);
+      const matchesStatus = !status || rowStatus === status;
+      const matchesClassification = !classification || rowClassification === classification;
+
+      const show = matchesSearch && matchesStatus && matchesClassification;
+      row.style.display = show ? "" : "none";
+
+      if (show) visible++;
+    });
+
+    const visibleItemCount = document.getElementById("visibleItemCount");
+    if (visibleItemCount) visibleItemCount.textContent = visible;
+
+    updateActiveFilterCount();
+  }
+
+  searchInput?.addEventListener("input", applyInventoryFilters);
+
+  clearSearch?.addEventListener("click", () => {
+    searchInput.value = "";
+    applyInventoryFilters();
+    searchInput.focus();
+  });
+
+  inventoryFilterBtn?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const isHidden = inventoryFilterPanel?.hasAttribute("hidden");
+
+    if (isHidden) {
+      inventoryFilterPanel?.removeAttribute("hidden");
+      inventoryFilterBtn.classList.add("is-open");
+    } else {
+      inventoryFilterPanel?.setAttribute("hidden", "");
+      inventoryFilterBtn.classList.remove("is-open");
+    }
+  });
+
+  applyInventoryFiltersBtn?.addEventListener("click", () => {
+    applyInventoryFilters();
+    inventoryFilterPanel?.setAttribute("hidden", "");
+    inventoryFilterBtn?.classList.remove("is-open");
+  });
+
+  clearInventoryFilters?.addEventListener("click", () => {
+    const allStatus = statusFilterInputs.find((input) => input.value === "");
+    const allType = classificationFilterInputs.find((input) => input.value === "");
+
+    if (allStatus) allStatus.checked = true;
+    if (allType) allType.checked = true;
+
+    applyInventoryFilters();
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".inventory-filter-dropdown")) {
+      inventoryFilterPanel?.setAttribute("hidden", "");
+      inventoryFilterBtn?.classList.remove("is-open");
+    }
+  });
+
+  updateCounts();
+  applyInventoryFilters();
+  updateActiveFilterCount();
 </script>

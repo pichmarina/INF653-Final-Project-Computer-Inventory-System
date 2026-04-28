@@ -13,46 +13,6 @@
     </div>
   </div>
 
-  <!-- Quick Stats -->
-  <div class="dashboard-stats">
-    <div class="dashboard-stat-card">
-      <div class="stat-card-bg">
-        <i class="fas fa-boxes"></i>
-      </div>
-      <div class="stat-card-content">
-        <span class="stat-card-value" id="totalItems">{{stats.totalItems}}</span>
-        <span class="stat-card-label">Total Items</span>
-      </div>
-    </div>
-    <div class="dashboard-stat-card">
-      <div class="stat-card-bg">
-        <i class="fas fa-user-check"></i>
-      </div>
-      <div class="stat-card-content">
-        <span class="stat-card-value" id="deployedItems">{{stats.deployedItems}}</span>
-        <span class="stat-card-label">In Use</span>
-      </div>
-    </div>
-    <div class="dashboard-stat-card">
-      <div class="stat-card-bg">
-        <i class="fas fa-check-circle"></i>
-      </div>
-      <div class="stat-card-content">
-        <span class="stat-card-value" id="availableItems">{{stats.availableItems}}</span>
-        <span class="stat-card-label">Available</span>
-      </div>
-    </div>
-    <div class="dashboard-stat-card">
-      <div class="stat-card-bg">
-        <i class="fas fa-tools"></i>
-      </div>
-      <div class="stat-card-content">
-        <span class="stat-card-value" id="maintenanceItems">{{stats.maintenanceItems}}</span>
-        <span class="stat-card-label">Maintenance</span>
-      </div>
-    </div>
-  </div>
-
   <!-- Navigation Cards - Quick Access to All Pages -->
   <div class="section-header">
     <h2 class="section-title">
@@ -150,12 +110,9 @@
   fetch('/api/reports/summary', { credentials: 'same-origin' }); if
   (!response.ok) { throw new Error(`HTTP ${response.status}`); } const result =
   await response.json(); if (result.success && result.data) { const data =
-  result.data; const total = data.total ?? 0; const deployed = data.deployed ??
+  result.data; const deployed = data.deployed ??
   0; const available = data.available ?? 0; const maintenance = data.maintenance
-  ?? 0; const totalItems = document.getElementById('totalItems'); const
-  deployedItems = document.getElementById('deployedItems'); const availableItems
-  = document.getElementById('availableItems'); const maintenanceItems =
-  document.getElementById('maintenanceItems'); const navAvailableCount =
+  ?? 0; const navAvailableCount =
   document.getElementById('navAvailableCount'); const navInUseCount =
   document.getElementById('navInUseCount'); const navMaintenanceCount =
   document.getElementById('navMaintenanceCount'); const mobileAvailableCount =
@@ -164,17 +121,14 @@
   document.getElementById('mobileMaintenanceCount'); if (mobileAvailableCount)
   mobileAvailableCount.textContent = available; if (mobileInUseCount)
   mobileInUseCount.textContent = deployed; if (mobileMaintenanceCount)
-  mobileMaintenanceCount.textContent = maintenance; if (totalItems)
-  totalItems.textContent = total; if (deployedItems) deployedItems.textContent =
-  deployed; if (availableItems) availableItems.textContent = available; if
-  (maintenanceItems) maintenanceItems.textContent = maintenance; if
+  mobileMaintenanceCount.textContent = maintenance; if
   (navAvailableCount) navAvailableCount.textContent = available; if
   (navInUseCount) navInUseCount.textContent = deployed; if (navMaintenanceCount)
   navMaintenanceCount.textContent = maintenance; } else { throw new
   Error('Invalid summary response'); } } catch (error) { console.error('Failed
-  to fetch dashboard data:', error); const fallbackIds = [ 'totalItems',
-  'deployedItems', 'availableItems', 'maintenanceItems', 'navAvailableCount',
-  'navInUseCount', 'navMaintenanceCount' ]; fallbackIds.forEach((id) => { const
+  to fetch dashboard data:', error); const fallbackIds = [ 'navAvailableCount',
+  'navInUseCount', 'navMaintenanceCount', 'mobileAvailableCount',
+  'mobileInUseCount', 'mobileMaintenanceCount' ]; fallbackIds.forEach((id) => { const
   el = document.getElementById(id); if (el) el.textContent = '0'; }); } }
   fetchDashboardData();
 </script>

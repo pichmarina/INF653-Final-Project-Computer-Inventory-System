@@ -1,6 +1,21 @@
 const Item = require("../models/Item");
 const Transaction = require("../models/Transaction");
 const User = require("../models/User");
+const fs = require("fs/promises");
+const path = require("path");
+const {
+  getStoredUploadPath,
+  getUploadUrl,
+} = require("../utils/uploadPaths");
+
+const ALLOWED_TRANSACTION_DOC_EXTENSIONS = new Set([
+  ".pdf",
+  ".doc",
+  ".docx",
+  ".jpg",
+  ".jpeg",
+  ".png",
+]);
 
 async function getTransactionPageData(req) {
   const items = await Item.find({ isDeleted: false }).lean();
@@ -15,55 +30,141 @@ async function getTransactionPageData(req) {
     users,
     availableItems,
     inUseItems,
+    availableCount: availableItems.length,
+    inUseCount: inUseItems.length,
   };
+}
+
+function getCheckoutFormState(body = {}) {
+  return {
+    itemId: body.itemId || "",
+    userId: body.userId || "",
+    notes: body.notes || "",
+  };
+}
+
+function getCheckinFormState(body = {}) {
+  return {
+    itemId: body.itemId || "",
+    notes: body.notes || "",
+  };
+}
+
+async function deleteUploadedFile(filePath) {
+  if (!filePath) return;
+
+  try {
+    await fs.unlink(filePath);
+  } catch {
+    // Ignore file cleanup errors to avoid masking validation responses.
+  }
+}
+
+function isSupportedTransactionDocument(file) {
+  if (!file || !file.originalname) {
+    return false;
+  }
+
+  const extension = path.extname(file.originalname).toLowerCase();
+  return ALLOWED_TRANSACTION_DOC_EXTENSIONS.has(extension);
+}
+
+async function renderTransactionError(req, res, statusCode, formError, scope) {
+  const pageData = await getTransactionPageData(req);
+
+  return res.status(statusCode).render("transactions", {
+    ...pageData,
+    formError,
+    errorScope: scope,
+    checkoutForm:
+      scope === "checkout" ? getCheckoutFormState(req.body) : undefined,
+    checkinForm:
+      scope === "checkin" ? getCheckinFormState(req.body) : undefined,
+  });
 }
 
 async function checkoutItem(req, res, next) {
   try {
     const { itemId, userId, notes } = req.body;
 
+    if (!itemId || !userId) {
+      await deleteUploadedFile(req.file?.path);
+      return renderTransactionError(
+        req,
+        res,
+        400,
+        "Item and user are required for check-out.",
+        "checkout",
+      );
+    }
+
     if (!req.file) {
-      const pageData = await getTransactionPageData(req);
-      return res.status(400).render("transactions", {
-        ...pageData,
-        formError: "Upload document is required for check-out.",
-      });
+      return renderTransactionError(
+        req,
+        res,
+        400,
+        "Reference document upload is required for check-out.",
+        "checkout",
+      );
+    }
+
+    if (!isSupportedTransactionDocument(req.file)) {
+      await deleteUploadedFile(req.file.path);
+      return renderTransactionError(
+        req,
+        res,
+        400,
+        "Reference document must be PDF, DOC, DOCX, JPG, JPEG, or PNG.",
+        "checkout",
+      );
     }
 
     const item = await Item.findById(itemId);
 
     if (!item || item.isDeleted) {
-      const pageData = await getTransactionPageData(req);
-      return res.status(404).render("transactions", {
-        ...pageData,
-        formError: "Item not found.",
-      });
+      await deleteUploadedFile(req.file.path);
+      return renderTransactionError(
+        req,
+        res,
+        404,
+        "Item not found.",
+        "checkout",
+      );
     }
 
     if (item.status === "Maintenance" || item.status === "Retired") {
-      const pageData = await getTransactionPageData(req);
-      return res.status(400).render("transactions", {
-        ...pageData,
-        formError: "This item cannot be checked out.",
-      });
+      await deleteUploadedFile(req.file.path);
+      return renderTransactionError(
+        req,
+        res,
+        400,
+        "This item cannot be checked out.",
+        "checkout",
+      );
     }
 
     if (item.status !== "Available") {
-      const pageData = await getTransactionPageData(req);
-      return res.status(400).render("transactions", {
-        ...pageData,
-        formError: "Item is not available for checkout.",
-      });
+      await deleteUploadedFile(req.file.path);
+      return renderTransactionError(
+        req,
+        res,
+        400,
+        "Item is not available for check-out.",
+        "checkout",
+      );
     }
 
     const user = await User.findById(userId);
 
     if (!user) {
-      const pageData = await getTransactionPageData(req);
-      return res.status(404).render("transactions", {
-        ...pageData,
-        formError: "User not found.",
-      });
+      await deleteUploadedFile(req.file.path);
+      return renderTransactionError(
+        req,
+        res,
+        404,
+        "User not found.",
+        "checkout",
+      );
     }
 
     item.status = "In-Use";
@@ -74,7 +175,7 @@ async function checkoutItem(req, res, next) {
       item: item._id,
       user: userId,
       action: "checkout",
-      documentPath: req.file.path,
+      documentPath: getStoredUploadPath(req.file),
       notes,
       checkoutDate: new Date(),
     });
@@ -89,40 +190,73 @@ async function checkinItem(req, res, next) {
   try {
     const { itemId, notes } = req.body;
 
+    if (!itemId) {
+      await deleteUploadedFile(req.file?.path);
+      return renderTransactionError(
+        req,
+        res,
+        400,
+        "Item is required for check-in.",
+        "checkin",
+      );
+    }
+
     if (!req.file) {
-      const pageData = await getTransactionPageData(req);
-      return res.status(400).render("transactions", {
-        ...pageData,
-        formError: "Upload document is required for check-in.",
-      });
+      return renderTransactionError(
+        req,
+        res,
+        400,
+        "Return inspection document upload is required for check-in.",
+        "checkin",
+      );
+    }
+
+    if (!isSupportedTransactionDocument(req.file)) {
+      await deleteUploadedFile(req.file.path);
+      return renderTransactionError(
+        req,
+        res,
+        400,
+        "Return inspection document must be PDF, DOC, DOCX, JPG, JPEG, or PNG.",
+        "checkin",
+      );
     }
 
     const item = await Item.findById(itemId);
 
     if (!item || item.isDeleted) {
-      const pageData = await getTransactionPageData(req);
-      return res.status(404).render("transactions", {
-        ...pageData,
-        formError: "Item not found.",
-      });
+      await deleteUploadedFile(req.file.path);
+      return renderTransactionError(
+        req,
+        res,
+        404,
+        "Item not found.",
+        "checkin",
+      );
     }
 
     if (item.status !== "In-Use") {
-      const pageData = await getTransactionPageData(req);
-      return res.status(400).render("transactions", {
-        ...pageData,
-        formError: "Only items currently in use can be checked in.",
-      });
+      await deleteUploadedFile(req.file.path);
+      return renderTransactionError(
+        req,
+        res,
+        400,
+        "Only items currently in use can be checked in.",
+        "checkin",
+      );
     }
 
     const checkedInUser = item.assignedTo;
 
     if (!checkedInUser) {
-      const pageData = await getTransactionPageData(req);
-      return res.status(400).render("transactions", {
-        ...pageData,
-        formError: "No assigned user found for this item.",
-      });
+      await deleteUploadedFile(req.file.path);
+      return renderTransactionError(
+        req,
+        res,
+        400,
+        "No assigned user found for this item.",
+        "checkin",
+      );
     }
 
     item.status = "Available";
@@ -133,7 +267,7 @@ async function checkinItem(req, res, next) {
       item: item._id,
       user: checkedInUser,
       action: "checkin",
-      documentPath: req.file.path,
+      documentPath: getStoredUploadPath(req.file),
       notes,
       checkinDate: new Date(),
     });
@@ -168,16 +302,20 @@ async function renderHistoryPage(req, res, next) {
       .sort({ createdAt: -1 });
 
     const history = transactions.map((tx) => ({
+      transactionId: tx._id ? tx._id.toString() : "",
       date: tx.createdAt ? tx.createdAt.toISOString().slice(0, 10) : "",
       time: tx.createdAt ? tx.createdAt.toTimeString().slice(0, 5) : "",
-      itemName: tx.item ? `${tx.item.brand || ""} ${tx.item.model || ""}`.trim() || tx.item.name : "Unknown Item",
+      itemName: tx.item
+        ? `${tx.item.brand || ""} ${tx.item.model || ""}`.trim() || tx.item.name
+        : "Unknown Item",
       serialNumber: tx.item ? tx.item.serialNumber || "" : "",
       action: tx.action === "checkout" ? "Checked Out" : "Checked In",
       actionClass: tx.action === "checkout" ? "badge-warning" : "badge-success",
       userName: tx.user ? tx.user.name : "Unknown User",
       userEmail: tx.user ? tx.user.email : "",
       notes: tx.notes || "",
-      documentPath: tx.documentPath || "",
+      documentPath: getUploadUrl(tx.documentPath),
+      documentUrl: tx._id ? `/documents/transactions/${tx._id.toString()}` : "",
     }));
 
     res.render("history", {

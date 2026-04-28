@@ -65,8 +65,8 @@
                 </td>
                 <td>{{#if this.notes}}{{this.notes}}{{else}}<span class="text-muted">—</span>{{/if}}</td>
                 <td>
-                  {{#if this.documentPath}}
-                    <a href="/{{this.documentPath}}" target="_blank" class="btn btn-outline" style="font-size:0.75rem;padding:4px 10px;">
+                  {{#if this.documentUrl}}
+                    <a href="{{this.documentUrl}}" target="_blank" class="btn btn-outline" style="font-size:0.75rem;padding:4px 10px;">
                       <i class="fas fa-file"></i> View
                     </a>
                   {{else}}

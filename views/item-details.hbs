@@ -1,356 +1,151 @@
-<div class="page-wrapper">
-  <div class="page-header-modern">
-    <div class="page-header-content">
-      <div class="page-header-left">
-        <span class="page-eyebrow">Assets</span>
-        <h1 class="page-heading">Item Details</h1>
-        <p class="page-description">Detailed information for the selected inventory item.</p>
+<div class="inv2-page inv2-detail-page">
+  <section class="inv2-asset-hero">
+    <div class="inv2-asset-hero-left">
+      <div class="inv2-asset-hero-icon">
+        {{#if (eq item.classification "Computer")}}
+          <i class="fas fa-desktop"></i>
+        {{else}}
+          <i class="fas fa-keyboard"></i>
+        {{/if}}
       </div>
 
-      <div class="page-header-right">
-        <button type="button" id="editToggleBtn" class="btn btn-primary">
-          <i class="fas fa-pen"></i>
-          Edit Item
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div class="details-grid">
-    <div class="data-card">
-      <div class="data-card-header">
-        <div class="data-card-header-left">
-          <h3 class="data-card-title">
-            <i class="fas fa-box-open"></i>
-            Item Overview
-          </h3>
-        </div>
-      </div>
-
-      <div class="data-card-body">
-        <!-- VIEW MODE -->
-        <div id="viewMode">
-          <div class="details-list">
-            <div class="details-row">
-              <span class="details-label">Item ID</span>
-              <span class="details-value">{{item.itemId}}</span>
-            </div>
-
-            <div class="details-row">
-              <span class="details-label">Serial Number</span>
-              <span class="details-value">{{item.serialNumber}}</span>
-            </div>
-
-            <div class="details-row">
-              <span class="details-label">Brand</span>
-              <span class="details-value">{{item.brand}}</span>
-            </div>
-
-            <div class="details-row">
-              <span class="details-label">Model</span>
-              <span class="details-value">{{item.model}}</span>
-            </div>
-
-            <div class="details-row">
-              <span class="details-label">Category</span>
-              <span class="details-value">{{item.category}}</span>
-            </div>
-
-            <div class="details-row">
-              <span class="details-label">Classification</span>
-              <span class="details-value">{{item.classification}}</span>
-            </div>
-
-            <div class="details-row">
-              <span class="details-label">Date Acquired</span>
-              <span class="details-value">{{formatDate item.dateAcquired}}</span>
-            </div>
-
-            <div class="details-row">
-              <span class="details-label">Status</span>
-              <span class="details-value">
-                <span class="status-badge
-                  {{#if (eq item.status "Available")}}status-available{{/if}}
-                  {{#if (eq item.status "In-Use")}}status-inuse{{/if}}
-                  {{#if (eq item.status "Maintenance")}}status-maintenance{{/if}}
-                  {{#if (eq item.status "Retired")}}status-retired{{/if}}
-                ">
-                  {{item.status}}
-                </span>
-              </span>
-            </div>
-
-            <div class="details-row">
-              <span class="details-label">Assigned To</span>
-              <span class="details-value">
-                {{#if item.assignedTo}}
-                  {{item.assignedTo.name}} {{#if item.assignedTo.email}}({{item.assignedTo.email}}){{/if}}
-                {{else}}
-                  —
-                {{/if}}
-              </span>
-            </div>
-
-            <div class="details-row">
-              <span class="details-label">Document</span>
-              <span class="details-value">
-                {{#if item.uploadPath}}
-                  <a href="/{{item.uploadPath}}" target="_blank" class="btn btn-outline btn-sm">View File</a>
-                {{else}}
-                  —
-                {{/if}}
-              </span>
-            </div>
-          </div>
-
-          <div class="details-bottom-actions">
-            <a href="/inventory" class="btn btn-outline">
-              <i class="fas fa-arrow-left"></i>
-              Back to Inventory
-            </a>
-
-            <form id="deleteItemForm" method="POST" action="/api/items/{{itemId}}?_method=DELETE">
-              <button type="button" id="deleteItemBtn" class="btn btn-danger">
-                <i class="fas fa-trash"></i>
-                Delete Item
-              </button>
-            </form>
-          </div>
-        </div>
-
-        <div id="editMode" style="display:none;">
-          {{#if formError}}
-            <div class="alert alert-error custom-alert-error">
-              <i class="fas fa-exclamation-circle"></i>
-              <span>{{formError}}</span>
-            </div>
-          {{/if}}
-
-          <form
-            class="modern-form"
-            method="POST"
-            enctype="multipart/form-data"
-            action="/api/items/{{itemId}}?_method=PUT"
-            novalidate
-          >
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="itemId" class="form-label">Item ID</label>
-                <input
-                  type="text"
-                  id="itemId"
-                  name="itemId"
-                  class="form-input"
-                  value="{{item.itemId}}"
-                />
-              </div>
-
-              <div class="form-group">
-                <label for="serialNumber" class="form-label">Serial Number</label>
-                <input
-                  type="text"
-                  id="serialNumber"
-                  name="serialNumber"
-                  class="form-input"
-                  value="{{item.serialNumber}}"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label for="brand" class="form-label">Brand</label>
-                <input
-                  type="text"
-                  id="brand"
-                  name="brand"
-                  class="form-input"
-                  value="{{item.brand}}"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label for="model" class="form-label">Model</label>
-                <input
-                  type="text"
-                  id="model"
-                  name="model"
-                  class="form-input"
-                  value="{{item.model}}"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label for="category" class="form-label">Category</label>
-                <input
-                  type="text"
-                  id="category"
-                  name="category"
-                  class="form-input"
-                  value="{{item.category}}"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label for="classification" class="form-label">Classification</label>
-                <select id="classification" name="classification" class="form-input" required>
-                  <option value="">Select classification</option>
-                  <option value="Computer" {{#if (eq item.classification "Computer")}}selected{{/if}}>Computer</option>
-                  <option value="Peripheral" {{#if (eq item.classification "Peripheral")}}selected{{/if}}>Peripheral</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label for="status" class="form-label">Status</label>
-                <select id="status" name="status" class="form-input" required>
-                  <option value="Available" {{#if (eq item.status "Available")}}selected{{/if}}>Available</option>
-                  <option value="In-Use" {{#if (eq item.status "In-Use")}}selected{{/if}}>In-Use</option>
-                  <option value="Maintenance" {{#if (eq item.status "Maintenance")}}selected{{/if}}>Maintenance</option>
-                  <option value="Retired" {{#if (eq item.status "Retired")}}selected{{/if}}>Retired</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label for="dateAcquired" class="form-label">Date Acquired</label>
-                <input
-                  type="date"
-                  id="dateAcquired"
-                  name="dateAcquired"
-                  class="form-input"
-                  value="{{item.dateAcquired}}"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label for="document" class="form-label">Upload Document</label>
-                <input
-                  type="file"
-                  id="document"
-                  name="document"
-                  class="form-input"
-                />
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button type="button" id="cancelEditBtn" class="btn btn-outline">Cancel</button>
-              <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i>
-                Save Changes
-              </button>
-            </div>
-          </form>
-        </div>
+      <div>
+        <span class="inv2-eyebrow">Asset Record</span>
+        <h1>{{item.brand}} {{item.model}}</h1>
+        <p>Item ID {{item.itemId}} · Serial {{item.serialNumber}}</p>
       </div>
     </div>
-  </div>
+
+    <div class="inv2-asset-hero-actions">
+      <span class="inv2-status
+        {{#if (eq item.status "Available")}}is-available{{/if}}
+        {{#if (eq item.status "In-Use")}}is-inuse{{/if}}
+        {{#if (eq item.status "Maintenance")}}is-maintenance{{/if}}
+        {{#if (eq item.status "Retired")}}is-retired{{/if}}
+      ">
+        {{item.status}}
+      </span>
+
+      <a href="/items/{{itemId}}/edit" class="inv2-primary-btn">
+        <i class="fas fa-pen"></i>
+        Edit Item
+      </a>
+    </div>
+  </section>
+
+  <section class="inv2-record-layout">
+    <main class="inv2-record-main">
+      <div class="inv2-section-title">
+        <div>
+          <h2>Item Information</h2>
+          <p>Core asset identity, classification, and ownership details.</p>
+        </div>
+      </div>
+
+      <div class="inv2-detail-grid">
+        <div class="inv2-detail-item">
+          <span>Item ID</span>
+          <strong>{{item.itemId}}</strong>
+        </div>
+
+        <div class="inv2-detail-item">
+          <span>Serial Number</span>
+          <strong>{{item.serialNumber}}</strong>
+        </div>
+
+        <div class="inv2-detail-item">
+          <span>Brand</span>
+          <strong>{{item.brand}}</strong>
+        </div>
+
+        <div class="inv2-detail-item">
+          <span>Model</span>
+          <strong>{{item.model}}</strong>
+        </div>
+
+        <div class="inv2-detail-item">
+          <span>Category</span>
+          <strong>{{item.category}}</strong>
+        </div>
+
+        <div class="inv2-detail-item">
+          <span>Classification</span>
+          <strong>{{item.classification}}</strong>
+        </div>
+
+        <div class="inv2-detail-item">
+          <span>Date Acquired</span>
+          <strong>{{formatDate item.dateAcquired}}</strong>
+        </div>
+
+        <div class="inv2-detail-item">
+          <span>Assigned To</span>
+          <strong>
+            {{#if item.assignedTo}}
+              {{item.assignedTo.name}}
+            {{else}}
+              Unassigned
+            {{/if}}
+          </strong>
+        </div>
+      </div>
+    </main>
+
+    <aside class="inv2-record-side">
+      <div class="inv2-side-card">
+        <h3>
+          <i class="fas fa-user-check"></i>
+          Assignment
+        </h3>
+
+        {{#if item.assignedTo}}
+          <div class="inv2-person-card">
+            <div class="inv2-person-avatar">
+              {{firstChar item.assignedTo.name}}
+            </div>
+            <div>
+              <strong>{{item.assignedTo.name}}</strong>
+              <span>{{item.assignedTo.email}}</span>
+            </div>
+          </div>
+        {{else}}
+          <p class="inv2-muted">This item is not currently assigned to anyone.</p>
+        {{/if}}
+      </div>
+
+      <div class="inv2-side-card">
+        <h3>
+          <i class="fas fa-file-alt"></i>
+          Document
+        </h3>
+
+        {{#if item.documentUrl}}
+          <a href="{{item.documentUrl}}" target="_blank" class="inv2-document-link">
+            <i class="fas fa-file-download"></i>
+            View uploaded document
+          </a>
+        {{else}}
+          <p class="inv2-muted">No document uploaded for this asset.</p>
+        {{/if}}
+      </div>
+
+      <div class="inv2-side-actions">
+        <a href="/inventory" class="inv2-secondary-btn">
+          <i class="fas fa-arrow-left"></i>
+          Back
+        </a>
+
+        <form
+          method="POST"
+          action="/api/items/{{itemId}}?_method=DELETE"
+          data-confirm-message="Are you sure you want to delete this item?"
+        >
+          <button type="submit" class="inv2-danger-btn">
+            <i class="fas fa-trash"></i>
+            Delete
+          </button>
+        </form>
+      </div>
+    </aside>
+  </section>
 </div>
-
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const editToggleBtn = document.getElementById("editToggleBtn");
-    const cancelEditBtn = document.getElementById("cancelEditBtn");
-    const viewMode = document.getElementById("viewMode");
-    const editMode = document.getElementById("editMode");
-
-    if (editToggleBtn && viewMode && editMode) {
-      editToggleBtn.addEventListener("click", () => {
-        viewMode.style.display = "none";
-        editMode.style.display = "block";
-        editToggleBtn.style.display = "none";
-      });
-    }
-
-    if (cancelEditBtn && viewMode && editMode && editToggleBtn) {
-      cancelEditBtn.addEventListener("click", () => {
-        editMode.style.display = "none";
-        viewMode.style.display = "block";
-        editToggleBtn.style.display = "inline-flex";
-      });
-    }
-
-    const detailEditForm = document.querySelector("#editMode .modern-form");
-
-    if (detailEditForm) {
-      detailEditForm.addEventListener("submit", function (e) {
-        const requiredFields = detailEditForm.querySelectorAll("[required]");
-
-        requiredFields.forEach((field) => {
-          field.classList.remove("input-error");
-          const oldError = field.parentElement.querySelector(".field-error");
-          if (oldError) oldError.remove();
-        });
-
-        let hasError = false;
-
-        requiredFields.forEach((field) => {
-          const value = field.value.trim();
-
-          if (!value) {
-            hasError = true;
-            field.classList.add("input-error");
-
-            const error = document.createElement("div");
-            error.className = "field-error";
-            error.textContent = "Required";
-            field.parentElement.appendChild(error);
-          }
-        });
-
-        if (hasError) {
-          e.preventDefault();
-        }
-      });
-    }
-
-    const deleteItemBtn = document.getElementById("deleteItemBtn");
-    const deleteItemForm = document.getElementById("deleteItemForm");
-
-    const confirmModal = document.getElementById("confirmModal");
-    const confirmModalMessage = document.getElementById("confirmModalMessage");
-    const cancelConfirmModal = document.getElementById("cancelConfirmModal");
-    const acceptConfirmModal = document.getElementById("acceptConfirmModal");
-    const closeConfirmModal = document.getElementById("closeConfirmModal");
-    const confirmModalOverlay = document.getElementById("confirmModalOverlay");
-
-    if (
-      deleteItemBtn &&
-      deleteItemForm &&
-      confirmModal &&
-      confirmModalMessage &&
-      cancelConfirmModal &&
-      acceptConfirmModal &&
-      closeConfirmModal
-    ) {
-      let pendingAction = null;
-
-      const openModal = () => {
-        confirmModalMessage.textContent = "Are you sure you want to delete this item?";
-        confirmModal.style.display = "flex";
-        pendingAction = () => deleteItemForm.submit();
-      };
-
-      const closeModal = () => {
-        confirmModal.style.display = "none";
-        pendingAction = null;
-      };
-
-      deleteItemBtn.addEventListener("click", openModal);
-      cancelConfirmModal.addEventListener("click", closeModal);
-      closeConfirmModal.addEventListener("click", closeModal);
-
-      if (confirmModalOverlay) {
-        confirmModalOverlay.addEventListener("click", closeModal);
-      }
-
-      acceptConfirmModal.addEventListener("click", () => {
-        if (pendingAction) {
-          pendingAction();
-        }
-      });
-    }
-  });
-</script>

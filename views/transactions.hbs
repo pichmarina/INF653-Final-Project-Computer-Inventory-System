@@ -1,220 +1,390 @@
-<div class="page-wrapper"> 
-  <div class="page-header-modern">
-    <div class="page-header-content">
+<div class="page-wrapper transactions-page">
+  <div class="page-header-modern transaction-hero">
+    <div class="page-header-content transaction-hero-content">
       <div class="page-header-left">
         <span class="page-eyebrow">Operations</span>
         <h1 class="page-heading">Check-In / Check-Out</h1>
-        <p class="page-description">Assign items to users or process returns with document uploads</p>
+        <p class="page-description">Assign available assets with a reference
+          document and process returns with inspection proof.</p>
+      </div>
+      <div class="transaction-kpis" aria-label="Transaction Summary">
+        <div class="transaction-kpi-card">
+          <span class="transaction-kpi-label">Available</span>
+          <strong class="transaction-kpi-value">{{availableCount}}</strong>
+        </div>
+        <div class="transaction-kpi-card">
+          <span class="transaction-kpi-label">In Use</span>
+          <strong class="transaction-kpi-value">{{inUseCount}}</strong>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="dashboard-grid">
-    <div class="dashboard-card">
-      <div class="dashboard-card-header">
-        <h3 class="dashboard-card-title">
-          <i class="fas fa-sign-out-alt"></i>
-          Check Out Item
-        </h3>
-      </div>
-      <div class="dashboard-card-body">
-        <form
-          class="modern-form"
-          method="POST"
-          enctype="multipart/form-data"
-          action="/api/transactions/checkout"
-          novalidate
+  {{#if formError}}
+    <div class="custom-alert-error transaction-page-alert" role="alert">
+      <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+      <span>{{formError}}</span>
+    </div>
+  {{/if}}
+
+  <div class="transaction-layout">
+    <aside
+      class="transaction-mode-rail"
+      aria-label="Transaction mode and guide"
+    >
+      <p class="transaction-mode-label">Choose Form</p>
+
+      <div
+        class="transaction-mode-switch"
+        role="tablist"
+        aria-label="Transaction Mode"
+      >
+        <button
+          type="button"
+          class="transaction-mode-btn is-active"
+          data-transaction-mode="checkout"
+          role="tab"
+          aria-selected="true"
+          aria-controls="transactionPanelCheckout"
+          id="transactionModeCheckout"
         >
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="checkoutItemId" class="form-label">Item</label>
-              <select id="checkoutItemId" name="itemId" class="form-input" required>
-                <option value="">Select available item</option>
-                {{#each availableItems}}
-                  <option value="{{this._id}}">
-                    {{this.itemId}} - {{this.brand}} {{this.model}} ({{this.serialNumber}})
-                  </option>
-                {{/each}}
-              </select>
-            </div>
+          <span class="transaction-mode-btn-icon" aria-hidden="true"><i
+              class="fas fa-sign-out-alt"
+            ></i></span>
+          <span class="transaction-mode-btn-copy">
+            <strong>Check Out</strong>
+            <small>Assign item to user</small>
+          </span>
+        </button>
+        <button
+          type="button"
+          class="transaction-mode-btn"
+          data-transaction-mode="checkin"
+          role="tab"
+          aria-selected="false"
+          aria-controls="transactionPanelCheckin"
+          id="transactionModeCheckin"
+        >
+          <span class="transaction-mode-btn-icon" aria-hidden="true"><i
+              class="fas fa-sign-in-alt"
+            ></i></span>
+          <span class="transaction-mode-btn-copy">
+            <strong>Check In</strong>
+            <small>Return item to stock</small>
+          </span>
+        </button>
+      </div>
+    </aside>
 
-            <div class="form-group">
-              <label for="checkoutUserId" class="form-label">User</label>
-              <select id="checkoutUserId" name="userId" class="form-input" required>
-                <option value="">Select user</option>
-                {{#each users}}
-                  <option value="{{this._id}}">
-                    {{this.name}} - {{this.email}}
-                  </option>
-                {{/each}}
-              </select>
-            </div>
-
-            <div class="form-group form-group-full">
-              <label for="checkoutDocument" class="form-label">Upload Document *</label>
-              <input
-                type="file"
-                id="checkoutDocument"
-                name="document"
-                class="form-input"
-                data-required-file="true"
-              />
-            </div>
-
-            <div class="form-group form-group-full">
-              <label for="checkoutNotes" class="form-label">Notes (Optional)</label>
-              <textarea
-                id="checkoutNotes"
-                name="notes"
-                class="form-input form-textarea"
-                placeholder="Optional notes"
-                rows="4"
-              ></textarea>
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary">
+    <section class="transaction-workspace" aria-live="polite">
+      <section
+        class="dashboard-card transaction-panel is-active"
+        data-transaction-panel="checkout"
+        id="transactionPanelCheckout"
+        role="tabpanel"
+        aria-labelledby="transactionModeCheckout"
+      >
+        <div class="dashboard-card-header transaction-panel-header">
+          <div class="transaction-card-title-wrap">
+            <h3 class="dashboard-card-title">
               <i class="fas fa-sign-out-alt"></i>
-              Check Out
-            </button>
+              Check Out Item
+            </h3>
+            <p class="transaction-card-subtitle">Assign an available asset and
+              log a reference document for accountability.</p>
           </div>
-        </form>
-      </div>
-    </div>
-
-    <div class="dashboard-card">
-      <div class="dashboard-card-header">
-        <h3 class="dashboard-card-title">
-          <i class="fas fa-sign-in-alt"></i>
-          Check In Item
-        </h3>
-      </div>
-      <div class="dashboard-card-body">
-        <form
-          class="modern-form"
-          method="POST"
-          enctype="multipart/form-data"
-          action="/api/transactions/checkin"
-          novalidate
-        >
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="checkinItemId" class="form-label">Item</label>
-              <select id="checkinItemId" name="itemId" class="form-input" required>
-                <option value="">Select checked-out item</option>
-                {{#each inUseItems}}
-                  <option value="{{this._id}}">
-                    {{this.itemId}} - {{this.brand}} {{this.model}} ({{this.serialNumber}})
-                  </option>
-                {{/each}}
-              </select>
-            </div>
-
-            <div class="form-group form-group-full">
-              <label for="checkinDocument" class="form-label">Upload Document *</label>
-              <input
-                type="file"
-                id="checkinDocument"
-                name="document"
-                class="form-input"
-                data-required-file="true"
-              />
-            </div>
-
-            <div class="form-group form-group-full">
-              <label for="checkinNotes" class="form-label">Notes (Optional)</label>
-              <textarea
-                id="checkinNotes"
-                name="notes"
-                class="form-input form-textarea"
-                placeholder="Optional notes"
-                rows="4"
-              ></textarea>
-            </div>
+          <span class="transaction-chip">Status: Assign</span>
+        </div>
+        <div class="dashboard-card-body transaction-panel-body">
+          <div class="custom-alert-info transaction-info-banner">
+            <i class="fas fa-file-shield"></i>
+            <span>Reference documentation is required before checkout is
+              approved.</span>
           </div>
 
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary">
+          <form
+            class="modern-form transaction-form"
+            method="POST"
+            enctype="multipart/form-data"
+            action="/api/transactions/checkout"
+            novalidate
+            data-form-scope="checkout"
+          >
+            <div class="form-grid transaction-form-grid">
+              <div class="form-group">
+                <label for="checkoutItemId" class="form-label">Available Item</label>
+                <select
+                  id="checkoutItemId"
+                  name="itemId"
+                  class="form-input"
+                  required
+                  data-selected="{{checkoutForm.itemId}}"
+                >
+                  <option value="">Select available item</option>
+                  {{#each availableItems}}
+                    <option value="{{this._id}}">
+                      {{this.itemId}}
+                      -
+                      {{this.brand}}
+                      {{this.model}}
+                      ({{this.serialNumber}})
+                    </option>
+                  {{/each}}
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="checkoutUserId" class="form-label">Assign To User</label>
+                <select
+                  id="checkoutUserId"
+                  name="userId"
+                  class="form-input"
+                  required
+                  data-selected="{{checkoutForm.userId}}"
+                >
+                  <option value="">Select user</option>
+                  {{#each users}}
+                    <option value="{{this._id}}">
+                      {{this.name}}
+                      -
+                      {{this.email}}
+                    </option>
+                  {{/each}}
+                </select>
+              </div>
+
+              <div class="form-group form-group-full">
+                <label for="checkoutDocument" class="form-label">Reference
+                  Document *</label>
+                <input
+                  type="file"
+                  id="checkoutDocument"
+                  name="document"
+                  class="form-input js-file-input"
+                  data-required-file="true"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                />
+                <div class="transaction-file-meta" aria-live="polite">
+                  <span class="transaction-file-name">No file selected</span>
+                  <span class="transaction-file-help">Allowed: PDF, DOC, DOCX,
+                    JPG, JPEG, PNG</span>
+                </div>
+              </div>
+
+              <div class="form-group form-group-full">
+                <label for="checkoutNotes" class="form-label">Reference Notes
+                  (Optional)</label>
+                <textarea
+                  id="checkoutNotes"
+                  name="notes"
+                  class="form-input form-textarea"
+                  placeholder="Add context for this assignment"
+                  rows="4"
+                >{{checkoutForm.notes}}</textarea>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="submit"
+                class="btn btn-primary transaction-submit-btn"
+              >
+                <i class="fas fa-sign-out-alt"></i>
+                Complete Check Out
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section
+        class="dashboard-card transaction-panel"
+        data-transaction-panel="checkin"
+        id="transactionPanelCheckin"
+        role="tabpanel"
+        aria-labelledby="transactionModeCheckin"
+      >
+        <div class="dashboard-card-header transaction-panel-header">
+          <div class="transaction-card-title-wrap">
+            <h3 class="dashboard-card-title">
               <i class="fas fa-sign-in-alt"></i>
-              Check In
-            </button>
+              Check In Item
+            </h3>
+            <p class="transaction-card-subtitle">Verify returned asset condition
+              and restore inventory availability.</p>
           </div>
-        </form>
-      </div>
-    </div>
+          <span class="transaction-chip transaction-chip-success">Status: Return</span>
+        </div>
+        <div class="dashboard-card-body transaction-panel-body">
+          <div
+            class="custom-alert-info transaction-info-banner transaction-info-banner-success"
+          >
+            <i class="fas fa-clipboard-check"></i>
+            <span>Return inspection proof is required before an item is marked
+              available.</span>
+          </div>
+
+          <form
+            class="modern-form transaction-form"
+            method="POST"
+            enctype="multipart/form-data"
+            action="/api/transactions/checkin"
+            novalidate
+            data-form-scope="checkin"
+          >
+            <div class="form-grid transaction-form-grid">
+              <div class="form-group">
+                <label for="checkinItemId" class="form-label">In-Use Item</label>
+                <select
+                  id="checkinItemId"
+                  name="itemId"
+                  class="form-input"
+                  required
+                  data-selected="{{checkinForm.itemId}}"
+                >
+                  <option value="">Select checked-out item</option>
+                  {{#each inUseItems}}
+                    <option value="{{this._id}}">
+                      {{this.itemId}}
+                      -
+                      {{this.brand}}
+                      {{this.model}}
+                      ({{this.serialNumber}})
+                    </option>
+                  {{/each}}
+                </select>
+              </div>
+
+              <div class="form-group form-group-full">
+                <label for="checkinDocument" class="form-label">Return
+                  Inspection Document *</label>
+                <input
+                  type="file"
+                  id="checkinDocument"
+                  name="document"
+                  class="form-input js-file-input"
+                  data-required-file="true"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                />
+                <div class="transaction-file-meta" aria-live="polite">
+                  <span class="transaction-file-name">No file selected</span>
+                  <span class="transaction-file-help">Allowed: PDF, DOC, DOCX,
+                    JPG, JPEG, PNG</span>
+                </div>
+              </div>
+
+              <div class="form-group form-group-full">
+                <label for="checkinNotes" class="form-label">Inspection Notes
+                  (Optional)</label>
+                <textarea
+                  id="checkinNotes"
+                  name="notes"
+                  class="form-input form-textarea"
+                  placeholder="Add return condition details"
+                  rows="4"
+                >{{checkinForm.notes}}</textarea>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="submit"
+                class="btn btn-primary transaction-submit-btn"
+              >
+                <i class="fas fa-sign-in-alt"></i>
+                Complete Check In
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </section>
   </div>
 </div>
 
 <script>
-  const params = new URLSearchParams(window.location.search);
-  const success = params.get("success");
-
-  if (success) {
-    const message =
-      success === "checkout"
-        ? "Item checked out successfully"
-        : success === "checkin"
-        ? "Item checked in successfully"
-        : "";
-
-    if (message) {
-      const popup = document.createElement("div");
-      popup.textContent = message;
-      popup.className = "success-toast";
-      document.body.appendChild(popup);
-
-      setTimeout(() => {
-        popup.classList.add("show");
-      }, 10);
-
-      setTimeout(() => {
-        popup.classList.remove("show");
-        setTimeout(() => popup.remove(), 300);
-      }, 2500);
-
-      const url = new URL(window.location);
-      url.searchParams.delete("success");
-      window.history.replaceState({}, "", url);
-    }
-  }
+  document.querySelectorAll("select[data-selected]").forEach((field) => { const
+  selectedValue = field.getAttribute("data-selected"); if (selectedValue) {
+  field.value = selectedValue; } }); const params = new
+  URLSearchParams(window.location.search); const success =
+  params.get("success"); if (success) { const message = success === "checkout" ?
+  "Item checked out successfully" : success === "checkin" ? "Item checked in
+  successfully" : ""; if (message) { const popup =
+  document.createElement("div"); popup.textContent = message; popup.className =
+  "success-toast"; document.body.appendChild(popup); setTimeout(() => {
+  popup.classList.add("show"); }, 10); setTimeout(() => {
+  popup.classList.remove("show"); setTimeout(() => popup.remove(), 300); },
+  2500); const url = new URL(window.location);
+  url.searchParams.delete("success"); window.history.replaceState({}, "", url);
+  } }
 </script>
 
 <script>
-  document.querySelectorAll(".modern-form").forEach((form) => {
-    form.addEventListener("submit", function (e) {
-      let hasError = false;
+  const transactionModeSwitch =
+  document.querySelector(".transaction-mode-switch"); const
+  transactionModeButtons = document.querySelectorAll("[data-transaction-mode]");
+  const transactionPanels =
+  document.querySelectorAll("[data-transaction-panel]"); function
+  setTransactionMode(mode, shouldPersist = true) { if (mode !== "checkout" &&
+  mode !== "checkin") { return; } transactionModeButtons.forEach((button) => {
+  const isActive = button.getAttribute("data-transaction-mode") === mode;
+  button.classList.toggle("is-active", isActive);
+  button.setAttribute("aria-selected", isActive ? "true" : "false");
+  button.setAttribute("tabindex", isActive ? "0" : "-1"); });
+  transactionPanels.forEach((panel) => { const isActive =
+  panel.getAttribute("data-transaction-panel") === mode;
+  panel.classList.toggle("is-active", isActive); panel.hidden = !isActive;
+  panel.setAttribute("aria-hidden", isActive ? "false" : "true"); }); if
+  (shouldPersist) { sessionStorage.setItem("transactionMode", mode); } } if
+  (transactionModeSwitch) { transactionModeSwitch.addEventListener("click",
+  function (event) { const toggleButton =
+  event.target.closest("[data-transaction-mode]"); if (!toggleButton) { return;
+  } event.preventDefault(); const mode =
+  toggleButton.getAttribute("data-transaction-mode"); setTransactionMode(mode);
+  }); transactionModeSwitch.addEventListener("keydown", function (event) { if
+  (event.key !== "ArrowRight" && event.key !== "ArrowLeft") { return; } const
+  focusedButton = event.target.closest("[data-transaction-mode]"); if
+  (!focusedButton) { return; } event.preventDefault(); const modeSequence =
+  ["checkout", "checkin"]; const currentMode =
+  focusedButton.getAttribute("data-transaction-mode"); const currentIndex =
+  modeSequence.indexOf(currentMode); if (currentIndex < 0) { return; } const
+  delta = event.key === "ArrowRight" ? 1 : -1; const nextIndex = (currentIndex +
+  delta + modeSequence.length) % modeSequence.length; const nextMode =
+  modeSequence[nextIndex]; const nextButton =
+  transactionModeSwitch.querySelector( `[data-transaction-mode="${nextMode}"]`,
+  ); setTransactionMode(nextMode); if (nextButton) { nextButton.focus(); } }); }
+  document.querySelectorAll(".js-file-input").forEach((input) => {
+  input.addEventListener("change", function () { const nameEl =
+  input.parentElement.querySelector(".transaction-file-name"); if (!nameEl) {
+  return; } if (input.files && input.files.length > 0) { nameEl.textContent =
+  input.files[0].name; } else { nameEl.textContent = "No file selected"; } });
+  }); document.querySelectorAll(".modern-form").forEach((form) => {
+  form.addEventListener("submit", function (e) { let hasError = false;
+  form.querySelectorAll(".field-error").forEach((el) => el.remove());
+  form.querySelectorAll(".input-error").forEach((el) => {
+  el.classList.remove("input-error"); }); form
+  .querySelectorAll("select[required], input[required], textarea[required]")
+  .forEach((field) => { if (!field.value.trim()) { hasError = true;
+  field.classList.add("input-error"); const error =
+  document.createElement("div"); error.className = "field-error";
+  error.textContent = "Required"; field.parentElement.appendChild(error); } });
+  form.querySelectorAll('[data-required-file="true"]').forEach((field) => { if
+  (!field.files || field.files.length === 0) { hasError = true;
+  field.classList.add("input-error"); const error =
+  document.createElement("div"); error.className = "field-error";
+  error.textContent = "Document is required";
+  field.parentElement.appendChild(error); } }); if (hasError) {
+  e.preventDefault(); } }); });
 
-      form.querySelectorAll(".field-error").forEach((el) => el.remove());
-      form.querySelectorAll(".input-error").forEach((el) => el.classList.remove("input-error"));
-
-      form.querySelectorAll("select[required], input[required], textarea[required]").forEach((field) => {
-        if (!field.value.trim()) {
-          hasError = true;
-          field.classList.add("input-error");
-
-          const error = document.createElement("div");
-          error.className = "field-error";
-          error.textContent = "Required";
-          field.parentElement.appendChild(error);
-        }
-      });
-
-      form.querySelectorAll('[data-required-file="true"]').forEach((field) => {
-        if (!field.files || field.files.length === 0) {
-          hasError = true;
-          field.classList.add("input-error");
-
-          const error = document.createElement("div");
-          error.className = "field-error";
-          error.textContent = "Document is required";
-          field.parentElement.appendChild(error);
-        }
-      });
-
-      if (hasError) {
-        e.preventDefault();
-      }
-    });
-  });
+  {{#if errorScope}}
+    const failedMode = "{{errorScope}}"; const failedForm =
+    document.querySelector('[data-form-scope="{{errorScope}}"]'); if (failedMode
+    === "checkout" || failedMode === "checkin") { setTransactionMode(failedMode,
+    false); } if (failedForm) { failedForm.scrollIntoView({ behavior: "smooth",
+    block: "center" }); }
+  {{else}}
+    const savedMode = sessionStorage.getItem("transactionMode"); if (savedMode
+    === "checkin" || savedMode === "checkout") { setTransactionMode(savedMode,
+    false); } else { setTransactionMode("checkout", false); }
+  {{/if}}
 </script>
