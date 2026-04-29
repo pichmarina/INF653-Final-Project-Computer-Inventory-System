@@ -16,6 +16,20 @@ function formatDate(date) {
   }).format(new Date(date));
 }
 
+function serializeApiKey(key) {
+  const keyObject = key.toObject ? key.toObject() : key;
+
+  return {
+    _id: keyObject._id,
+    name: keyObject.name,
+    createdBy: keyObject.createdBy,
+    isRevoked: keyObject.isRevoked,
+    createdAt: keyObject.createdAt,
+    updatedAt: keyObject.updatedAt,
+    shortHash: keyObject.keyHash ? `${keyObject.keyHash.slice(0, 12)}...` : "",
+  };
+}
+
 async function buildKeysViewData(query = {}, extras = {}) {
   const keyDocs = await ApiKey.find({ isRevoked: false })
     .populate("createdBy", "name email role")
@@ -89,7 +103,7 @@ async function listApiKeys(req, res, next) {
 
     return res.json({
       success: true,
-      data: keys,
+      data: keys.map(serializeApiKey),
     });
   } catch (error) {
     next(error);
@@ -119,7 +133,7 @@ async function revokeApiKey(req, res, next) {
       return res.json({
         success: true,
         message: "API key revoked",
-        data: key,
+        data: serializeApiKey(key),
       });
     }
 

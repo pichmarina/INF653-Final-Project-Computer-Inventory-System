@@ -14,6 +14,7 @@ const { renderKeysPage } = require("../controllers/apiKeyController");
 const { getDashboardData } = require("../controllers/reportController");
 const { renderItemsPage } = require("../controllers/itemController");
 const {
+  getSummaryReport,
   renderSummaryReportPage,
   renderAgingReportPage,
   renderAssetsByUserReportPage,
@@ -194,6 +195,7 @@ router.get(
 
 router.get("/reports", requireViewAuth, renderReportsPage);
 
+router.get("/reports/summary-data", requireViewAuth, getSummaryReport);
 router.get("/reports/summary", requireViewAuth, renderSummaryReportPage);
 router.get("/reports/aging", requireViewAuth, renderAgingReportPage);
 router.get("/reports/by-user", requireViewAuth, renderAssetsByUserReportPage);

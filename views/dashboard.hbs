@@ -107,7 +107,7 @@
 
 <script>
   async function fetchDashboardData() { try { const response = await
-  fetch('/api/reports/summary', { credentials: 'same-origin' }); if
+  fetch('/reports/summary-data', { credentials: 'same-origin' }); if
   (!response.ok) { throw new Error(`HTTP ${response.status}`); } const result =
   await response.json(); if (result.success && result.data) { const data =
   result.data; const deployed = data.deployed ??

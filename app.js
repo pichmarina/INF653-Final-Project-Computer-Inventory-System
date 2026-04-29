@@ -95,72 +95,51 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(methodOverride("_method"));
 
-const whitelist = [
-  process.env.BASE_URL || "http://localhost:3000",
-  "http://127.0.0.1:3000",
-  "http://localhost:3000",
-];
-
-// Normalize origin for comparison
 function normalizeOrigin(origin) {
   if (!origin) return null;
 
-  // Remove trailing slash
-  let normalized = origin.replace(/\/$/, "");
+  return String(origin).replace(/\/$/, "");
+}
 
-  // Handle IPv6 localhost variants
-  // ::1, [::1], http://::1, http://[::1], http://::1:3000
-  if (normalized.includes("::1") || normalized.includes("[::1]")) {
-    normalized = "http://localhost:3000";
-  }
+function getAllowedOrigins() {
+  const configuredOrigins = [
+    process.env.BASE_URL,
+    process.env.CORS_ORIGIN,
+    ...(process.env.DEV_CORS_ORIGINS || "").split(","),
+  ]
+    .map((origin) => normalizeOrigin(origin && origin.trim()))
+    .filter(Boolean);
 
-  // Handle 127.0.0.1
-  if (normalized.includes("127.0.0.1")) {
-    normalized = "http://127.0.0.1:3000";
-  }
+  return new Set(configuredOrigins);
+}
 
-  return normalized;
+const allowedOrigins = getAllowedOrigins();
+
+function corsError(origin) {
+  const error = new Error(`CORS origin is not allowed: ${origin}`);
+  error.status = 403;
+  return error;
 }
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Debug: log the origin being checked
-      console.log("CORS check - origin:", origin, "type:", typeof origin);
+      // Browser same-origin requests and normal form posts do not send Origin.
+      if (!origin) {
+        return callback(null, true);
+      }
 
-      // Allow requests with no origin (form submissions, same-origin requests, mobile apps)
-      // Also handle the string "null" which browsers send for file:// or about: pages
-      if (!origin || origin === "null" || origin === "undefined") {
-        console.log("CORS: No origin, allowing");
+      if (origin === "null" && process.env.NODE_ENV !== "production") {
         return callback(null, true);
       }
 
       const normalizedOrigin = normalizeOrigin(origin);
 
-      // Check if the normalized origin is in the whitelist
-      const isWhitelisted = whitelist.some(
-        (allowed) => normalizeOrigin(allowed) === normalizedOrigin,
-      );
-
-      // Also allow any localhost variant (IPv4, IPv6, with or without port)
-      const isLocalhost =
-        origin.includes("localhost") ||
-        origin.includes("127.0.0.1") ||
-        origin.includes("::1") ||
-        origin.includes("[::1]");
-
-      console.log(
-        "CORS - isWhitelisted:",
-        isWhitelisted,
-        "isLocalhost:",
-        isLocalhost,
-      );
-
-      if (isWhitelisted || isLocalhost) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
+      if (allowedOrigins.has(normalizedOrigin)) {
+        return callback(null, true);
       }
+
+      return callback(corsError(origin));
     },
     credentials: true,
   }),

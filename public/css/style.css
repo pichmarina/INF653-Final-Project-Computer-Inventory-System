@@ -1350,9 +1350,42 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .profile-hero-main {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-avatar-stack {
+    width: 100%;
+  }
+
+  .profile-avatar-actions {
+    max-width: 260px;
+  }
+
+  .profile-chip-row {
+    justify-content: center;
+  }
+
   .profile-form-grid,
   .profile-upload-row {
     grid-template-columns: 1fr;
+  }
+
+  .profile-upload-row {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .profile-avatar-controls {
+    align-items: center;
+    width: 100%;
+  }
+
+  .profile-file-actions {
+    justify-content: center;
+    width: 100%;
   }
 
   .profile-actions {
@@ -2389,6 +2422,10 @@ textarea {
 }
 .search-input-wrapper button:hover {
   color: var(--danger);
+}
+
+.hidden {
+  display: none !important;
 }
 
 .search-box input {
@@ -6751,18 +6788,41 @@ body.dark-mode .transaction-form input[type="file"]::file-selector-button:hover 
     padding: 10px;
   }
 
+  .transaction-layout {
+    gap: 16px;
+  }
+
+  .transaction-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .transaction-form .form-input,
+  .transaction-form select.form-input {
+    width: 100%;
+    max-width: 100%;
+  }
+
   .transaction-submit-btn {
     width: 100%;
     min-width: 0;
   }
 
   .transaction-file-meta {
-    flex-direction: column;
     align-items: flex-start;
   }
 
   .transaction-file-help {
     text-align: left;
+  }
+}
+
+@media (max-width: 520px) {
+  .transaction-mode-switch {
+    grid-template-columns: 1fr;
+  }
+
+  .transaction-panel-header {
+    align-items: flex-start;
   }
 }
 
@@ -9795,9 +9855,10 @@ body.dark-mode .asset-upload-label:hover {
   padding: 16px;
   border: 1.5px dashed var(--border-color-dark);
   border-radius: 16px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
   align-items: center;
-  gap: 14px;
+  gap: 4px 14px;
   background: var(--gray-50);
   cursor: pointer;
   transition:
@@ -9823,20 +9884,22 @@ body.dark-mode .asset-upload-label:hover {
   background: #eef2ff;
   color: #4f46e5;
   font-size: 1.05rem;
+  grid-row: 1 / span 2;
 }
 
 .inv2-file-drop strong {
   display: block;
   color: var(--text-primary);
   font-size: 0.94rem;
+  min-width: 0;
 }
 
 .inv2-file-drop span {
   display: block;
-  margin-top: 3px;
   color: var(--text-muted);
   font-size: 0.84rem;
-  overflow-wrap: anywhere;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .inv2-file-drop-wide {
@@ -10011,6 +10074,7 @@ body.dark-mode .inv2-edit-note {
   .inv2-toolbar-controls {
     grid-template-columns: 1fr;
   }
+}
 
 @media (max-width: 640px) {
   .inv2-page-head,
@@ -10039,6 +10103,11 @@ body.dark-mode .inv2-edit-note {
   }
 
   .inv2-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .inv2-record-side,
+  .inv2-form-grid {
     grid-template-columns: 1fr;
   }
 
@@ -10218,4 +10287,10 @@ body.dark-mode .inv2-edit-note {
 
 .filter-section:not([open]) .filter-section-body {
   display: none !important;
+}
+#checkinDocument {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding-left: 0 !important;
 }
