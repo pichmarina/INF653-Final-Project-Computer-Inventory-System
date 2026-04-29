@@ -1,122 +1,23 @@
 <div class="auth-page">
   <div class="auth-container">
-    <div class="auth-visual">
-      <div class="auth-visual-content">
-        <div class="auth-logo">
-          <div class="auth-logo-icon">
-            <i class="fas fa-server"></i>
-          </div>
-          <div class="auth-logo-text">
-            <span class="auth-logo-title">CIS</span>
-            <span class="auth-logo-subtitle">Computer Inventory System</span>
-          </div>
-        </div>
-
-        <div class="auth-kicker">
-          <span class="auth-kicker-dot"></span>
-          Live Asset Control Center
-        </div>
-
-        <div class="auth-features">
-          <h2 class="auth-features-title">Track every computer, assignment, and return from one secure workspace.</h2>
-          <p class="auth-features-subtitle">Built for IT teams that need clear visibility into laptops, desktops, peripherals, users, inventory status, and transaction history.</p>
-
-          <div class="auth-command-card" aria-hidden="true">
-            <div class="auth-command-header">
-              <div>
-                <span class="auth-command-label">Inventory Health</span>
-                <strong>98.4%</strong>
-              </div>
-              <span class="auth-command-status">Online</span>
-            </div>
-
-            <div class="auth-device-row">
-              <div class="auth-device-icon laptop"><i class="fas fa-laptop"></i></div>
-              <div class="auth-device-info">
-                <span>MacBook Pro 14"</span>
-                <small>Assigned to Admin Office</small>
-              </div>
-              <span class="auth-device-badge active">Active</span>
-            </div>
-
-            <div class="auth-device-row">
-              <div class="auth-device-icon desktop"><i class="fas fa-desktop"></i></div>
-              <div class="auth-device-info">
-                <span>Dell OptiPlex 7010</span>
-                <small>Ready for checkout</small>
-              </div>
-              <span class="auth-device-badge ready">Ready</span>
-            </div>
-
-            <div class="auth-device-row">
-              <div class="auth-device-icon repair"><i class="fas fa-screwdriver-wrench"></i></div>
-              <div class="auth-device-info">
-                <span>HP EliteDisplay</span>
-                <small>Maintenance queue</small>
-              </div>
-              <span class="auth-device-badge review">Review</span>
-            </div>
-          </div>
-
-          <div class="feature-list">
-            <div class="feature-item">
-              <div class="feature-icon">
-                <i class="fas fa-boxes-stacked"></i>
-              </div>
-              <div class="feature-content">
-                <h4>Centralized Inventory</h4>
-                <p>Keep device records, categories, conditions, and locations organized.</p>
-              </div>
-            </div>
-            <div class="feature-item">
-              <div class="feature-icon">
-                <i class="fas fa-right-left"></i>
-              </div>
-              <div class="feature-content">
-                <h4>Assignment Tracking</h4>
-                <p>Monitor checkouts, returns, users, and asset responsibility.</p>
-              </div>
-            </div>
-            <div class="feature-item">
-              <div class="feature-icon">
-                <i class="fas fa-chart-simple"></i>
-              </div>
-              <div class="feature-content">
-                <h4>Actionable Reports</h4>
-                <p>Review stock, usage, and transaction trends when decisions matter.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="auth-stats">
-          <div class="auth-stat">
-            <span class="auth-stat-number"><i class="fas fa-shield-halved"></i></span>
-            <span class="auth-stat-label">Secure Login</span>
-          </div>
-          <div class="auth-stat">
-            <span class="auth-stat-number"><i class="fas fa-clock-rotate-left"></i></span>
-            <span class="auth-stat-label">History</span>
-          </div>
-          <div class="auth-stat">
-            <span class="auth-stat-number"><i class="fas fa-bolt"></i></span>
-            <span class="auth-stat-label">Fast Updates</span>
-          </div>
-        </div>
+    <div class="auth-brand">
+      <div class="auth-logo-icon">
+        <i class="fas fa-server"></i>
       </div>
-
-      <div class="auth-visual-pattern"></div>
+      <div class="auth-logo-text">
+        <span class="auth-logo-title">CIS</span>
+        <span class="auth-logo-subtitle">Computer Inventory System</span>
+      </div>
     </div>
 
     <div class="auth-form-section">
       <div class="auth-form-container">
         <div class="auth-form-header">
           <div class="auth-form-icon">
-            <i class="fas fa-fingerprint"></i>
+            <i class="fas fa-arrow-right-to-bracket"></i>
           </div>
-          <span class="auth-form-eyebrow">Authorized Access</span>
-          <h2 class="auth-form-title">Welcome back</h2>
-          <p class="auth-form-subtitle">Sign in to manage computer assets and inventory activity.</p>
+          <h2 class="auth-form-title">Sign in with email</h2>
+          <p class="auth-form-subtitle">Access your inventory dashboard.</p>
         </div>
 
         {{#if formError}}
@@ -182,7 +83,7 @@
 
           <button type="submit" class="btn btn-primary btn-large btn-full">
             <i class="fas fa-sign-in-alt"></i>
-            Sign in to dashboard
+            Sign in
           </button>
         </form>
 
