@@ -17,6 +17,7 @@ const ALLOWED_TRANSACTION_DOC_EXTENSIONS = new Set([
   ".jpeg",
   ".png",
 ]);
+const APP_TIME_ZONE = process.env.APP_TIME_ZONE || "Asia/Phnom_Penh";
 
 function wantsJsonResponse(req) {
   const accept = req.get("accept") || "";
@@ -39,6 +40,38 @@ function formatDuration(startDate, endDate) {
 
   const minutes = Math.max(Math.floor(durationMs / (1000 * 60)), 0);
   return minutes > 0 ? `${minutes}m` : "Less than 1m";
+}
+
+function formatTransactionTimestamp(date) {
+  if (!date) {
+    return {
+      date: "",
+      time: "",
+    };
+  }
+
+  const parts = new Intl.DateTimeFormat("en-US", {
+    day: "2-digit",
+    hour: "2-digit",
+    hour12: false,
+    minute: "2-digit",
+    month: "2-digit",
+    timeZone: APP_TIME_ZONE,
+    year: "numeric",
+  })
+    .formatToParts(new Date(date))
+    .reduce((values, part) => {
+      if (part.type !== "literal") {
+        values[part.type] = part.value;
+      }
+
+      return values;
+    }, {});
+
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    time: `${parts.hour}:${parts.minute}`,
+  };
 }
 
 function getSuccessMessage(query = {}) {
@@ -397,6 +430,7 @@ async function renderHistoryPage(req, res, next) {
 
     const history = transactions.reverse().map((tx) => {
       const transactionId = tx._id ? tx._id.toString() : "";
+      const timestamp = formatTransactionTimestamp(tx.createdAt);
       const fallbackDuration =
         tx.action === "checkout"
           ? `In use for ${formatDuration(tx.checkoutDate || tx.createdAt, new Date())}`
@@ -407,8 +441,8 @@ async function renderHistoryPage(req, res, next) {
 
       return {
         transactionId,
-        date: tx.createdAt ? tx.createdAt.toISOString().slice(0, 10) : "",
-        time: tx.createdAt ? tx.createdAt.toTimeString().slice(0, 5) : "",
+        date: timestamp.date,
+        time: timestamp.time,
         itemName: tx.item
           ? getItemDisplayName(tx.item)
           : "Unknown Item",
