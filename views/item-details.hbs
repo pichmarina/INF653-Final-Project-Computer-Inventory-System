@@ -141,16 +141,18 @@
           Back
         </a>
 
-        <form
-          method="POST"
-          action="/api/items/{{itemId}}?_method=DELETE"
-          data-confirm-message="Are you sure you want to delete this item?"
-        >
-          <button type="submit" class="inv2-danger-btn">
-            <i class="fas fa-trash"></i>
-            Delete
-          </button>
-        </form>
+        {{#if (isAdmin user)}}
+          <form
+            method="POST"
+            action="/api/items/{{itemId}}?_method=DELETE"
+            data-confirm-message="Are you sure you want to delete this item?"
+          >
+            <button type="submit" class="inv2-danger-btn">
+              <i class="fas fa-trash"></i>
+              Delete
+            </button>
+          </form>
+        {{/if}}
       </div>
     </aside>
   </section>
