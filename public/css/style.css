@@ -3003,6 +3003,14 @@ body.dark-mode .welcome-section {
   font-size: 1.5rem;
   font-weight: 700;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.welcome-avatar-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .welcome-title {
@@ -7330,6 +7338,16 @@ body.dark-mode .report-section-badge {
   background: #fff !important;
   border-radius: 20px !important;
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22) !important;
+}
+
+#confirmModal .modal-footer {
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+
+#confirmModal .modal-footer .btn {
+  width: 100% !important;
+  justify-content: center !important;
 }
 
 body.dark-mode #confirmModal .modal-container,

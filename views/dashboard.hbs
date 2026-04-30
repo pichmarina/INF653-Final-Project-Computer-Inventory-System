@@ -3,7 +3,11 @@
   <div class="welcome-section">
     <div class="welcome-content">
       <div class="welcome-avatar">
-        {{firstChar displayName}}
+        {{#if user.avatarPath}}
+          <img src="{{user.avatarPath}}" alt="{{displayName}}" class="welcome-avatar-image">
+        {{else}}
+          {{firstChar displayName}}
+        {{/if}}
       </div>
       <div class="welcome-text">
         <h1 class="welcome-title">Welcome back, {{displayName}}!</h1>
