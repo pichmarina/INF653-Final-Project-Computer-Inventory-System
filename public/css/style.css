@@ -6620,32 +6620,51 @@ body.dark-mode .form-input:focus {
   box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.17);
 }
 
-.transaction-form input[type="file"] {
-  padding: 0 10px;
-  height: 42px;
-  line-height: 42px;
+.transaction-file-upload-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: white;
+  min-height: 42px;
+  overflow: hidden;
 }
 
-.transaction-form input[type="file"]::file-selector-button {
+.transaction-hidden-file {
+  display: none;
+}
+
+.transaction-file-btn {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 5px 12px;
+  margin: 7px 12px 7px 8px;
   border: 1px solid rgba(79, 70, 229, 0.3);
   border-radius: 9px;
-  padding: 5px 10px;
-  margin-right: 8px;
-  margin-top: 0;
-  margin-bottom: 0;
-  height: 28px;
-  vertical-align: middle;
   background: var(--primary-soft);
   color: var(--primary-dark);
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  height: 28px;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.transaction-form input[type="file"]::file-selector-button:hover {
+.transaction-file-btn:hover {
   background: #dfe5ff;
   border-color: var(--primary-light);
+}
+
+.transaction-file-box-text {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .transaction-file-meta {
@@ -6804,10 +6823,23 @@ body.dark-mode .transaction-info-banner.transaction-info-banner-success {
   color: #bbf7d0;
 }
 
-body.dark-mode .transaction-form input[type="file"] {
-  background: transparent;
-  border: 0;
-  color: var(--text-secondary);
+body.dark-mode .transaction-file-upload-box {
+  background: #131f31;
+  border-color: #314155;
+}
+
+body.dark-mode .transaction-file-btn {
+  background: rgba(129, 140, 248, 0.18);
+  border-color: rgba(129, 140, 248, 0.4);
+  color: #c7d0ff;
+}
+
+body.dark-mode .transaction-file-btn:hover {
+  background: rgba(129, 140, 248, 0.28);
+}
+
+body.dark-mode .transaction-file-box-text {
+  color: var(--text-muted);
 }
 
 body.dark-mode .transaction-form input[type="file"]::file-selector-button {
@@ -10347,13 +10379,6 @@ body.dark-mode .inv2-edit-note {
 .filter-section:not([open]) .filter-section-body {
   display: none !important;
 }
-#checkinDocument {
-  border: none !important;
-  box-shadow: none !important;
-  background: transparent !important;
-  padding-left: 0 !important;
-}
-
 .inv2-error-alert {
   display: flex;
   align-items: center;
