@@ -45,7 +45,7 @@ The **Computer Inventory System (CIS)** is built as the INF 653 final group proj
 | Service Access | Hashed API keys via `x-api-key` header |
 | Security | Helmet, CORS, express-rate-limit, bcryptjs |
 | Logging | Morgan (`common` format) |
-| Deployment | Render (configured via `render.yaml`) |
+| Deployment | Vercel |
 
 ---
 
@@ -125,6 +125,7 @@ The **Computer Inventory System (CIS)** is built as the INF 653 final group proj
 │   ├── generateToken.js
 │   ├── hashApiKey.js
 │   ├── itemDisplayName.js
+│   ├── documentStorage.js    # Cloudflare R2 document storage helpers
 │   ├── seedAdmin.js          # Seeds default admin account
 │   └── uploadPaths.js
 ├── views/                    # Handlebars templates
@@ -134,7 +135,9 @@ The **Computer Inventory System (CIS)** is built as the INF 653 final group proj
 ├── public/
 │   ├── css/style.css
 │   └── js/main.js
-├── render.yaml               # Render deployment config
+├── scripts/
+│   └── syntax-check.js       # Project syntax test script
+├── render.yaml               # Optional Render deployment config
 └── .env.example
 ```
 
@@ -267,6 +270,7 @@ Copy `.env.example` to `.env` and configure:
 | `BASE_URL` | Public URL of the app (used for CORS) |
 | `CORS_ORIGIN` | Allowed CORS origin |
 | `DEV_CORS_ORIGINS` | Comma-separated extra origins for local dev (e.g. `http://localhost:3000`) |
+| `APP_TIME_ZONE` | Display timezone for history timestamps; defaults to `Asia/Phnom_Penh` |
 | `STORAGE_PROVIDER` | Storage backend (`r2` for Cloudflare R2) |
 | `R2_ENDPOINT` | Cloudflare R2 endpoint URL |
 | `R2_ACCESS_KEY_ID` | Cloudflare R2 access key ID |
@@ -287,6 +291,8 @@ Copy `.env.example` to `.env` and configure:
 
 ## Deployment
 
+- **Live URL**: https://computer-inventory-system.vercel.app
+- **Platform**: Vercel
 - **Build Command**: `npm install`
 - **Start Command**: `npm start`
 
@@ -303,5 +309,5 @@ Copy `.env.example` to `.env` and configure:
 
 ## Submission Checklist
 
-- **Live URL**: Add your hosted application URL here after deployment.
-- **GitHub repository**: Add your repository URL here before submission.
+- **Live URL**: https://computer-inventory-system.vercel.app
+- **GitHub repository**: https://github.com/pichmarina/INF653-Final-Project-Computer-Inventory-System
