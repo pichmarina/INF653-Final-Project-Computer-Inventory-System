@@ -48,7 +48,10 @@ async function getItemById(req, res, next) {
 
 async function createItem(req, res, next) {
   try {
-    const itemData = req.body;
+    const itemData = {
+      ...req.body,
+      status: "Available",
+    };
 
     if (req.file) {
       itemData.uploadPath = await saveUploadedDocument(req.file, req.user?._id);
@@ -94,6 +97,79 @@ async function updateItem(req, res, next) {
   try {
     const updateData = req.body;
 
+    const currentItem = await Item.findOne({
+      _id: req.params.id,
+      isDeleted: false,
+    });
+
+    if (!currentItem) {
+      if (wantsJsonResponse(req)) {
+        return res.status(404).json({
+          success: false,
+          message: "Item not found",
+        });
+      }
+
+      return res.status(404).render("404", {
+        title: "404 - Item Not Found",
+        user: req.user,
+      });
+    }
+
+    // Cannot manually change status while checked out
+    if (currentItem.status === "In-Use" && updateData.status && updateData.status !== "In-Use") {
+      return res.status(400).render("item-form", {
+        title: "Edit Item",
+        isEdit: true,
+        itemId: req.params.id,
+        user: req.user,
+        item: {
+          ...currentItem.toObject(),
+          ...req.body,
+          dateAcquired: currentItem.dateAcquired
+            ? new Date(currentItem.dateAcquired).toISOString().split("T")[0]
+            : "",
+        },
+        formError: "Status cannot be changed while the item is checked out.",
+      });
+    }
+
+    // Retired is terminal
+    if (currentItem.status === "Retired" && updateData.status && updateData.status !== "Retired") {
+      return res.status(400).render("item-form", {
+        title: "Edit Item",
+        isEdit: true,
+        itemId: req.params.id,
+        user: req.user,
+        item: {
+          ...currentItem.toObject(),
+          ...req.body,
+          dateAcquired: currentItem.dateAcquired
+            ? new Date(currentItem.dateAcquired).toISOString().split("T")[0]
+            : "",
+        },
+        formError: "Retired items cannot be changed back.",
+      });
+    }
+
+    // Admin may never manually force In-Use
+    if (updateData.status === "In-Use" && currentItem.status !== "In-Use") {
+      return res.status(400).render("item-form", {
+        title: "Edit Item",
+        isEdit: true,
+        itemId: req.params.id,
+        user: req.user,
+        item: {
+          ...currentItem.toObject(),
+          ...req.body,
+          dateAcquired: currentItem.dateAcquired
+            ? new Date(currentItem.dateAcquired).toISOString().split("T")[0]
+            : "",
+        },
+        formError: "In-Use is controlled automatically by check-out.",
+      });
+    }
+
     if (req.file) {
       updateData.uploadPath = await saveUploadedDocument(req.file, req.user?._id);
     }
@@ -108,9 +184,16 @@ async function updateItem(req, res, next) {
     );
 
     if (!item) {
-      return res.status(404).json({
-        success: false,
-        message: "Item not found",
+      if (wantsJsonResponse(req)) {
+        return res.status(404).json({
+          success: false,
+          message: "Item not found",
+        });
+      }
+
+      return res.status(404).render("404", {
+        title: "404 - Item Not Found",
+        user: req.user,
       });
     }
 
@@ -123,7 +206,7 @@ async function updateItem(req, res, next) {
     }
 
     return res.redirect("/inventory?success=updated");
-    } catch (error) {
+  } catch (error) {
     const item = await Item.findOne({
       _id: req.params.id,
       isDeleted: false,
@@ -134,8 +217,9 @@ async function updateItem(req, res, next) {
     }
 
     if (error.code === 11000 && error.keyPattern && error.keyPattern.itemId) {
-      return res.status(400).render("item-details", {
-        title: "Item Details",
+      return res.status(400).render("item-form", {
+        title: "Edit Item",
+        isEdit: true,
         itemId: req.params.id,
         user: req.user,
         item: {
@@ -147,8 +231,9 @@ async function updateItem(req, res, next) {
     }
 
     if (error.name === "ValidationError") {
-      return res.status(400).render("item-details", {
-        title: "Item Details",
+      return res.status(400).render("item-form", {
+        title: "Edit Item",
+        isEdit: true,
         itemId: req.params.id,
         user: req.user,
         item: {
@@ -160,7 +245,7 @@ async function updateItem(req, res, next) {
     }
 
     next(error);
-  }  
+  }
 }
 
 async function softDeleteItem(req, res, next) {
