@@ -324,17 +324,10 @@
   document.querySelectorAll("select[data-selected]").forEach((field) => { const
   selectedValue = field.getAttribute("data-selected"); if (selectedValue) {
   field.value = selectedValue; } }); const params = new
-  URLSearchParams(window.location.search); const success =
-  params.get("success"); if (success) { const message = success === "checkout" ?
-  "Item checked out successfully" : success === "checkin" ? "Item checked in
-  successfully" : ""; if (message) { const popup =
-  document.createElement("div"); popup.textContent = message; popup.className =
-  "success-toast"; document.body.appendChild(popup); setTimeout(() => {
-  popup.classList.add("show"); }, 10); setTimeout(() => {
-  popup.classList.remove("show"); setTimeout(() => popup.remove(), 300); },
-  2500); const url = new URL(window.location);
+  URLSearchParams(window.location.search); if (params.has("success")) { const
+  url = new URL(window.location);
   url.searchParams.delete("success"); window.history.replaceState({}, "", url);
-  } }
+  }
 </script>
 
 <script>
