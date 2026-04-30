@@ -124,12 +124,24 @@ async function updateItem(req, res, next) {
 
     return res.redirect("/inventory?success=updated");
   } catch (error) {
+    const item = await Item.findOne({
+      _id: req.params.id,
+      isDeleted: false,
+    }).populate("assignedTo", "name email").lean();
+
+    if (item && item.dateAcquired) {
+      item.dateAcquired = new Date(item.dateAcquired).toISOString().split("T")[0];
+    }
+
     if (error.code === 11000 && error.keyPattern && error.keyPattern.itemId) {
       return res.status(400).render("item-details", {
         title: "Item Details",
         itemId: req.params.id,
         user: req.user,
-        item: { ...req.body, _id: req.params.id },
+        item: {
+          ...item,
+          ...req.body,
+        },
         formError: "Item ID already exists. Please use a different Item ID.",
       });
     }
@@ -139,7 +151,10 @@ async function updateItem(req, res, next) {
         title: "Item Details",
         itemId: req.params.id,
         user: req.user,
-        item: { ...req.body, _id: req.params.id },
+        item: {
+          ...item,
+          ...req.body,
+        },
         formError: "Please fill in all required fields.",
       });
     }

@@ -10294,3 +10294,16 @@ body.dark-mode .inv2-edit-note {
   background: transparent !important;
   padding-left: 0 !important;
 }
+
+.inv2-error-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  font-weight: 500;
+}

@@ -31,6 +31,12 @@
         Edit Item
       </a>
     </div>
+    {{#if formError}}
+      <div class="inv2-error-alert">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>{{formError}}</span>
+      </div>
+{{/if}}
   </section>
 
   <section class="inv2-record-layout">
