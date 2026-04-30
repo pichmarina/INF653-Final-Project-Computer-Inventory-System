@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const fs = require("fs/promises");
 const path = require("path");
 const User = require("../models/User");
+const { saveUploadedAvatar } = require("../utils/documentStorage");
 const generateToken = require("../utils/generateToken");
 
 function wantsJsonResponse(req) {
@@ -50,6 +51,13 @@ function toAbsoluteUploadPath(urlPath) {
 
   const normalizedPath = String(urlPath).replace(/^\//, "");
   return path.join(__dirname, "..", normalizedPath);
+}
+
+function isLocalUploadPath(urlPath) {
+  if (!urlPath) return false;
+
+  const normalizedPath = String(urlPath).replace(/\\/g, "/");
+  return normalizedPath.startsWith("/uploads/") || normalizedPath.startsWith("uploads/");
 }
 
 async function login(req, res, next) {
@@ -199,9 +207,6 @@ async function updateProfile(req, res, next) {
 
     const trimmedName = String(name || "").trim();
     const normalizedEmail = currentUser.email;
-    const uploadedAvatarPath = req.file
-      ? `/uploads/avatars/${req.file.filename}`
-      : null;
 
     if (!trimmedName) {
       errors.name = "Name is required";
@@ -273,6 +278,10 @@ async function updateProfile(req, res, next) {
       currentUser.passwordHash = await bcrypt.hash(String(newPassword), 10);
     }
 
+    const uploadedAvatarPath = req.file
+      ? await saveUploadedAvatar(req.file, currentUser._id)
+      : null;
+
     let oldAvatarPath = null;
     if (uploadedAvatarPath) {
       oldAvatarPath = currentUser.avatarPath;
@@ -281,7 +290,11 @@ async function updateProfile(req, res, next) {
 
     await currentUser.save();
 
-    if (oldAvatarPath && oldAvatarPath !== uploadedAvatarPath) {
+    if (
+      oldAvatarPath &&
+      oldAvatarPath !== uploadedAvatarPath &&
+      isLocalUploadPath(oldAvatarPath)
+    ) {
       await removeFileIfExists(toAbsoluteUploadPath(oldAvatarPath));
     }
 

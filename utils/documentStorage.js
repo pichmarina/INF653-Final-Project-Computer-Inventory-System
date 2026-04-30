@@ -14,10 +14,12 @@ const {
 const MIME_TYPES_BY_EXTENSION = {
   ".doc": "application/msword",
   ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".gif": "image/gif",
   ".jpeg": "image/jpeg",
   ".jpg": "image/jpeg",
   ".pdf": "application/pdf",
   ".png": "image/png",
+  ".webp": "image/webp",
 };
 
 let r2Client;
@@ -90,6 +92,33 @@ async function saveUploadedDocument(file, userId) {
   return storedPath;
 }
 
+async function saveUploadedAvatar(file, userId) {
+  if (!file || !file.path) return "";
+
+  if (!process.env.R2_PUBLIC_BASE_URL) {
+    throw new Error(
+      "R2 public URL is not configured. Set R2_PUBLIC_BASE_URL so uploaded avatars can be displayed globally.",
+    );
+  }
+
+  const filename = file.filename || path.basename(file.path);
+  const storedPath = path.posix.join("uploads", "avatars", filename);
+  const body = await fs.readFile(file.path);
+
+  await putDocumentObject({
+    body,
+    contentLength: file.size || body.length,
+    contentType: file.mimetype || getMimeTypeFromFilename(filename),
+    key: storedPath,
+    originalName: file.originalname || filename,
+    userId,
+  });
+
+  await fs.unlink(file.path).catch(() => {});
+
+  return getPublicUploadUrl(storedPath);
+}
+
 async function saveLocalDocumentCopy(uploadPath, filePath, userId) {
   const storedPath = getUploadUrl(uploadPath);
   const filename = getUploadFilename(uploadPath);
@@ -107,6 +136,24 @@ async function saveLocalDocumentCopy(uploadPath, filePath, userId) {
     originalName: filename,
     userId,
   });
+}
+
+function getMimeTypeFromFilename(filename) {
+  const extension = path.extname(filename || "").toLowerCase();
+  return MIME_TYPES_BY_EXTENSION[extension] || "application/octet-stream";
+}
+
+function getPublicUploadUrl(uploadPath) {
+  const key = getUploadUrl(uploadPath);
+  const publicBaseUrl = process.env.R2_PUBLIC_BASE_URL;
+
+  if (!key) return "";
+
+  if (!publicBaseUrl) {
+    return `/${key}`;
+  }
+
+  return `${publicBaseUrl.replace(/\/+$/, "")}/${key}`;
 }
 
 async function findUploadedDocument(uploadPath) {
@@ -176,6 +223,8 @@ async function putDocumentObject({
 
 module.exports = {
   findUploadedDocument,
+  getPublicUploadUrl,
   saveLocalDocumentCopy,
+  saveUploadedAvatar,
   saveUploadedDocument,
 };
