@@ -5,9 +5,9 @@ const { getItemDisplayName } = require("../utils/itemDisplayName");
 const fs = require("fs/promises");
 const path = require("path");
 const {
-  getStoredUploadPath,
   getUploadUrl,
 } = require("../utils/uploadPaths");
+const { saveUploadedDocument } = require("../utils/documentStorage");
 
 const ALLOWED_TRANSACTION_DOC_EXTENSIONS = new Set([
   ".pdf",
@@ -213,7 +213,7 @@ async function checkoutItem(req, res, next) {
       item: item._id,
       user: userId,
       action: "checkout",
-      documentPath: getStoredUploadPath(req.file),
+      documentPath: await saveUploadedDocument(req.file, req.user?._id),
       notes,
       checkoutDate: new Date(),
     });
@@ -316,7 +316,7 @@ async function checkinItem(req, res, next) {
       item: item._id,
       user: checkedInUser,
       action: "checkin",
-      documentPath: getStoredUploadPath(req.file),
+      documentPath: await saveUploadedDocument(req.file, req.user?._id),
       notes,
       checkinDate: new Date(),
     });

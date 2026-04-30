@@ -1,6 +1,6 @@
 const Item = require("../models/Item");
 const { getItemDisplayName } = require("../utils/itemDisplayName");
-const { getStoredUploadPath } = require("../utils/uploadPaths");
+const { saveUploadedDocument } = require("../utils/documentStorage");
 
 function wantsJsonResponse(req) {
   const accept = req.get("accept") || "";
@@ -51,7 +51,7 @@ async function createItem(req, res, next) {
     const itemData = req.body;
 
     if (req.file) {
-      itemData.uploadPath = getStoredUploadPath(req.file);
+      itemData.uploadPath = await saveUploadedDocument(req.file, req.user?._id);
     }
 
     const item = await Item.create(itemData);
@@ -95,7 +95,7 @@ async function updateItem(req, res, next) {
     const updateData = req.body;
 
     if (req.file) {
-      updateData.uploadPath = getStoredUploadPath(req.file);
+      updateData.uploadPath = await saveUploadedDocument(req.file, req.user?._id);
     }
 
     const item = await Item.findOneAndUpdate(
@@ -165,6 +165,21 @@ async function updateItem(req, res, next) {
 
 async function softDeleteItem(req, res, next) {
   try {
+    if (!req.user || req.user.role !== "Admin") {
+      if (wantsJsonResponse(req)) {
+        return res.status(403).json({
+          success: false,
+          message: "Admin access required",
+        });
+      }
+
+      return res.status(403).render("error", {
+        title: "Access Denied",
+        message: "Admin access required",
+        user: req.user,
+      });
+    }
+
     const item = await Item.findOneAndUpdate(
       { _id: req.params.id, isDeleted: false },
       { isDeleted: true },

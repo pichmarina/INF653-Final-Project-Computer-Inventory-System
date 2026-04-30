@@ -161,6 +161,58 @@ body.dark-mode .auth-form-section {
   border-color: var(--border-color);
 }
 
+body.dark-mode .auth-form .btn-primary {
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(79, 70, 229, 0.35);
+}
+
+body.dark-mode .auth-form .btn-primary:hover:not(:disabled) {
+  box-shadow: 0 12px 26px rgba(79, 70, 229, 0.5);
+}
+
+body.dark-mode .auth-page {
+  background: var(--bg-primary);
+}
+
+body.dark-mode .auth-container {
+  background:
+    radial-gradient(circle at 50% 112%, rgba(15, 23, 42, 0.95) 0 18%, transparent 44%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(17, 24, 39, 0.97) 46%, rgba(11, 17, 32, 1) 100%),
+    var(--bg-primary);
+}
+
+body.dark-mode .auth-container::before,
+body.dark-mode .auth-container::after {
+  border-color: rgba(99, 102, 241, 0.12);
+}
+
+body.dark-mode .auth-logo-title {
+  color: var(--text-primary);
+}
+
+body.dark-mode .auth-logo-subtitle {
+  color: var(--text-muted);
+}
+
+body.dark-mode .auth-form-container {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .auth-form-title {
+  color: var(--text-primary);
+}
+
+body.dark-mode .auth-form-subtitle {
+  color: var(--text-muted);
+}
+
+body.dark-mode .auth-form-icon {
+  background: var(--gray-100);
+  color: var(--text-secondary);
+}
+
 body.dark-mode .data-table th {
   background: var(--gray-50);
   color: var(--text-muted);
@@ -6569,16 +6621,23 @@ body.dark-mode .form-input:focus {
 }
 
 .transaction-form input[type="file"] {
-  padding: 10px;
+  padding: 0 10px;
+  height: 42px;
+  line-height: 42px;
 }
 
 .transaction-form input[type="file"]::file-selector-button {
   border: 1px solid rgba(79, 70, 229, 0.3);
   border-radius: 9px;
-  padding: 8px 12px;
-  margin-right: 10px;
+  padding: 5px 10px;
+  margin-right: 8px;
+  margin-top: 0;
+  margin-bottom: 0;
+  height: 28px;
+  vertical-align: middle;
   background: var(--primary-soft);
   color: var(--primary-dark);
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;

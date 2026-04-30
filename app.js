@@ -145,10 +145,11 @@ app.use(
   }),
 );
 
-app.use(globalLimiter);
-
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.get("/favicon.ico", (req, res) => res.sendStatus(204));
+
+app.use(globalLimiter);
 
 // Make user available to all views
 app.use((req, res, next) => {
