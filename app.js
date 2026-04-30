@@ -122,28 +122,42 @@ function corsError(origin) {
 }
 
 app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Browser same-origin requests and normal form posts do not send Origin.
-      if (!origin) {
-        return callback(null, true);
-      }
+  cors((req, callback) => {
+    callback(null, {
+      origin: function (origin, originCallback) {
+        // Browser same-origin requests and opaque-origin form posts may omit Origin.
+        if (!origin) {
+          return originCallback(null, true);
+        }
 
-      if (origin === "null" && process.env.NODE_ENV !== "production") {
-        return callback(null, true);
-      }
+        if (origin === "null" && isOpaqueLoginFormPost(req)) {
+          return originCallback(null, true);
+        }
 
-      const normalizedOrigin = normalizeOrigin(origin);
+        const normalizedOrigin = normalizeOrigin(origin);
 
-      if (allowedOrigins.has(normalizedOrigin)) {
-        return callback(null, true);
-      }
+        if (allowedOrigins.has(normalizedOrigin)) {
+          return originCallback(null, true);
+        }
 
-      return callback(corsError(origin));
-    },
-    credentials: true,
+        return originCallback(corsError(origin));
+      },
+      credentials: true,
+    });
   }),
 );
+
+function isOpaqueLoginFormPost(req) {
+  const accept = req.get("accept") || "";
+  const contentType = req.get("content-type") || "";
+
+  return (
+    req.method === "POST" &&
+    req.path === "/api/auth/login" &&
+    accept.includes("text/html") &&
+    contentType.includes("application/x-www-form-urlencoded")
+  );
+}
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
