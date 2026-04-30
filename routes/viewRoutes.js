@@ -30,6 +30,10 @@ const {
   getUploadFilename,
   getUploadUrl,
 } = require("../utils/uploadPaths");
+const {
+  findUploadedDocument,
+  saveLocalDocumentCopy,
+} = require("../utils/documentStorage");
 const { getItemDisplayName } = require("../utils/itemDisplayName");
 
 const uploadRoot = path.join(__dirname, "..", "uploads");
@@ -111,6 +115,9 @@ router.get("/history", requireViewAuth, renderHistoryPage);
 
 async function sendStoredDocument(req, res, uploadPath) {
   const normalizedStoredPath = String(uploadPath || "").replace(/\\/g, "/");
+  const rawFilename =
+    getUploadFilename(uploadPath) || path.basename(normalizedStoredPath);
+  const filename = rawFilename && rawFilename !== "." ? rawFilename : "";
   const safeAbsolutePath =
     path.isAbsolute(normalizedStoredPath) &&
     normalizedStoredPath.split("/").includes("uploads")
@@ -119,9 +126,7 @@ async function sendStoredDocument(req, res, uploadPath) {
   const candidatePaths = [
     safeAbsolutePath,
     getUploadFilePath(uploadPath, uploadRoot),
-    getUploadFilename(uploadPath)
-      ? path.join(uploadRoot, getUploadFilename(uploadPath))
-      : "",
+    filename ? path.join(uploadRoot, filename) : "",
   ].filter(Boolean);
 
   if (candidatePaths.length === 0) {
@@ -134,10 +139,34 @@ async function sendStoredDocument(req, res, uploadPath) {
   for (const filePath of candidatePaths) {
     try {
       await fs.access(filePath);
+      await mirrorLocalDocument(uploadPath, filePath, req.user?._id);
       return res.sendFile(filePath);
     } catch {
       // Try the next normalized file path before returning a 404.
     }
+  }
+
+  if (filename) {
+    const globalUploadPath = await findUploadByFilename(uploadRoot, filename);
+
+    if (globalUploadPath) {
+      await mirrorLocalDocument(uploadPath, globalUploadPath, req.user?._id);
+      return res.sendFile(globalUploadPath);
+    }
+  }
+
+  const storedDocument = await findUploadedDocument(uploadPath);
+
+  if (storedDocument) {
+    res.type(storedDocument.mimeType || "application/octet-stream");
+    if (storedDocument.contentLength) {
+      res.setHeader("Content-Length", storedDocument.contentLength);
+    }
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="${encodeURIComponent(storedDocument.originalName)}"`,
+    );
+    return storedDocument.body.pipe(res);
   }
 
   console.warn("Document file not found", {
@@ -150,6 +179,46 @@ async function sendStoredDocument(req, res, uploadPath) {
     title: "404 - Document Not Found",
     user: req.user,
   });
+}
+
+async function mirrorLocalDocument(uploadPath, filePath, userId) {
+  try {
+    await saveLocalDocumentCopy(uploadPath, filePath, userId);
+  } catch (error) {
+    console.warn("Could not mirror document to R2", {
+      storedPath: uploadPath,
+      filePath,
+      error: error.message,
+    });
+  }
+}
+
+async function findUploadByFilename(directory, filename) {
+  let entries;
+
+  try {
+    entries = await fs.readdir(directory, { withFileTypes: true });
+  } catch {
+    return "";
+  }
+
+  for (const entry of entries) {
+    const entryPath = path.join(directory, entry.name);
+
+    if (entry.isFile() && entry.name === filename) {
+      return entryPath;
+    }
+
+    if (entry.isDirectory()) {
+      const foundPath = await findUploadByFilename(entryPath, filename);
+
+      if (foundPath) {
+        return foundPath;
+      }
+    }
+  }
+
+  return "";
 }
 
 router.get("/documents/items/:id", requireViewAuth, async (req, res, next) => {
