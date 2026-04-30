@@ -266,11 +266,13 @@ Copy `.env.example` to `.env` and configure:
 | `PORT` | Server port (default: `3000`) |
 | `BASE_URL` | Public URL of the app (used for CORS) |
 | `CORS_ORIGIN` | Allowed CORS origin |
-| `R2_ACCOUNT_ID` | Cloudflare R2 account ID |
-| `R2_ACCESS_KEY_ID` | Cloudflare R2 access key |
-| `R2_SECRET_ACCESS_KEY` | Cloudflare R2 secret key |
-| `R2_BUCKET_NAME` | Cloudflare R2 bucket name |
-| `R2_PUBLIC_URL` | Public URL for R2 bucket |
+| `DEV_CORS_ORIGINS` | Comma-separated extra origins for local dev (e.g. `http://localhost:3000`) |
+| `STORAGE_PROVIDER` | Storage backend (`r2` for Cloudflare R2) |
+| `R2_ENDPOINT` | Cloudflare R2 endpoint URL |
+| `R2_ACCESS_KEY_ID` | Cloudflare R2 access key ID |
+| `R2_SECRET_ACCESS_KEY` | Cloudflare R2 secret access key |
+| `R2_BUCKET` | Cloudflare R2 bucket name |
+| `R2_PUBLIC_BASE_URL` | Public base URL for served R2 objects |
 
 ---
 
@@ -297,63 +299,9 @@ Copy `.env.example` to `.env` and configure:
 - Items and users are **never hard-deleted** — `isDeleted` flags preserve historical transaction logs
 - API keys are **hashed** in the database; the raw key is shown only once upon creation
 
+---
 
-```env
-PORT=3000
-MONGO_URI=mongodb+srv://...
-BASE_URL=https://your-deployed-app.example.com
-CORS_ORIGIN=https://your-deployed-app.example.com
-DEV_CORS_ORIGINS=http://127.0.0.1:3000,http://localhost:3000
-JWT_SECRET=replace-with-a-long-random-secret
-JWT_EXPIRES_IN=1d
-STORAGE_PROVIDER=r2
-R2_ENDPOINT=https://your-account-id.r2.cloudflarestorage.com
-R2_BUCKET=your-r2-bucket-name
-R2_ACCESS_KEY_ID=your-r2-access-key-id
-R2_SECRET_ACCESS_KEY=your-r2-secret-access-key
-R2_PUBLIC_BASE_URL=https://your-public-r2-domain.r2.dev
-```
+## Submission Checklist
 
-`BASE_URL` and `CORS_ORIGIN` should be the deployed application origin. Keep
-`DEV_CORS_ORIGINS` for local development only.
-
-Uploaded item and transaction documents are stored in Cloudflare R2. The app
-keeps the R2 object key in MongoDB and streams the file from R2 when users view
-documents from inventory or history.
-
-## Run Locally
-
-```bash
-npm install
-npm start
-```
-
-Open `http://localhost:3000`.
-
-## API Authentication
-
-Use `POST /api/auth/login` to receive a JWT. Standard JSON API requests should
-send the token as:
-
-```http
-Authorization: Bearer <token>
-```
-
-Service integrations can use an active API key on endpoints that explicitly
-support API-key access:
-
-```http
-x-api-key: <raw-api-key>
-```
-
-## Deployment
-
-Deploy the app to a Node-compatible cloud platform such as Render, Railway, AWS,
-or DigitalOcean. A `render.yaml` blueprint is included for Render. Configure the
-production environment variables above, especially `MONGO_URI`, `JWT_SECRET`,
-`BASE_URL`, and `CORS_ORIGIN`.
-
-Submission checklist:
-
-- Live URL: add your hosted application URL here after deployment.
-- GitHub repository: add your repository URL here before submission.
+- **Live URL**: Add your hosted application URL here after deployment.
+- **GitHub repository**: Add your repository URL here before submission.
