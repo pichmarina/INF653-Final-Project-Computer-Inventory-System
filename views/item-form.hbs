@@ -87,8 +87,6 @@
             <select id="status" name="status" required>
               {{#if (eq item.status "In-Use")}}
                 <option value="In-Use" selected>In-Use</option>
-              {{else if (eq item.status "Retired")}}
-                <option value="Retired" selected>Retired</option>
               {{else}}
                 <option value="Available" {{#if (eq item.status "Available")}}selected{{/if}}>Available</option>
                 <option value="Maintenance" {{#if (eq item.status "Maintenance")}}selected{{/if}}>Maintenance</option>
@@ -99,10 +97,6 @@
 
           {{#if (eq item.status "In-Use")}}
             <div class="field-error">Status cannot be changed while the item is checked out.</div>
-          {{/if}}
-
-          {{#if (eq item.status "Retired")}}
-            <div class="field-error">Retired items cannot be changed back.</div>
           {{/if}}
 
           <div class="inv2-form-group">
