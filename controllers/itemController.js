@@ -66,6 +66,26 @@ async function createItem(req, res, next) {
 
     return res.redirect("/inventory?success=added");
   } catch (error) {
+    if (error.code === 11000 && error.keyPattern && error.keyPattern.itemId) {
+      return res.status(400).render("item-form", {
+        title: "Add Item",
+        isEdit: false,
+        user: req.user,
+        item: { ...req.body },
+        formError: "Item ID already exists. Please use a different Item ID.",
+      });
+    }
+
+    if (error.name === "ValidationError") {
+      return res.status(400).render("item-form", {
+        title: "Add Item",
+        isEdit: false,
+        user: req.user,
+        item: { ...req.body },
+        formError: "Please fill in all required fields.",
+      });
+    }
+
     next(error);
   }
 }
@@ -104,6 +124,26 @@ async function updateItem(req, res, next) {
 
     return res.redirect("/inventory?success=updated");
   } catch (error) {
+    if (error.code === 11000 && error.keyPattern && error.keyPattern.itemId) {
+      return res.status(400).render("item-details", {
+        title: "Item Details",
+        itemId: req.params.id,
+        user: req.user,
+        item: { ...req.body, _id: req.params.id },
+        formError: "Item ID already exists. Please use a different Item ID.",
+      });
+    }
+
+    if (error.name === "ValidationError") {
+      return res.status(400).render("item-details", {
+        title: "Item Details",
+        itemId: req.params.id,
+        user: req.user,
+        item: { ...req.body, _id: req.params.id },
+        formError: "Please fill in all required fields.",
+      });
+    }
+
     next(error);
   }
 }
