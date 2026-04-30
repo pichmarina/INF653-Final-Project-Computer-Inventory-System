@@ -99,6 +99,10 @@
             <div class="field-error">Status cannot be changed while the item is checked out.</div>
           {{/if}}
 
+          {{#if (eq item.status "Retired")}}
+            <div class="field-error">Retired items cannot be changed back.</div>
+          {{/if}}
+
           <div class="inv2-form-group">
             <label for="dateAcquired">Date Acquired</label>
             <input type="date" id="dateAcquired" name="dateAcquired" value="{{item.dateAcquired}}" required>
@@ -248,24 +252,25 @@
 
         <div class="inv2-form-grid">
           <div class="inv2-form-group">
-            <label for="category">Category</label>
-            <input
-              type="text"
-              id="category"
-              name="category"
-              value="{{item.category}}"
-              placeholder="Example: Laptop, Monitor, Keyboard"
-              required
-            >
-          </div>
-
-          <div class="inv2-form-group">
             <label for="classification">Classification</label>
             <select id="classification" name="classification" required>
               <option value="">Select classification</option>
               <option value="Computer" {{#if (eq item.classification "Computer")}}selected{{/if}}>Computer</option>
               <option value="Peripheral" {{#if (eq item.classification "Peripheral")}}selected{{/if}}>Peripheral</option>
             </select>
+          </div>
+
+          <div class="inv2-form-group" data-specific-item-group {{#unless item.classification}}hidden{{/unless}}>
+            <label for="category">Specific Item</label>
+            <input
+              type="text"
+              id="category"
+              name="category"
+              value="{{item.category}}"
+              placeholder="Example: Laptop, Desktop, Workstation"
+              data-computer-placeholder="Example: Laptop, Desktop, Workstation"
+              data-peripheral-placeholder="Example: Monitor, Keyboard, Mouse"
+            >
           </div>
 
           <div class="inv2-form-group">
@@ -336,6 +341,35 @@
 
       if (oldError) oldError.remove();
     };
+
+    const classificationSelect = itemForm.querySelector("#classification");
+    const specificItemGroup = itemForm.querySelector("[data-specific-item-group]");
+    const specificItemInput = specificItemGroup?.querySelector("input");
+
+    function updateSpecificItemField() {
+      if (!classificationSelect || !specificItemGroup || !specificItemInput) return;
+
+      const selectedClassification = classificationSelect.value;
+      const hasClassification = Boolean(selectedClassification);
+      specificItemGroup.hidden = !hasClassification;
+      specificItemInput.required = hasClassification;
+
+      if (!hasClassification) {
+        specificItemInput.value = "";
+        clearFieldError(specificItemInput);
+        return;
+      }
+
+      const placeholderKey =
+        selectedClassification === "Peripheral"
+          ? "peripheralPlaceholder"
+          : "computerPlaceholder";
+      specificItemInput.placeholder =
+        specificItemInput.dataset[placeholderKey] || "Example: Laptop, Monitor, Keyboard";
+    }
+
+    classificationSelect?.addEventListener("change", updateSpecificItemField);
+    updateSpecificItemField();
 
     itemForm.addEventListener("submit", function (e) {
       const requiredFields = itemForm.querySelectorAll("[required]");
