@@ -130,7 +130,7 @@ app.use(
           return originCallback(null, true);
         }
 
-        if (origin === "null" && isOpaqueLoginFormPost(req)) {
+        if (origin === "null" && isOpaqueAuthFormPost(req)) {
           return originCallback(null, true);
         }
 
@@ -147,13 +147,14 @@ app.use(
   }),
 );
 
-function isOpaqueLoginFormPost(req) {
+function isOpaqueAuthFormPost(req) {
   const accept = req.get("accept") || "";
   const contentType = req.get("content-type") || "";
+  const authFormPaths = new Set(["/api/auth/login", "/api/auth/logout"]);
 
   return (
     req.method === "POST" &&
-    req.path === "/api/auth/login" &&
+    authFormPaths.has(req.path) &&
     accept.includes("text/html") &&
     contentType.includes("application/x-www-form-urlencoded")
   );
