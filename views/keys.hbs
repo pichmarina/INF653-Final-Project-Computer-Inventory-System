@@ -273,7 +273,16 @@
         const text = row.textContent.toLowerCase();
         row.style.display = text.includes(searchTerm) ? '' : 'none';
       });
+      if (clearKeySearch) clearKeySearch.classList.toggle('hidden', !this.value);
     });
+
+    if (clearKeySearch) {
+      clearKeySearch.addEventListener('click', function () {
+        keySearch.value = '';
+        keySearch.dispatchEvent(new Event('input'));
+        keySearch.focus();
+      });
+    }
   }
 
   if (clearKeySearch) {

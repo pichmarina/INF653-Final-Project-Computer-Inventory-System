@@ -156,7 +156,8 @@ body.dark-mode .stat-card,
 body.dark-mode .page-header-modern,
 body.dark-mode .info-card,
 body.dark-mode .modal-container,
-body.dark-mode .auth-form-section {
+body.dark-mode .auth-form-section,
+body.dark-mode .profile-popover {
   background: var(--bg-card);
   border-color: var(--border-color);
 }
@@ -5031,7 +5032,8 @@ body.dark-mode .action-btn:hover {
   flex: 0 1 auto;
 }
 
-.users-table-card .search-box {
+.users-table-card .search-box,
+.users-table-card .search-input-wrapper {
   width: 360px;
   min-width: 300px;
   max-width: 420px;
@@ -5062,6 +5064,15 @@ body.dark-mode .action-btn:hover {
   height: 46px;
   border-radius: 14px;
   padding: 0 14px 0 42px;
+  font-size: 0.92rem;
+}
+
+.users-table-card .search-input-wrapper {
+  min-height: 46px;
+  border-radius: 14px;
+}
+
+.users-table-card .search-input-wrapper input {
   font-size: 0.92rem;
 }
 
@@ -5205,7 +5216,8 @@ body.dark-mode .action-btn:hover {
     min-width: 240px;
   }
 
-  .users-table-card .search-box {
+  .users-table-card .search-box,
+  .users-table-card .search-input-wrapper {
     width: 100%;
     min-width: 0;
     max-width: none;
@@ -5318,6 +5330,7 @@ body.dark-mode .action-btn:hover {
   }
 
   .users-table-card .search-box input,
+  .users-table-card .search-input-wrapper,
   .users-table-card .data-card-header-right .filter-trigger-btn {
     min-height: 42px;
     height: 42px;
