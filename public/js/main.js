@@ -1144,7 +1144,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Update navbar quick stats on every page
   async function updateNavbarStats() {
     try {
-      const response = await fetch("/api/reports/summary", {
+      const response = await fetch("/reports/summary-data", {
         credentials: "same-origin",
       });
       if (!response.ok) return;

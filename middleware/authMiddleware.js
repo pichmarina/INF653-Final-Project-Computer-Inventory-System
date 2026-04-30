@@ -9,14 +9,14 @@ async function verifyJWT(req, res, next) {
 
     if (authHeader && authHeader.startsWith("Bearer ")) {
       token = authHeader.split(" ")[1];
-    } else if (req.cookies && req.cookies.token) {
+    } else if (isBrowserFormRequest(req) && req.cookies && req.cookies.token) {
       token = req.cookies.token;
     }
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "Authentication required",
+        message: "Authentication required. Use Authorization: Bearer <token>.",
       });
     }
 
@@ -40,6 +40,17 @@ async function verifyJWT(req, res, next) {
       message: "Invalid or expired token",
     });
   }
+}
+
+function isBrowserFormRequest(req) {
+  const accept = req.get("accept") || "";
+  const contentType = req.get("content-type") || "";
+
+  return (
+    req.method !== "GET" &&
+    accept.includes("text/html") &&
+    !contentType.includes("application/json")
+  );
 }
 
 async function requireViewAuth(req, res, next) {

@@ -107,7 +107,7 @@
       <div class="data-card-header-right">
         <div class="search-input-wrapper">
           <i class="fas fa-search"></i>
-          <input type="text" id="keySearch" placeholder="Search keys..." autocomplete="off">
+          <input type="text" id="keySearch" placeholder="Search keys..." autocomplete="off" />
           <button type="button" id="clearKeySearch" class="hidden">
             <i class="fas fa-times"></i>
           </button>
@@ -266,6 +266,7 @@
   if (keySearch) {
     keySearch.addEventListener('input', function () {
       const searchTerm = this.value.toLowerCase();
+      clearKeySearch.classList.toggle('hidden', !searchTerm);
       const rows = document.querySelectorAll('#keysTable tbody tr');
 
       rows.forEach((row) => {
@@ -282,6 +283,17 @@
         keySearch.focus();
       });
     }
+  }
+
+  if (clearKeySearch) {
+    clearKeySearch.addEventListener('click', function () {
+      keySearch.value = '';
+      this.classList.add('hidden');
+      document.querySelectorAll('#keysTable tbody tr').forEach(function (row) {
+        row.style.display = '';
+      });
+      keySearch.focus();
+    });
   }
 
   function copyApiKey() {

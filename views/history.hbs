@@ -9,7 +9,7 @@
     </div>
   </div>
 
-  <div class="data-card">
+  <div class="data-card history-table-card">
     <div class="data-card-header">
       <div class="data-card-header-left">
         <h3 class="data-card-title">
@@ -31,13 +31,23 @@
       </div>
     </div>
     <div class="table-wrapper">
-      <table class="data-table" id="historyTable">
+      <table class="data-table history-table" id="historyTable">
+        <colgroup>
+          <col class="history-col-date">
+          <col class="history-col-item">
+          <col class="history-col-action">
+          <col class="history-col-user">
+          <col class="history-col-duration">
+          <col class="history-col-notes">
+          <col class="history-col-document">
+        </colgroup>
         <thead>
           <tr>
             <th>Date</th>
             <th>Item</th>
             <th>Action</th>
             <th>User</th>
+            <th>Duration</th>
             <th>Notes</th>
             <th>Document</th>
           </tr>
@@ -45,7 +55,14 @@
         <tbody>
           {{#if hasHistory}}
             {{#each history}}
-              <tr>
+              <tr
+                data-history-row
+                data-action="{{this.action}}"
+                data-date="{{this.date}}"
+                data-time="{{this.time}}"
+                data-serial="{{this.serialNumber}}"
+                data-user-email="{{this.userEmail}}"
+              >
                 <td>
                   <div>{{this.date}}</div>
                   <div class="text-muted" style="font-size:0.75rem;">{{this.time}}</div>
@@ -63,10 +80,16 @@
                   <div>{{this.userName}}</div>
                   <div class="text-muted" style="font-size:0.75rem;">{{this.userEmail}}</div>
                 </td>
-                <td>{{#if this.notes}}{{this.notes}}{{else}}<span class="text-muted">—</span>{{/if}}</td>
                 <td>
-                  {{#if this.documentPath}}
-                    <a href="/{{this.documentPath}}" target="_blank" class="btn btn-outline" style="font-size:0.75rem;padding:4px 10px;">
+                  <div class="history-duration-value">
+                    <i class="fas fa-clock" aria-hidden="true"></i>
+                    <span data-duration-text>{{this.durationLabel}}</span>
+                  </div>
+                </td>
+                <td>{{#if this.notes}}{{this.notes}}{{else}}<span class="text-muted">N/A</span>{{/if}}</td>
+                <td>
+                  {{#if this.documentUrl}}
+                    <a href="{{this.documentUrl}}" target="_blank" class="btn btn-outline" style="font-size:0.75rem;padding:4px 10px;">
                       <i class="fas fa-file"></i> View
                     </a>
                   {{else}}
@@ -75,9 +98,20 @@
                 </td>
               </tr>
             {{/each}}
+            <tr id="historyNoResultsRow" class="hidden">
+              <td colspan="7" class="table-empty">
+                <div class="empty-state">
+                  <div class="empty-state-icon">
+                    <i class="fas fa-search"></i>
+                  </div>
+                  <h4>No matching history</h4>
+                  <p>Try a different search term.</p>
+                </div>
+              </td>
+            </tr>
           {{else}}
             <tr>
-              <td colspan="6" class="table-empty">
+              <td colspan="7" class="table-empty">
                 <div class="empty-state">
                   <div class="empty-state-icon">
                     <i class="fas fa-history"></i>
@@ -91,6 +125,24 @@
         </tbody>
       </table>
     </div>
+    {{#if hasHistory}}
+      <div class="data-card-footer history-pagination" id="historyPagination">
+        <div class="pagination-info" id="historyPaginationInfo">
+          Showing records
+        </div>
+        <div class="pagination-controls" aria-label="History pagination">
+          <button type="button" class="btn btn-outline btn-sm history-page-btn" id="historyPrevPage">
+            <i class="fas fa-chevron-left"></i>
+            Previous
+          </button>
+          <span class="pagination-page-label" id="historyPageLabel">Page 1 of 1</span>
+          <button type="button" class="btn btn-outline btn-sm history-page-btn" id="historyNextPage">
+            Next
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    {{/if}}
   </div>
 </div>
 
@@ -104,19 +156,158 @@
     var searchInput = document.getElementById('historySearch');
     var table = document.getElementById('historyTable');
     var clearBtn = document.getElementById('clearHistorySearch');
+    var noResultsRow = document.getElementById('historyNoResultsRow');
+    var pagination = document.getElementById('historyPagination');
+    var paginationInfo = document.getElementById('historyPaginationInfo');
+    var pageLabel = document.getElementById('historyPageLabel');
+    var prevPageBtn = document.getElementById('historyPrevPage');
+    var nextPageBtn = document.getElementById('historyNextPage');
     if (!searchInput || !table) return;
-    searchInput.addEventListener('input', function() {
-      var filter = this.value.toLowerCase();
-      var rows = table.querySelectorAll('tbody tr');
-      rows.forEach(function(row) {
-        row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+
+    var rowsPerPage = 10;
+    var currentPage = 1;
+    var historyRows = Array.from(table.querySelectorAll('[data-history-row]'));
+
+    function parseRowDate(row) {
+      var date = row.getAttribute('data-date') || '';
+      var time = row.getAttribute('data-time') || '00:00';
+      var parsed = new Date(date + 'T' + time + ':00');
+      return isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    function formatElapsed(start, end) {
+      if (!start || !end) return '0m';
+      var diffMs = Math.max(end.getTime() - start.getTime(), 0);
+      var totalMinutes = Math.floor(diffMs / 60000);
+      var days = Math.floor(totalMinutes / 1440);
+      var hours = Math.floor((totalMinutes % 1440) / 60);
+      var minutes = totalMinutes % 60;
+
+      if (days > 0 && hours > 0) return days + 'd ' + hours + 'h';
+      if (days > 0) return days + 'd';
+      if (hours > 0 && minutes > 0) return hours + 'h ' + minutes + 'm';
+      if (hours > 0) return hours + 'h';
+      return Math.max(minutes, 1) + 'm';
+    }
+
+    function setDuration(row, label) {
+      var target = row.querySelector('[data-duration-text]');
+      if (target) target.textContent = label;
+    }
+
+    function updateDurationLabels() {
+      var chronologicalRows = historyRows.slice().sort(function(a, b) {
+        var dateA = parseRowDate(a);
+        var dateB = parseRowDate(b);
+        return (dateA ? dateA.getTime() : 0) - (dateB ? dateB.getTime() : 0);
       });
+      var openCheckouts = new Map();
+
+      chronologicalRows.forEach(function(row) {
+        var action = row.getAttribute('data-action') || '';
+        var serial = row.getAttribute('data-serial') || '';
+        var userEmail = row.getAttribute('data-user-email') || '';
+        var key = serial + '|' + userEmail;
+        var rowDate = parseRowDate(row);
+
+        if (action === 'Checked Out') {
+          openCheckouts.set(key, { row: row, date: rowDate });
+          setDuration(row, 'In use for ' + formatElapsed(rowDate, new Date()));
+          return;
+        }
+
+        if (action === 'Checked In') {
+          var checkout = openCheckouts.get(key);
+          if (checkout) {
+            setDuration(row, 'Returned after ' + formatElapsed(checkout.date, rowDate));
+            setDuration(checkout.row, 'Checkout recorded');
+            openCheckouts.delete(key);
+          } else {
+            setDuration(row, 'Return recorded');
+          }
+        }
+      });
+    }
+
+    updateDurationLabels();
+
+    function getFilteredRows() {
+      var filter = searchInput.value.toLowerCase().trim();
+      if (!filter) return historyRows;
+      return historyRows.filter(function(row) {
+        return row.textContent.toLowerCase().includes(filter);
+      });
+    }
+
+    function renderPagination() {
+      var filteredRows = getFilteredRows();
+      var totalRows = filteredRows.length;
+      var totalPages = Math.max(Math.ceil(totalRows / rowsPerPage), 1);
+      if (currentPage > totalPages) currentPage = totalPages;
+      var startIndex = (currentPage - 1) * rowsPerPage;
+      var endIndex = Math.min(startIndex + rowsPerPage, totalRows);
+      var visibleRows = new Set(filteredRows.slice(startIndex, endIndex));
+
+      historyRows.forEach(function(row) {
+        row.style.display = visibleRows.has(row) ? '' : 'none';
+      });
+
+      if (noResultsRow) {
+        noResultsRow.classList.toggle('hidden', totalRows !== 0);
+      }
+
+      if (pagination) {
+        pagination.style.display = totalRows > rowsPerPage || searchInput.value.trim() ? '' : 'none';
+      }
+
+      if (paginationInfo) {
+        if (totalRows === 0) {
+          paginationInfo.innerHTML = 'Showing <strong>0</strong> records';
+        } else {
+          paginationInfo.innerHTML = 'Showing <strong>' + (endIndex - startIndex) + '</strong> of <strong>' + totalRows + '</strong> records';
+        }
+      }
+
+      if (pageLabel) {
+        pageLabel.textContent = 'Page ' + currentPage + ' of ' + totalPages;
+      }
+
+      if (prevPageBtn) {
+        prevPageBtn.disabled = currentPage <= 1;
+      }
+
+      if (nextPageBtn) {
+        nextPageBtn.disabled = currentPage >= totalPages;
+      }
+    }
+
+    searchInput.addEventListener('input', function() {
+      currentPage = 1;
+      renderPagination();
       if (clearBtn) { if (this.value.length > 0) { clearBtn.classList.remove('hidden'); } else { clearBtn.classList.add('hidden'); } }
     });
+
     if (clearBtn) clearBtn.addEventListener('click', function() {
       searchInput.value = '';
       searchInput.dispatchEvent(new Event('input'));
       searchInput.focus();
     });
+
+    if (prevPageBtn) prevPageBtn.addEventListener('click', function() {
+      if (currentPage > 1) {
+        currentPage -= 1;
+        renderPagination();
+      }
+    });
+
+    if (nextPageBtn) nextPageBtn.addEventListener('click', function() {
+      var totalPages = Math.max(Math.ceil(getFilteredRows().length / rowsPerPage), 1);
+      if (currentPage < totalPages) {
+        currentPage += 1;
+        renderPagination();
+      }
+    });
+
+    renderPagination();
   });
 </script>

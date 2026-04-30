@@ -7,10 +7,12 @@ const morgan = require("morgan");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const methodOverride = require("method-override");
+const helmet = require("helmet");
 
 const connectDB = require("./config/db");
 const globalLimiter = require("./middleware/rateLimiter");
 const errorHandler = require("./middleware/errorHandler");
+const { getItemDisplayName } = require("./utils/itemDisplayName");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -68,6 +70,8 @@ app.engine(
 
       // JSON stringify for debugging
       json: (obj) => JSON.stringify(obj, null, 2),
+
+      itemDisplayName: (item) => getItemDisplayName(item),
     },
   }),
 );
@@ -80,31 +84,72 @@ app.set("views", path.join(__dirname, "views"));
 ========================= */
 app.set("trust proxy", 1);
 
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  }),
+);
 app.use(morgan("common"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(methodOverride("_method"));
 
-const whitelist = [process.env.BASE_URL || "http://localhost:3000"];
+function normalizeOrigin(origin) {
+  if (!origin) return null;
+
+  return String(origin).replace(/\/$/, "");
+}
+
+function getAllowedOrigins() {
+  const configuredOrigins = [
+    process.env.BASE_URL,
+    process.env.CORS_ORIGIN,
+    ...(process.env.DEV_CORS_ORIGINS || "").split(","),
+  ]
+    .map((origin) => normalizeOrigin(origin && origin.trim()))
+    .filter(Boolean);
+
+  return new Set(configuredOrigins);
+}
+
+const allowedOrigins = getAllowedOrigins();
+
+function corsError(origin) {
+  const error = new Error(`CORS origin is not allowed: ${origin}`);
+  error.status = 403;
+  return error;
+}
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || whitelist.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
+      // Browser same-origin requests and normal form posts do not send Origin.
+      if (!origin) {
+        return callback(null, true);
       }
+
+      if (origin === "null" && process.env.NODE_ENV !== "production") {
+        return callback(null, true);
+      }
+
+      const normalizedOrigin = normalizeOrigin(origin);
+
+      if (allowedOrigins.has(normalizedOrigin)) {
+        return callback(null, true);
+      }
+
+      return callback(corsError(origin));
     },
     credentials: true,
   }),
 );
 
-app.use(globalLimiter);
-
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.get("/favicon.ico", (req, res) => res.sendStatus(204));
+
+app.use(globalLimiter);
 
 // Make user available to all views
 app.use((req, res, next) => {

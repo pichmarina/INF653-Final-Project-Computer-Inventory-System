@@ -1,88 +1,23 @@
 <div class="auth-page">
   <div class="auth-container">
-    <div class="auth-visual">
-      <div class="auth-visual-content">
-        <div class="auth-logo">
-          <div class="auth-logo-icon">
-            <i class="fas fa-server"></i>
-          </div>
-          <div class="auth-logo-text">
-            <span class="auth-logo-title">CIS</span>
-            <span class="auth-logo-subtitle">Computer Inventory System</span>
-          </div>
-        </div>
-
-        <div class="auth-features">
-          <h2 class="auth-features-title">Manage Your IT Assets with Confidence</h2>
-          <p class="auth-features-subtitle">A comprehensive solution for tracking, managing, and optimizing your organization's computer hardware and peripherals.</p>
-
-          <div class="feature-list">
-            <div class="feature-item">
-              <div class="feature-icon">
-                <i class="fas fa-boxes"></i>
-              </div>
-              <div class="feature-content">
-                <h4>Inventory Management</h4>
-                <p>Track all assets from procurement to retirement</p>
-              </div>
-            </div>
-            <div class="feature-item">
-              <div class="feature-icon">
-                <i class="fas fa-exchange-alt"></i>
-              </div>
-              <div class="feature-content">
-                <h4>Check-In/Check-Out</h4>
-                <p>Seamless asset assignment and return workflow</p>
-              </div>
-            </div>
-            <div class="feature-item">
-              <div class="feature-icon">
-                <i class="fas fa-chart-line"></i>
-              </div>
-              <div class="feature-content">
-                <h4>Reports & Analytics</h4>
-                <p>Insightful dashboards and detailed reports</p>
-              </div>
-            </div>
-            <div class="feature-item">
-              <div class="feature-icon">
-                <i class="fas fa-shield-alt"></i>
-              </div>
-              <div class="feature-content">
-                <h4>Secure Access</h4>
-                <p>Role-based access control with JWT authentication</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="auth-stats">
-          <div class="auth-stat">
-            <span class="auth-stat-number">100%</span>
-            <span class="auth-stat-label">Secure</span>
-          </div>
-          <div class="auth-stat">
-            <span class="auth-stat-number">24/7</span>
-            <span class="auth-stat-label">Access</span>
-          </div>
-          <div class="auth-stat">
-            <span class="auth-stat-number">Real-time</span>
-            <span class="auth-stat-label">Updates</span>
-          </div>
-        </div>
+    <div class="auth-brand">
+      <div class="auth-logo-icon">
+        <i class="fas fa-server"></i>
       </div>
-
-      <div class="auth-visual-pattern"></div>
+      <div class="auth-logo-text">
+        <span class="auth-logo-title">CIS</span>
+        <span class="auth-logo-subtitle">Computer Inventory System</span>
+      </div>
     </div>
 
     <div class="auth-form-section">
       <div class="auth-form-container">
         <div class="auth-form-header">
           <div class="auth-form-icon">
-            <i class="fas fa-lock"></i>
+            <i class="fas fa-arrow-right-to-bracket"></i>
           </div>
-          <h2 class="auth-form-title">Welcome Back</h2>
-          <p class="auth-form-subtitle">Sign in to access your inventory dashboard</p>
+          <h2 class="auth-form-title">Sign in with email</h2>
+          <p class="auth-form-subtitle">Access your inventory dashboard.</p>
         </div>
 
         {{#if formError}}
@@ -103,7 +38,7 @@
               id="email"
               name="email"
               class="form-input {{#if errors.email}}input-error{{/if}}"
-              placeholder="Enter your email"
+              placeholder="admin@example.com"
               value="{{values.email}}"
               required
               autocomplete="email"
@@ -124,11 +59,11 @@
                 id="password"
                 name="password"
                 class="form-input {{#if errors.password}}input-error{{/if}}"
-                placeholder="Enter your password"
+                placeholder="Enter password"
                 required
                 autocomplete="current-password"
               >
-              <button type="button" class="password-toggle" id="passwordToggle">
+              <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password">
                 <i class="fas fa-eye"></i>
               </button>
             </div>
@@ -148,14 +83,18 @@
 
           <button type="submit" class="btn btn-primary btn-large btn-full">
             <i class="fas fa-sign-in-alt"></i>
-            Sign In
+            Sign in
           </button>
         </form>
 
         <div class="auth-form-footer">
           <p class="demo-credentials">
             <i class="fas fa-info-circle"></i>
-            <strong>Demo:</strong> admin@example.com / 123456
+            <strong>Demo (Admin):</strong> admin@example.com / 123456
+          </p>
+          <p class="demo-credentials">
+            <i class="fas fa-info-circle"></i>
+            <strong>Demo (Technician):</strong> julie@gmail.com / 123456
           </p>
         </div>
       </div>
@@ -170,10 +109,12 @@
 
     if (passwordInput.type === 'password') {
       passwordInput.type = 'text';
+      this.setAttribute('aria-label', 'Hide password');
       icon.classList.remove('fa-eye');
       icon.classList.add('fa-eye-slash');
     } else {
       passwordInput.type = 'password';
+      this.setAttribute('aria-label', 'Show password');
       icon.classList.remove('fa-eye-slash');
       icon.classList.add('fa-eye');
     }

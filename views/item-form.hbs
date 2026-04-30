@@ -1,57 +1,403 @@
-<section class="card">
-  <h1>{{#if isEdit}}Edit Item{{else}}Add Item{{/if}}</h1>
-  <p>{{#if isEdit}}Update item information below.{{else}}Enter the item details below.{{/if}}</p>
-  
-  {{#if isEdit}}
-    <p><strong>Editing item ID:</strong> {{itemId}}</p>
-  {{/if}}
+{{#if isEdit}}
+  <div class="inv2-page inv2-edit-page">
+    <section class="inv2-asset-hero inv2-edit-hero">
+      <div class="inv2-asset-hero-left">
+        <div class="inv2-asset-hero-icon">
+          {{#if (eq item.classification "Computer")}}
+            <i class="fas fa-desktop"></i>
+          {{else}}
+            <i class="fas fa-keyboard"></i>
+          {{/if}}
+        </div>
 
-  <form
-    class="form"
-    method="POST"
-    enctype="multipart/form-data"
-    action="{{#if isEdit}}/api/items/{{itemId}}?_method=PUT{{else}}/api/items{{/if}}"
-  >
-    <div class="form-group">
-      <label for="itemId">Item ID</label>
-      <input type="text" id="itemId" name="itemId" placeholder="Enter item ID" />
-    </div>
+        <div>
+          <span class="inv2-eyebrow">Editing Asset</span>
+          <h1>{{item.displayName}}</h1>
+          <p>Item ID {{item.itemId}} · Serial {{item.serialNumber}}</p>
+        </div>
+      </div>
 
-    <div class="form-group">
-      <label for="serialNumber">Serial Number</label>
-      <input type="text" id="serialNumber" name="serialNumber" placeholder="Enter serial number" />
-    </div>
+      <div class="inv2-asset-hero-actions">
+        <span class="inv2-edit-pill">
+          <i class="fas fa-pen"></i>
+          Editing Mode
+        </span>
+      </div>
+    </section>
 
-    <div class="form-group">
-      <label for="brand">Brand</label>
-      <input type="text" id="brand" name="brand" placeholder="Enter brand" />
-    </div>
+    {{#if formError}}
+      <div class="alert alert-error custom-alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>{{formError}}</span>
+      </div>
+    {{/if}}
 
-    <div class="form-group">
-      <label for="model">Model</label>
-      <input type="text" id="model" name="model" placeholder="Enter model" />
-    </div>
+    <form
+      class="inv2-record-layout inv2-edit-form"
+      method="POST"
+      enctype="multipart/form-data"
+      action="/api/items/{{itemId}}?_method=PUT"
+      novalidate
+    >
+      <main class="inv2-record-main">
+        <div class="inv2-section-title">
+          <div>
+            <h2>Edit Item Information</h2>
+            <p>Update the asset details below, then save your changes.</p>
+          </div>
+        </div>
 
-    <div class="form-group">
-      <label for="category">Category</label>
-      <input type="text" id="category" name="category" placeholder="Enter category" />
-    </div>
+        <div class="inv2-form-grid">
+          <div class="inv2-form-group">
+            <label for="itemId">Item ID</label>
+            <input type="text" id="itemId" name="itemId" value="{{item.itemId}}" required>
+          </div>
 
-    <div class="form-group">
-      <label for="classification">Classification</label>
-      <input type="text" id="classification" name="classification" placeholder="Computer or Peripheral" />
-    </div>
+          <div class="inv2-form-group">
+            <label for="serialNumber">Serial Number</label>
+            <input type="text" id="serialNumber" name="serialNumber" value="{{item.serialNumber}}" required>
+          </div>
 
-    <div class="form-group">
-      <label for="dateAcquired">Date Acquired</label>
-      <input type="date" id="dateAcquired" name="dateAcquired" />
-    </div>
+          <div class="inv2-form-group">
+            <label for="brand">Brand</label>
+            <input type="text" id="brand" name="brand" value="{{item.brand}}" required>
+          </div>
 
-    <div class="form-group">
-      <label for="document">Upload Document</label>
-      <input type="file" id="document" name="document" />
-    </div>
+          <div class="inv2-form-group">
+            <label for="model">Model</label>
+            <input type="text" id="model" name="model" value="{{item.model}}" required>
+          </div>
 
-    <button type="submit" class="btn">{{#if isEdit}}Update Item{{else}}Create Item{{/if}}</button>
-  </form>
-</section>
+          <div class="inv2-form-group">
+            <label for="category">Category</label>
+            <input type="text" id="category" name="category" value="{{item.category}}" required>
+          </div>
+
+          <div class="inv2-form-group">
+            <label for="classification">Classification</label>
+            <select id="classification" name="classification" required>
+              <option value="">Select classification</option>
+              <option value="Computer" {{#if (eq item.classification "Computer")}}selected{{/if}}>Computer</option>
+              <option value="Peripheral" {{#if (eq item.classification "Peripheral")}}selected{{/if}}>Peripheral</option>
+            </select>
+          </div>
+
+          <div class="inv2-form-group">
+            <label for="status">Status</label>
+            <select id="status" name="status" required>
+              {{#if (eq item.status "In-Use")}}
+                <option value="In-Use" selected>In-Use</option>
+              {{else}}
+                <option value="Available" {{#if (eq item.status "Available")}}selected{{/if}}>Available</option>
+                <option value="Maintenance" {{#if (eq item.status "Maintenance")}}selected{{/if}}>Maintenance</option>
+                <option value="Retired" {{#if (eq item.status "Retired")}}selected{{/if}}>Retired</option>
+              {{/if}}
+            </select>
+          </div>
+
+          {{#if (eq item.status "In-Use")}}
+            <div class="field-error">Status cannot be changed while the item is checked out.</div>
+          {{/if}}
+
+          <div class="inv2-form-group">
+            <label for="dateAcquired">Date Acquired</label>
+            <input type="date" id="dateAcquired" name="dateAcquired" value="{{item.dateAcquired}}" required>
+          </div>
+        </div>
+      </main>
+
+      <aside class="inv2-record-side">
+        <div class="inv2-side-card">
+          <h3>
+            <i class="fas fa-file-alt"></i>
+            Document
+          </h3>
+
+          <label for="document" class="inv2-file-drop">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <strong>Choose file</strong>
+            <span data-file-name>Keep current file or upload a new one</span>
+          </label>
+
+          <input type="file" id="document" name="document" class="inv2-hidden-file">
+
+          {{#if item.documentUrl}}
+            <a href="{{item.documentUrl}}" target="_blank" class="inv2-current-file">
+              <i class="fas fa-paperclip"></i>
+              Current document attached
+            </a>
+          {{else}}
+            <p class="inv2-muted inv2-file-note">No document uploaded yet.</p>
+          {{/if}}
+        </div>
+
+        <div class="inv2-side-card inv2-edit-note">
+          <h3>
+            <i class="fas fa-circle-info"></i>
+            Editing Notice
+          </h3>
+          <p class="inv2-muted">
+            You are editing this asset record. Review your changes before saving.
+          </p>
+        </div>
+
+        <div class="inv2-side-actions">
+          <a href="/items/{{itemId}}" class="inv2-secondary-btn">
+            Cancel
+          </a>
+
+          <button type="submit" class="inv2-primary-btn">
+            <i class="fas fa-save"></i>
+            Save Changes
+          </button>
+        </div>
+      </aside>
+    </form>
+  </div>
+{{else}}
+  <div class="inv2-page inv2-add-page">
+    <section class="inv2-page-head inv2-add-head">
+      <div>
+        <span class="inv2-eyebrow">New Asset</span>
+        <h1>Add New Item</h1>
+        <p>Create a new inventory record with the required asset details.</p>
+      </div>
+
+      <a href="/inventory" class="inv2-secondary-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Inventory
+      </a>
+    </section>
+
+    {{#if formError}}
+      <div class="alert alert-error custom-alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>{{formError}}</span>
+      </div>
+    {{/if}}
+
+    <form
+      class="inv2-add-form"
+      method="POST"
+      enctype="multipart/form-data"
+      action="/api/items"
+      novalidate
+    >
+      <section class="inv2-form-section">
+        <div class="inv2-form-section-head">
+          <h2>Asset Basics</h2>
+          <p>Start with the item identity and hardware information.</p>
+        </div>
+
+        <div class="inv2-form-grid">
+          <div class="inv2-form-group">
+            <label for="itemId">Item ID</label>
+            <input
+              type="text"
+              id="itemId"
+              name="itemId"
+              value="{{item.itemId}}"
+              placeholder="Example: PC-001"
+              required
+            >
+          </div>
+
+          <div class="inv2-form-group">
+            <label for="serialNumber">Serial Number</label>
+            <input
+              type="text"
+              id="serialNumber"
+              name="serialNumber"
+              value="{{item.serialNumber}}"
+              placeholder="Example: SN-2026-0001"
+              required
+            >
+          </div>
+
+          <div class="inv2-form-group">
+            <label for="brand">Brand</label>
+            <input
+              type="text"
+              id="brand"
+              name="brand"
+              value="{{item.brand}}"
+              placeholder="Example: Dell"
+              required
+            >
+          </div>
+
+          <div class="inv2-form-group">
+            <label for="model">Model</label>
+            <input
+              type="text"
+              id="model"
+              name="model"
+              value="{{item.model}}"
+              placeholder="Example: OptiPlex 7090"
+              required
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="inv2-form-section">
+        <div class="inv2-form-section-head">
+          <h2>Inventory Details</h2>
+          <p>Classify the item and set its current inventory status.</p>
+        </div>
+
+        <div class="inv2-form-grid">
+          <div class="inv2-form-group">
+            <label for="classification">Classification</label>
+            <select id="classification" name="classification" required>
+              <option value="">Select classification</option>
+              <option value="Computer" {{#if (eq item.classification "Computer")}}selected{{/if}}>Computer</option>
+              <option value="Peripheral" {{#if (eq item.classification "Peripheral")}}selected{{/if}}>Peripheral</option>
+            </select>
+          </div>
+
+          <div class="inv2-form-group" data-specific-item-group {{#unless item.classification}}hidden{{/unless}}>
+            <label for="category">Specific Item</label>
+            <input
+              type="text"
+              id="category"
+              name="category"
+              value="{{item.category}}"
+              placeholder="Example: Laptop, Desktop, Workstation"
+              data-computer-placeholder="Example: Laptop, Desktop, Workstation"
+              data-peripheral-placeholder="Example: Monitor, Keyboard, Mouse"
+            >
+          </div>
+
+          <div class="inv2-form-group">
+            <label for="dateAcquired">Date Acquired</label>
+            <input
+              type="date"
+              id="dateAcquired"
+              name="dateAcquired"
+              value="{{item.dateAcquired}}"
+              required
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="inv2-form-section">
+        <div class="inv2-form-section-head">
+          <h2>Document</h2>
+          <p>Optional. Upload a receipt, warranty, or reference file.</p>
+        </div>
+
+        <label for="document" class="inv2-file-drop inv2-file-drop-wide">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <strong>Choose file</strong>
+          <span data-file-name>No file selected</span>
+        </label>
+
+        <input type="file" id="document" name="document" class="inv2-hidden-file">
+      </section>
+
+      <div class="inv2-form-actions">
+        <a href="/inventory" class="inv2-secondary-btn">Cancel</a>
+        <button type="submit" class="inv2-primary-btn">
+          <i class="fas fa-save"></i>
+          Create Item
+        </button>
+      </div>
+    </form>
+  </div>
+{{/if}}
+
+<script>
+  const itemForm = document.querySelector(".inv2-add-form, .inv2-edit-form");
+
+  if (itemForm) {
+    const fileInput = itemForm.querySelector("#document");
+    const fileName = itemForm.querySelector("[data-file-name]");
+
+    function updateFileName() {
+      if (!fileInput || !fileName) return;
+
+      const selectedFile = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+      const defaultText = document.body.contains(document.querySelector(".inv2-edit-page"))
+        ? "Keep current file or upload a new one"
+        : "No file selected";
+
+      fileName.textContent = selectedFile ? selectedFile.name : defaultText;
+    }
+
+    fileInput?.addEventListener("change", updateFileName);
+    updateFileName();
+
+    const clearFieldError = (field) => {
+      field.classList.remove("input-error");
+
+      const wrapper = field.closest(".inv2-form-group");
+      const oldError = wrapper?.querySelector(".field-error");
+
+      if (oldError) oldError.remove();
+    };
+
+    const classificationSelect = itemForm.querySelector("#classification");
+    const specificItemGroup = itemForm.querySelector("[data-specific-item-group]");
+    const specificItemInput = specificItemGroup?.querySelector("input");
+
+    function updateSpecificItemField() {
+      if (!classificationSelect || !specificItemGroup || !specificItemInput) return;
+
+      const selectedClassification = classificationSelect.value;
+      const hasClassification = Boolean(selectedClassification);
+      specificItemGroup.hidden = !hasClassification;
+      specificItemInput.required = hasClassification;
+
+      if (!hasClassification) {
+        specificItemInput.value = "";
+        clearFieldError(specificItemInput);
+        return;
+      }
+
+      const placeholderKey =
+        selectedClassification === "Peripheral"
+          ? "peripheralPlaceholder"
+          : "computerPlaceholder";
+      specificItemInput.placeholder =
+        specificItemInput.dataset[placeholderKey] || "Example: Laptop, Monitor, Keyboard";
+    }
+
+    classificationSelect?.addEventListener("change", updateSpecificItemField);
+    updateSpecificItemField();
+
+    itemForm.addEventListener("submit", function (e) {
+      const requiredFields = itemForm.querySelectorAll("[required]");
+      let hasError = false;
+      let firstInvalidField = null;
+
+      requiredFields.forEach((field) => clearFieldError(field));
+
+      requiredFields.forEach((field) => {
+        if (!field.value.trim()) {
+          hasError = true;
+          if (!firstInvalidField) firstInvalidField = field;
+
+          field.classList.add("input-error");
+
+          const wrapper = field.closest(".inv2-form-group");
+          const error = document.createElement("div");
+          error.className = "field-error";
+          error.textContent = "Required";
+          wrapper?.appendChild(error);
+        }
+      });
+
+      if (hasError) {
+        e.preventDefault();
+        firstInvalidField?.focus();
+      }
+    });
+
+    itemForm.querySelectorAll("input, select").forEach((field) => {
+      const eventName = field.tagName === "SELECT" || field.type === "file" ? "change" : "input";
+      field.addEventListener(eventName, () => clearFieldError(field));
+    });
+  }
+</script>

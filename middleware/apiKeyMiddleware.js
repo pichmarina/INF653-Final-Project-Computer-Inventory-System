@@ -17,9 +17,14 @@ async function verifyApiKey(req, res, next) {
     const apiKey = await ApiKey.findOne({
       keyHash: hashed,
       isRevoked: false,
-    });
+    }).populate("createdBy", "isEnabled isDeleted");
 
-    if (!apiKey) {
+    if (
+      !apiKey ||
+      !apiKey.createdBy ||
+      apiKey.createdBy.isDeleted ||
+      !apiKey.createdBy.isEnabled
+    ) {
       return res.status(401).json({
         success: false,
         message: "Invalid or revoked API key",

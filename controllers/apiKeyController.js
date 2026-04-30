@@ -2,6 +2,11 @@ const crypto = require("crypto");
 const ApiKey = require("../models/ApiKey");
 const hashApiKey = require("../utils/hashApiKey");
 
+function wantsJsonResponse(req) {
+  const accept = req.get("accept") || "";
+  return req.is("application/json") || accept.includes("application/json");
+}
+
 function formatDate(date) {
   if (!date) return "-";
   return new Intl.DateTimeFormat("en-GB", {
@@ -11,7 +16,21 @@ function formatDate(date) {
   }).format(new Date(date));
 }
 
-async function buildKeysViewData(query = {}) {
+function serializeApiKey(key) {
+  const keyObject = key.toObject ? key.toObject() : key;
+
+  return {
+    _id: keyObject._id,
+    name: keyObject.name,
+    createdBy: keyObject.createdBy,
+    isRevoked: keyObject.isRevoked,
+    createdAt: keyObject.createdAt,
+    updatedAt: keyObject.updatedAt,
+    shortHash: keyObject.keyHash ? `${keyObject.keyHash.slice(0, 12)}...` : "",
+  };
+}
+
+async function buildKeysViewData(query = {}, extras = {}) {
   const keyDocs = await ApiKey.find({ isRevoked: false })
     .populate("createdBy", "name email role")
     .sort({ createdAt: -1 });
@@ -28,7 +47,7 @@ async function buildKeysViewData(query = {}) {
     keyCount: keys.length,
     successMessage: query.success || null,
     errorMessage: query.error || null,
-    rawKey: query.rawKey || null,
+    rawKey: extras.rawKey || null,
   };
 }
 
@@ -54,9 +73,23 @@ async function createApiKey(req, res, next) {
       createdBy: req.user._id,
     });
 
-    return res.redirect(
-      `/keys?success=API key created successfully&rawKey=${encodeURIComponent(rawKey)}`
+    if (wantsJsonResponse(req)) {
+      return res.status(201).json({
+        success: true,
+        message: "API key created successfully. Copy this value now; it will not be shown again.",
+        data: {
+          name,
+          apiKey: rawKey,
+        },
+      });
+    }
+
+    const viewData = await buildKeysViewData(
+      { success: "API key created successfully" },
+      { rawKey },
     );
+    viewData.user = req.user;
+    return res.status(201).render("keys", viewData);
   } catch (error) {
     next(error);
   }
@@ -70,7 +103,7 @@ async function listApiKeys(req, res, next) {
 
     return res.json({
       success: true,
-      data: keys,
+      data: keys.map(serializeApiKey),
     });
   } catch (error) {
     next(error);
@@ -86,7 +119,22 @@ async function revokeApiKey(req, res, next) {
     );
 
     if (!key) {
+      if (wantsJsonResponse(req)) {
+        return res.status(404).json({
+          success: false,
+          message: "API key not found",
+        });
+      }
+
       return res.redirect("/keys?error=API key not found");
+    }
+
+    if (wantsJsonResponse(req)) {
+      return res.json({
+        success: true,
+        message: "API key revoked",
+        data: serializeApiKey(key),
+      });
     }
 
     return res.redirect("/keys?success=API key revoked");

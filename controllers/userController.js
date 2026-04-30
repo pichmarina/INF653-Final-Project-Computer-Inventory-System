@@ -2,6 +2,11 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const ApiKey = require("../models/ApiKey");
 
+function wantsJsonResponse(req) {
+  const accept = req.get("accept") || "";
+  return req.is("application/json") || accept.includes("application/json");
+}
+
 function formatDate(date) {
   if (!date) return "-";
   return new Intl.DateTimeFormat("en-GB", {
@@ -143,22 +148,42 @@ async function createUser(req, res, next) {
     }
 
     if (Object.keys(errors).length > 0) {
+      if (wantsJsonResponse(req)) {
+        return res.status(400).json({
+          success: false,
+          message: "User validation failed",
+          errors,
+        });
+      }
+
       const viewData = await buildUsersViewData(req.query, {
         errors,
         formValues: { name, email, role },
       });
+      viewData.user = req.user;
 
       return res.status(400).render("users", viewData);
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    await User.create({
+    const user = await User.create({
       name: name.trim(),
       email: email.toLowerCase().trim(),
       passwordHash,
       role: role || "Technician",
     });
+
+    if (wantsJsonResponse(req)) {
+      const userObject = user.toObject();
+      delete userObject.passwordHash;
+
+      return res.status(201).json({
+        success: true,
+        message: "User created successfully",
+        data: userObject,
+      });
+    }
 
     return res.redirect("/users?success=User created successfully");
   } catch (error) {
@@ -171,6 +196,13 @@ async function updateUserRole(req, res, next) {
     const { role } = req.body;
 
     if (!["Admin", "Technician"].includes(role)) {
+      if (wantsJsonResponse(req)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid role",
+        });
+      }
+
       return res.redirect("/users?error=Invalid role");
     }
 
@@ -181,7 +213,25 @@ async function updateUserRole(req, res, next) {
     );
 
     if (!user) {
+      if (wantsJsonResponse(req)) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
       return res.redirect("/users?error=User not found");
+    }
+
+    if (wantsJsonResponse(req)) {
+      const userObject = user.toObject();
+      delete userObject.passwordHash;
+
+      return res.json({
+        success: true,
+        message: "User role updated",
+        data: userObject,
+      });
     }
 
     return res.redirect("/users?success=User role updated");
@@ -201,6 +251,13 @@ async function updateUserStatus(req, res, next) {
     );
 
     if (!user) {
+      if (wantsJsonResponse(req)) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
       return res.redirect("/users?error=User not found");
     }
 
@@ -209,6 +266,17 @@ async function updateUserStatus(req, res, next) {
         { createdBy: user._id, isRevoked: false },
         { isRevoked: true }
       );
+    }
+
+    if (wantsJsonResponse(req)) {
+      const userObject = user.toObject();
+      delete userObject.passwordHash;
+
+      return res.json({
+        success: true,
+        message: "User status updated",
+        data: userObject,
+      });
     }
 
     return res.redirect("/users?success=User status updated");

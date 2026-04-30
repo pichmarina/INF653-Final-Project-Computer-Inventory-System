@@ -34,6 +34,8 @@
               <tr><td>Total Items</td><td>{{summary.total}}</td></tr>
               <tr><td>Deployed (In Use)</td><td>{{summary.deployed}}</td></tr>
               <tr><td>Available</td><td>{{summary.available}}</td></tr>
+              <tr><td>Maintenance</td><td>{{summary.maintenance}}</td></tr>
+              <tr><td>Retired</td><td>{{summary.retired}}</td></tr>
             </tbody>
           </table>
         </div>
@@ -61,7 +63,10 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Name</th>
+                  <th>Asset</th>
+                  <th>Item ID</th>
+                  <th>Serial Number</th>
+                  <th>Age</th>
                   <th>Date Acquired</th>
                   <th>Status</th>
                 </tr>
@@ -69,7 +74,10 @@
               <tbody>
                 {{#each agingItems}}
                   <tr>
-                    <td>{{this.name}}</td>
+                    <td>{{this.displayName}}</td>
+                    <td><span class="inv2-code">{{this.itemId}}</span></td>
+                    <td><span class="inv2-code">{{this.serialNumber}}</span></td>
+                    <td><span class="asset-age-pill">{{this.ageLabel}}</span></td>
                     <td>{{formatDate this.dateAcquired}}</td>
                     <td>{{this.status}}</td>
                   </tr>
@@ -116,7 +124,10 @@
                     {{#if this.items.length}}
                       <ul class="report-items-list">
                         {{#each this.items}}
-                          <li>{{this.name}}</li>
+                          <li>
+                            <strong>{{this.displayName}}</strong>
+                            <span>{{this.itemId}} · {{this.status}}</span>
+                          </li>
                         {{/each}}
                       </ul>
                     {{else}}

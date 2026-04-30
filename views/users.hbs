@@ -447,23 +447,23 @@
     <div class="modal-body">
       <div class="form-group">
         <label class="form-label">Full Name</label>
-        <input type="text" class="form-input" id="detailUserName" readonly>
+        <input type="text" class="form-input detail-readonly-input" id="detailUserName" readonly>
       </div>
       <div class="form-group">
         <label class="form-label">Email</label>
-        <input type="text" class="form-input" id="detailUserEmail" readonly>
+        <input type="text" class="form-input detail-readonly-input" id="detailUserEmail" readonly>
       </div>
       <div class="form-group">
         <label class="form-label">Role</label>
-        <input type="text" class="form-input" id="detailUserRole" readonly>
+        <input type="text" class="form-input detail-readonly-input" id="detailUserRole" readonly>
       </div>
       <div class="form-group">
         <label class="form-label">Status</label>
-        <input type="text" class="form-input" id="detailUserStatus" readonly>
+        <input type="text" class="form-input detail-readonly-input" id="detailUserStatus" readonly>
       </div>
       <div class="form-group">
         <label class="form-label">Created</label>
-        <input type="text" class="form-input" id="detailUserCreated" readonly>
+        <input type="text" class="form-input detail-readonly-input" id="detailUserCreated" readonly>
       </div>
     </div>
   </div>
@@ -570,35 +570,28 @@
 
   if (userSearch) {
     const clearUserSearch = document.getElementById('clearUserSearch');
-    const usersTable = document.getElementById('usersTable');
-
-    if (clearUserSearch && userSearch.value) clearUserSearch.classList.remove('hidden');
 
     function filterUsersTable(term) {
-      if (!usersTable) return;
-      const rows = usersTable.querySelectorAll('tbody tr');
-      rows.forEach(function (row) {
-        row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+      const t = term.toLowerCase();
+      document.querySelectorAll('#usersTable tbody tr').forEach(function (row) {
+        row.style.display = row.textContent.toLowerCase().includes(t) ? '' : 'none';
       });
+      if (clearUserSearch) clearUserSearch.classList.toggle('hidden', !term);
     }
 
     userSearch.addEventListener('input', function () {
-      const term = this.value.toLowerCase();
-      if (clearUserSearch) clearUserSearch.classList.toggle('hidden', !this.value);
-      filterUsersTable(term);
+      filterUsersTable(this.value);
     });
 
     if (clearUserSearch) {
       clearUserSearch.addEventListener('click', function () {
         userSearch.value = '';
-        clearUserSearch.classList.add('hidden');
         filterUsersTable('');
         userSearch.focus();
       });
     }
 
-    // Run filter on load in case search value is pre-filled from URL
-    if (userSearch.value) filterUsersTable(userSearch.value.toLowerCase());
+    if (userSearch.value) filterUsersTable(userSearch.value);
   }
 
   updateFilterSummary();

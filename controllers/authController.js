@@ -2,7 +2,13 @@ const bcrypt = require("bcryptjs");
 const fs = require("fs/promises");
 const path = require("path");
 const User = require("../models/User");
+const { saveUploadedAvatar } = require("../utils/documentStorage");
 const generateToken = require("../utils/generateToken");
+
+function wantsJsonResponse(req) {
+  const accept = req.get("accept") || "";
+  return req.is("application/json") || accept.includes("application/json");
+}
 
 function buildProfileViewData(user, query = {}, extras = {}) {
   return {
@@ -47,6 +53,13 @@ function toAbsoluteUploadPath(urlPath) {
   return path.join(__dirname, "..", normalizedPath);
 }
 
+function isLocalUploadPath(urlPath) {
+  if (!urlPath) return false;
+
+  const normalizedPath = String(urlPath).replace(/\\/g, "/");
+  return normalizedPath.startsWith("/uploads/") || normalizedPath.startsWith("uploads/");
+}
+
 async function login(req, res, next) {
   try {
     const { email, password } = req.body;
@@ -62,6 +75,14 @@ async function login(req, res, next) {
     }
 
     if (Object.keys(errors).length > 0) {
+      if (wantsJsonResponse(req)) {
+        return res.status(400).json({
+          success: false,
+          message: "Email and password are required",
+          errors,
+        });
+      }
+
       return res.status(400).render("login", {
         title: "Login",
         errors,
@@ -75,6 +96,13 @@ async function login(req, res, next) {
     });
 
     if (!user || !user.isEnabled) {
+      if (wantsJsonResponse(req)) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid credentials or disabled account",
+        });
+      }
+
       return res.status(401).render("login", {
         title: "Login",
         formError: "Invalid credentials or disabled account",
@@ -85,6 +113,13 @@ async function login(req, res, next) {
     const isMatch = await bcrypt.compare(password, user.passwordHash);
 
     if (!isMatch) {
+      if (wantsJsonResponse(req)) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid credentials",
+        });
+      }
+
       return res.status(401).render("login", {
         title: "Login",
         formError: "Invalid credentials",
@@ -101,6 +136,22 @@ async function login(req, res, next) {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
+    if (wantsJsonResponse(req)) {
+      return res.json({
+        success: true,
+        message: "Login successful",
+        token,
+        data: {
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          },
+        },
+      });
+    }
+
     return res.redirect("/dashboard");
   } catch (error) {
     next(error);
@@ -109,6 +160,14 @@ async function login(req, res, next) {
 
 function logout(req, res) {
   res.clearCookie("token");
+
+  if (wantsJsonResponse(req)) {
+    return res.json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  }
+
   return res.redirect("/login");
 }
 
@@ -132,8 +191,7 @@ async function renderProfilePage(req, res, next) {
 
 async function updateProfile(req, res, next) {
   try {
-    const { name, email, currentPassword, newPassword, confirmPassword } =
-      req.body;
+    const { name, currentPassword, newPassword, confirmPassword } = req.body;
 
     const currentUser = await User.findOne({
       _id: req.user._id,
@@ -148,19 +206,10 @@ async function updateProfile(req, res, next) {
     const errors = {};
 
     const trimmedName = String(name || "").trim();
-    const normalizedEmail = String(email || "")
-      .trim()
-      .toLowerCase();
-    const uploadedAvatarPath = req.file
-      ? `/uploads/avatars/${req.file.filename}`
-      : null;
+    const normalizedEmail = currentUser.email;
 
     if (!trimmedName) {
       errors.name = "Name is required";
-    }
-
-    if (!normalizedEmail) {
-      errors.email = "Email is required";
     }
 
     const wantsPasswordChange =
@@ -180,18 +229,6 @@ async function updateProfile(req, res, next) {
 
       if ((newPassword || "") !== (confirmPassword || "")) {
         errors.confirmPassword = "Password confirmation does not match";
-      }
-    }
-
-    if (!errors.email && normalizedEmail !== currentUser.email) {
-      const existingUser = await User.findOne({
-        email: normalizedEmail,
-        isDeleted: false,
-        _id: { $ne: currentUser._id },
-      }).lean();
-
-      if (existingUser) {
-        errors.email = "This email is already in use";
       }
     }
 
@@ -241,6 +278,10 @@ async function updateProfile(req, res, next) {
       currentUser.passwordHash = await bcrypt.hash(String(newPassword), 10);
     }
 
+    const uploadedAvatarPath = req.file
+      ? await saveUploadedAvatar(req.file, currentUser._id)
+      : null;
+
     let oldAvatarPath = null;
     if (uploadedAvatarPath) {
       oldAvatarPath = currentUser.avatarPath;
@@ -249,7 +290,11 @@ async function updateProfile(req, res, next) {
 
     await currentUser.save();
 
-    if (oldAvatarPath && oldAvatarPath !== uploadedAvatarPath) {
+    if (
+      oldAvatarPath &&
+      oldAvatarPath !== uploadedAvatarPath &&
+      isLocalUploadPath(oldAvatarPath)
+    ) {
       await removeFileIfExists(toAbsoluteUploadPath(oldAvatarPath));
     }
 

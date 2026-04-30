@@ -1,38 +1,159 @@
-<section class="card">
-  <h1>Item Details</h1>
-  <p>Detailed information for the selected inventory item.</p>
+<div class="inv2-page inv2-detail-page">
+  <section class="inv2-asset-hero">
+    <div class="inv2-asset-hero-left">
+      <div class="inv2-asset-hero-icon">
+        {{#if (eq item.classification "Computer")}}
+          <i class="fas fa-desktop"></i>
+        {{else}}
+          <i class="fas fa-keyboard"></i>
+        {{/if}}
+      </div>
 
-  <div class="grid">
-    <div class="mini-card">
-      <strong>Item ID</strong>
-      <p>{{itemId}}</p>
+      <div>
+        <span class="inv2-eyebrow">Asset Record</span>
+        <h1>{{item.displayName}}</h1>
+        <p>Item ID {{item.itemId}} · Serial {{item.serialNumber}}</p>
+      </div>
     </div>
-    <div class="mini-card">
-      <strong>Brand</strong>
-      <p>Dell</p>
-    </div>
-    <div class="mini-card">
-      <strong>Model</strong>
-      <p>Latitude 5420</p>
-    </div>
-    <div class="mini-card">
-      <strong>Category</strong>
-      <p>Laptop</p>
-    </div>
-    <div class="mini-card">
-      <strong>Status</strong>
-      <p>Available</p>
-    </div>
-    <div class="mini-card">
-      <strong>Assigned To</strong>
-      <p>—</p>
-    </div>
-  </div>
 
-  <div style="margin-top: 20px;">
-    <a href="/items/{{itemId}}/edit" class="btn" style="text-decoration: none; display: inline-block;">Edit Item</a>
-  </div>
+    <div class="inv2-asset-hero-actions">
+      <span class="inv2-status
+        {{#if (eq item.status "Available")}}is-available{{/if}}
+        {{#if (eq item.status "In-Use")}}is-inuse{{/if}}
+        {{#if (eq item.status "Maintenance")}}is-maintenance{{/if}}
+        {{#if (eq item.status "Retired")}}is-retired{{/if}}
+      ">
+        {{item.status}}
+      </span>
 
-  <form method="POST" action="/api/items/{{itemId}}?_method=DELETE" style="margin-top: 12px;">
-    <button type="submit" class="btn">Delete Item</button>
-  </form>
+      <a href="/items/{{itemId}}/edit" class="inv2-primary-btn">
+        <i class="fas fa-pen"></i>
+        Edit Item
+      </a>
+    </div>
+    {{#if formError}}
+      <div class="inv2-error-alert">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>{{formError}}</span>
+      </div>
+{{/if}}
+  </section>
+
+  <section class="inv2-record-layout">
+    <main class="inv2-record-main">
+      <div class="inv2-section-title">
+        <div>
+          <h2>Item Information</h2>
+          <p>Core asset identity, classification, and ownership details.</p>
+        </div>
+      </div>
+
+      <div class="inv2-detail-grid">
+        <div class="inv2-detail-item">
+          <span>Item ID</span>
+          <strong>{{item.itemId}}</strong>
+        </div>
+
+        <div class="inv2-detail-item">
+          <span>Serial Number</span>
+          <strong>{{item.serialNumber}}</strong>
+        </div>
+
+        <div class="inv2-detail-item">
+          <span>Brand</span>
+          <strong>{{item.brand}}</strong>
+        </div>
+
+        <div class="inv2-detail-item">
+          <span>Model</span>
+          <strong>{{item.model}}</strong>
+        </div>
+
+        <div class="inv2-detail-item">
+          <span>Category</span>
+          <strong>{{item.category}}</strong>
+        </div>
+
+        <div class="inv2-detail-item">
+          <span>Classification</span>
+          <strong>{{item.classification}}</strong>
+        </div>
+
+        <div class="inv2-detail-item">
+          <span>Date Acquired</span>
+          <strong>{{formatDate item.dateAcquired}}</strong>
+        </div>
+
+        <div class="inv2-detail-item">
+          <span>Assigned To</span>
+          <strong>
+            {{#if item.assignedTo}}
+              {{item.assignedTo.name}}
+            {{else}}
+              Unassigned
+            {{/if}}
+          </strong>
+        </div>
+      </div>
+    </main>
+
+    <aside class="inv2-record-side">
+      <div class="inv2-side-card">
+        <h3>
+          <i class="fas fa-user-check"></i>
+          Assignment
+        </h3>
+
+        {{#if item.assignedTo}}
+          <div class="inv2-person-card">
+            <div class="inv2-person-avatar">
+              {{firstChar item.assignedTo.name}}
+            </div>
+            <div>
+              <strong>{{item.assignedTo.name}}</strong>
+              <span>{{item.assignedTo.email}}</span>
+            </div>
+          </div>
+        {{else}}
+          <p class="inv2-muted">This item is not currently assigned to anyone.</p>
+        {{/if}}
+      </div>
+
+      <div class="inv2-side-card">
+        <h3>
+          <i class="fas fa-file-alt"></i>
+          Document
+        </h3>
+
+        {{#if item.documentUrl}}
+          <a href="{{item.documentUrl}}" target="_blank" class="inv2-document-link">
+            <i class="fas fa-file-download"></i>
+            View uploaded document
+          </a>
+        {{else}}
+          <p class="inv2-muted">No document uploaded for this asset.</p>
+        {{/if}}
+      </div>
+
+      <div class="inv2-side-actions">
+        <a href="/inventory" class="inv2-secondary-btn">
+          <i class="fas fa-arrow-left"></i>
+          Back
+        </a>
+
+        {{#if (isAdmin user)}}
+          <form
+            method="POST"
+            action="/api/items/{{itemId}}?_method=DELETE"
+            data-confirm-message="Are you sure you want to delete this item?"
+          >
+            <button type="submit" class="inv2-danger-btn">
+              <i class="fas fa-trash"></i>
+              Delete
+            </button>
+          </form>
+        {{/if}}
+      </div>
+    </aside>
+  </section>
+</div>
