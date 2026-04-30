@@ -1,8 +1,9 @@
 const multer = require("multer");
+const os = require("os");
 const path = require("path");
 const fs = require("fs");
 
-const avatarUploadDir = path.join(__dirname, "..", "uploads", "avatars");
+const avatarUploadDir = path.join(os.tmpdir(), "cis-uploads", "avatars");
 
 if (!fs.existsSync(avatarUploadDir)) {
   fs.mkdirSync(avatarUploadDir, { recursive: true });

@@ -148,7 +148,6 @@ app.use(
 );
 
 function isOpaqueUiFormPost(req) {
-  const accept = req.get("accept") || "";
   const contentType = req.get("content-type") || "";
   const isFormPost =
     contentType.includes("application/x-www-form-urlencoded") ||
@@ -156,7 +155,6 @@ function isOpaqueUiFormPost(req) {
 
   return (
     req.method === "POST" &&
-    accept.includes("text/html") &&
     isFormPost
   );
 }
