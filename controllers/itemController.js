@@ -123,7 +123,7 @@ async function updateItem(req, res, next) {
     }
 
     return res.redirect("/inventory?success=updated");
-  } catch (error) {
+    } catch (error) {
     const item = await Item.findOne({
       _id: req.params.id,
       isDeleted: false,
@@ -160,7 +160,7 @@ async function updateItem(req, res, next) {
     }
 
     next(error);
-  }
+  }  
 }
 
 async function softDeleteItem(req, res, next) {
