@@ -134,24 +134,6 @@ async function updateItem(req, res, next) {
       });
     }
 
-    // Retired is terminal
-    if (currentItem.status === "Retired" && updateData.status && updateData.status !== "Retired") {
-      return res.status(400).render("item-form", {
-        title: "Edit Item",
-        isEdit: true,
-        itemId: req.params.id,
-        user: req.user,
-        item: {
-          ...currentItem.toObject(),
-          ...req.body,
-          dateAcquired: currentItem.dateAcquired
-            ? new Date(currentItem.dateAcquired).toISOString().split("T")[0]
-            : "",
-        },
-        formError: "Retired items cannot be changed back.",
-      });
-    }
-
     // Admin may never manually force In-Use
     if (updateData.status === "In-Use" && currentItem.status !== "In-Use") {
       return res.status(400).render("item-form", {

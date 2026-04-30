@@ -99,10 +99,6 @@
             <div class="field-error">Status cannot be changed while the item is checked out.</div>
           {{/if}}
 
-          {{#if (eq item.status "Retired")}}
-            <div class="field-error">Retired items cannot be changed back.</div>
-          {{/if}}
-
           <div class="inv2-form-group">
             <label for="dateAcquired">Date Acquired</label>
             <input type="date" id="dateAcquired" name="dateAcquired" value="{{item.dateAcquired}}" required>
