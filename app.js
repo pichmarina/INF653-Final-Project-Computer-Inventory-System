@@ -149,14 +149,12 @@ app.use(
 
 function isOpaqueUiFormPost(req) {
   const contentType = req.get("content-type") || "";
+  const browserMethod = req.originalMethod || req.method;
   const isFormPost =
     contentType.includes("application/x-www-form-urlencoded") ||
     contentType.includes("multipart/form-data");
 
-  return (
-    req.method === "POST" &&
-    isFormPost
-  );
+  return browserMethod === "POST" && isFormPost;
 }
 
 app.use(express.static(path.join(__dirname, "public")));
